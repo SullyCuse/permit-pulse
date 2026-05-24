@@ -106,10 +106,16 @@ export default async function DashboardPage() {
 }
 
 function PermitCard({ permit }: { permit: any }) {
+  const contractor = permit.raw_data?.contractor
+  const estimatedValue = permit.raw_data?.estimated_value
+  const filedDate = permit.date_filed
+    ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : '—'
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-5">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
               {permit.permit_type ?? 'Unknown type'}
@@ -120,12 +126,17 @@ function PermitCard({ permit }: { permit: any }) {
           {permit.description && (
             <p className="text-xs text-gray-500 mt-1 line-clamp-2">{permit.description}</p>
           )}
+          {contractor && (
+            <p className="text-xs text-gray-400 mt-1.5">
+              <span className="font-medium text-gray-500">Contractor:</span> {contractor}
+            </p>
+          )}
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-xs text-gray-400">{permit.date_filed ?? '—'}</p>
-          {permit.estimated_value && (
+          <p className="text-xs text-gray-400">{filedDate}</p>
+          {estimatedValue && (
             <p className="text-xs font-medium text-gray-700 mt-1">
-              ${Number(permit.estimated_value).toLocaleString()}
+              ${Number(estimatedValue).toLocaleString()}
             </p>
           )}
         </div>
