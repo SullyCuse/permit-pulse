@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "permit-pulse-hall-county",
+  "title": "Permit Pulse — Hall County Scraper",
+  "description": "Detects new Hall County permit PDFs and saves them to Supabase.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "dockerfile": "./Dockerfile"
+}
