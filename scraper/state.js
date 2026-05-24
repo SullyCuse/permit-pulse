@@ -45,4 +45,16 @@ async function setGwinnettLastDate(yyyymmdd) {
   return setStateValue('gwinnett_last_report_date', yyyymmdd);
 }
 
-module.exports = { getLastItemNumber, setLastItemNumber, getGwinnettLastDate, setGwinnettLastDate };
+// Forsyth County — last processed IssueDate as Unix ms timestamp
+async function getForsythLastTimestamp() {
+  return getStateValue('forsyth_last_timestamp', 0);
+}
+async function setForsythLastTimestamp(ms) {
+  return setStateValue('forsyth_last_timestamp', ms);
+}
+
+module.exports = {
+  getLastItemNumber, setLastItemNumber,
+  getGwinnettLastDate, setGwinnettLastDate,
+  getForsythLastTimestamp, setForsythLastTimestamp,
+};

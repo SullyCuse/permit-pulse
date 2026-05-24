@@ -3,8 +3,13 @@ const { fetchLatestPdfUrls } = require('./fetch-archive');
 const { downloadAndParsePdf } = require('./parse-permit-pdf');
 const { fetchNewReportUrls, downloadPdf } = require('./gwinnett-fetch-reports');
 const { parsePdfBuffer } = require('./gwinnett-parse-permit-pdf');
+const { fetchNewPermits } = require('./forsyth-fetch-permits');
 const { savePermits } = require('./save-permits');
-const { getLastItemNumber, setLastItemNumber, getGwinnettLastDate, setGwinnettLastDate } = require('./state');
+const {
+  getLastItemNumber, setLastItemNumber,
+  getGwinnettLastDate, setGwinnettLastDate,
+  getForsythLastTimestamp, setForsythLastTimestamp,
+} = require('./state');
 
 const APP_URL = process.env.APP_URL ?? 'https://web-chi-nine-72.vercel.app';
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -96,10 +101,34 @@ async function main() {
       console.log(`\n[Gwinnett County] State advanced to ${latestDate}`);
     }
 
+    // --- Forsyth County ---
+    const forsythLastTs = await getForsythLastTimestamp();
+    console.log(`\n[Forsyth County] Last processed timestamp: ${forsythLastTs ? new Date(forsythLastTs).toISOString() : 'none'}`);
+
+    let forsythCount = 0;
+    try {
+      const { permits: forsythPermits, maxTimestamp } = await fetchNewPermits(forsythLastTs);
+      forsythCount = forsythPermits.length;
+
+      if (forsythPermits.length === 0) {
+        console.log('[Forsyth County] No new permits found.');
+      } else {
+        const result = await savePermits(forsythPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setForsythLastTimestamp(maxTimestamp);
+        console.log(`\n[Forsyth County] State advanced to ${new Date(maxTimestamp).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Forsyth County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
     console.log(`  Gwinnett reports processed: ${gwinnettReports.length}`);
+    console.log(`  Forsyth permits fetched: ${forsythCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 
