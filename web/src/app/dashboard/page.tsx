@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import SubscribeButton from './SubscribeButton'
+import { Logo } from '@/components/Logo'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <span className="font-bold text-lg">Permit Pulse</span>
+          <Logo />
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">{user.email}</span>
             <form action="/auth/signout" method="POST">
