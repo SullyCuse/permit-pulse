@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -10,11 +10,23 @@ export async function POST(req: NextRequest) {
   const zipCode = (formData.get('zip_code') as string)?.trim()
 
   if (zipCode && /^\d{5}$/.test(zipCode)) {
-    await supabase.from('watchlists').upsert({
-      user_id: user.id,
-      zip_code: zipCode,
-      county: 'Hall',
-    }, { onConflict: 'user_id,zip_code' })
+    const admin = createAdminClient()
+
+    const { data: existing } = await admin
+      .from('watchlists')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('zip_code', zipCode)
+      .single()
+
+    if (!existing) {
+      const { error } = await admin.from('watchlists').insert({
+        user_id: user.id,
+        zip_code: zipCode,
+        county: 'Hall',
+      })
+      if (error) console.error('watchlist insert error:', error)
+    }
   }
 
   return NextResponse.redirect(new URL('/dashboard', req.url))
