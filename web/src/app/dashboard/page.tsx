@@ -96,7 +96,7 @@ export default async function DashboardPage() {
                     <form action="/api/watchlist" method="POST">
                       <input type="hidden" name="zip_code" value={zip} />
                       <input type="hidden" name="action" value="remove" />
-                      <button type="submit" className="text-gray-300 hover:text-red-400 transition-colors text-xs leading-none">✕</button>
+                      <button type="submit" className="text-gray-400 hover:text-red-500 transition-colors text-sm font-bold leading-none">✕</button>
                     </form>
                   </li>
                 ))}
