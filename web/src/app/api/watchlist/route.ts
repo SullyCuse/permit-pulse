@@ -12,6 +12,14 @@ export async function POST(req: NextRequest) {
   if (zipCode && /^\d{5}$/.test(zipCode)) {
     const admin = createAdminClient()
 
+    // Ensure user row exists in public.users (may not exist if they haven't subscribed yet)
+    await admin.from('users').upsert({
+      id: user.id,
+      auth_id: user.id,
+      email: user.email,
+      is_active: false,
+    }, { onConflict: 'id', ignoreDuplicates: true })
+
     const { data: existing } = await admin
       .from('watchlists')
       .select('user_id')
@@ -26,7 +34,7 @@ export async function POST(req: NextRequest) {
         county: 'Hall',
         permit_types: [],
       })
-      if (error) console.error('watchlist insert error:', error)
+      if (error) console.error('watchlist insert error:', error.message, error.details)
     }
   }
 
