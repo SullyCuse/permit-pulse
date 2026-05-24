@@ -1,4 +1,8 @@
+'use client'
+
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
 export default function HomePage() {
   return (
@@ -153,6 +157,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* County Request */}
+      <section className="py-16 max-w-xl mx-auto px-6 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Don't see your county?</h2>
+        <p className="text-gray-500 mb-8 text-sm">Tell us where you work and we'll prioritize adding it.</p>
+        <CountyRequestForm />
+      </section>
+
       {/* Bottom CTA */}
       <section className="py-20 text-center px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to stay ahead?</h2>
@@ -166,6 +177,53 @@ export default function HomePage() {
         © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
       </footer>
     </div>
+  )
+}
+
+function CountyRequestForm() {
+  return (
+    <Suspense>
+      <CountyRequestFormInner />
+    </Suspense>
+  )
+}
+
+function CountyRequestFormInner() {
+  const params = useSearchParams()
+  const status = params.get('county_request')
+
+  if (status === 'thanks') {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl px-6 py-5 text-green-800 text-sm font-medium">
+        Thanks! We'll let you know when that county is available.
+      </div>
+    )
+  }
+
+  return (
+    <form action="/api/county-request" method="POST" className="flex flex-col gap-3">
+      <input
+        name="county"
+        required
+        placeholder="County name (e.g. Forsyth County, GA)"
+        className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <input
+        name="email"
+        type="email"
+        placeholder="Your email (optional — we'll notify you when it's live)"
+        className="border border-gray-300 rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {status === 'invalid' && (
+        <p className="text-red-500 text-xs">Please enter a valid county name.</p>
+      )}
+      <button
+        type="submit"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium"
+      >
+        Request this county
+      </button>
+    </form>
   )
 }
 
