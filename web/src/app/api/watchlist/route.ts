@@ -13,12 +13,13 @@ export async function POST(req: NextRequest) {
     const admin = createAdminClient()
 
     // Ensure user row exists in public.users (may not exist if they haven't subscribed yet)
-    await admin.from('users').upsert({
+    const { error: userError } = await admin.from('users').upsert({
       id: user.id,
       auth_id: user.id,
       email: user.email,
       is_active: false,
     }, { onConflict: 'id', ignoreDuplicates: true })
+    if (userError) console.error('users upsert error:', JSON.stringify(userError))
 
     const { data: existing } = await admin
       .from('watchlists')
@@ -32,7 +33,6 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         zip_code: zipCode,
         county: 'Hall',
-        permit_types: [],
       })
       if (error) console.error('watchlist insert error:', error.message, error.details)
     }
