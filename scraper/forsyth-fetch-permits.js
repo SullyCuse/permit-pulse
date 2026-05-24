@@ -122,7 +122,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
 
     return {
       permit_number:  a.PermitNumber,
-      address:        addr?.address ?? null,
+      address:        addr?.address && addr?.city ? `${addr.address}, ${addr.city}` : (addr?.address ?? null),
       zip_code:       addr?.zip_code ?? null,
       permit_type:    a.PermitType ?? null,
       description:    a.PermitClassDescription || a.PermitClass || null,

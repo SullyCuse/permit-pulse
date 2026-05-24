@@ -1,12 +1,25 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import SubscribeButton from './SubscribeButton'
 import { Logo } from '@/components/Logo'
 
-export default async function DashboardPage() {
+const PAGE_SIZE = 50
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth'] as const
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ county?: string; page?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const params = await searchParams
+  const activeCounty = COUNTIES.includes(params.county as any) ? params.county! : 'All'
+  const page = Math.max(1, parseInt(params.page ?? '1', 10))
+  const offset = (page - 1) * PAGE_SIZE
 
   // Fetch user subscription status
   const { data: userData } = await supabase
@@ -17,19 +30,35 @@ export default async function DashboardPage() {
 
   const isActive = userData?.is_active ?? false
 
-  // Fetch latest 50 permits (admin client bypasses RLS — permits are public county data)
+  // Fetch permits (admin client bypasses RLS — permits are public county data)
   const admin = createAdminClient()
-  const { data: permits } = await admin
+  let query = admin
     .from('permits')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('date_filed', { ascending: false })
-    .limit(50)
+    .range(offset, offset + PAGE_SIZE - 1)
+
+  if (activeCounty !== 'All') {
+    query = query.eq('county', activeCounty)
+  }
+
+  const { data: permits, count: totalCount } = await query
+
+  const totalPages = Math.ceil((totalCount ?? 0) / PAGE_SIZE)
 
   // Fetch user's watchlist (admin client bypasses RLS — user already authenticated above)
   const { data: watchlist } = await admin
     .from('watchlists')
     .select('*')
     .eq('user_id', user.id)
+
+  function countyHref(county: string, p = 1) {
+    const q = new URLSearchParams()
+    if (county !== 'All') q.set('county', county)
+    if (p > 1) q.set('page', String(p))
+    const qs = q.toString()
+    return `/dashboard${qs ? `?${qs}` : ''}`
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -68,13 +97,63 @@ export default async function DashboardPage() {
       <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Permit feed */}
         <div className="lg:col-span-2">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Permits</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Permits</h2>
+            <span className="text-sm text-gray-400">{totalCount?.toLocaleString() ?? 0} total</span>
+          </div>
+
+          {/* County filter tabs */}
+          <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg w-fit">
+            {COUNTIES.map(county => (
+              <Link
+                key={county}
+                href={countyHref(county)}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  activeCounty === county
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {county}
+              </Link>
+            ))}
+          </div>
+
           {permits && permits.length > 0 ? (
-            <div className="space-y-3">
-              {permits.map((permit: any) => (
-                <PermitCard key={permit.id} permit={permit} />
-              ))}
-            </div>
+            <>
+              <div className="space-y-3">
+                {permits.map((permit: any) => (
+                  <PermitCard key={permit.id} permit={permit} />
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6">
+                  <span className="text-sm text-gray-400">
+                    Page {page} of {totalPages}
+                  </span>
+                  <div className="flex gap-2">
+                    {page > 1 && (
+                      <Link
+                        href={countyHref(activeCounty, page - 1)}
+                        className="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-gray-700"
+                      >
+                        ← Previous
+                      </Link>
+                    )}
+                    {page < totalPages && (
+                      <Link
+                        href={countyHref(activeCounty, page + 1)}
+                        className="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-gray-700"
+                      >
+                        Next →
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
               No permits found yet.
@@ -129,6 +208,8 @@ function PermitCard({ permit }: { permit: any }) {
               {permit.permit_type ?? 'Unknown type'}
             </span>
             <span className="text-xs text-gray-400">{permit.permit_number}</span>
+            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-gray-400">{permit.county}</span>
           </div>
           <p className="text-sm font-medium text-gray-900">
             {permit.address ?? 'No address'}
