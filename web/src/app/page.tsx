@@ -12,13 +12,13 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall County, GA · Updated every Monday
+          Hall &amp; Gwinnett County, GA · Updated every Monday
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
           Know about new permits<br />before your competition
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse tracks every building permit filed in Hall County and sends you instant alerts when new filings match your zip codes — so you can be first on the job.
+          Permit Pulse tracks every building permit filed in Hall and Gwinnett County and sends you instant alerts when new filings match your zip codes — so you can be first on the job.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -48,7 +48,7 @@ export default function HomePage() {
 
       {/* Who it's for */}
       <section className="py-20 max-w-5xl mx-auto px-6">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Built for Hall County professionals</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Built for Georgia professionals</h2>
         <p className="text-center text-gray-500 mb-12 max-w-xl mx-auto">Whether you're chasing new construction leads or tracking neighborhood development, Permit Pulse keeps you ahead.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
@@ -84,7 +84,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
-              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall County for new filings every Monday morning automatically.' },
+              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall and Gwinnett County for new filings every Monday morning automatically.' },
               { step: '3', title: 'Get alerted instantly', desc: 'Receive a clear email alert the moment a matching permit is filed — with address, type, and value.' },
             ].map(item => (
               <div key={item.step}>
@@ -108,14 +108,14 @@ export default function HomePage() {
             name="Basic"
             price={29}
             description="Perfect for contractors focused on one area."
-            features={['Hall County coverage', 'Weekly digest email', 'Up to 3 zip codes', 'Permit feed dashboard']}
+            features={['Hall & Gwinnett County', 'Weekly digest email', 'Up to 3 zip codes', 'Permit feed dashboard']}
             highlight={false}
           />
           <PricingCard
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={['Hall County coverage', 'Instant alerts', 'Unlimited zip codes', 'Priority support']}
+            features={['Hall & Gwinnett County', 'Instant alerts', 'Unlimited zip codes', 'Priority support']}
             highlight={true}
           />
         </div>
@@ -129,7 +129,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from Hall County\'s official public records, updated every Monday morning.',
+                a: 'We pull directly from Hall and Gwinnett County\'s official public records, updated every Monday morning.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -141,7 +141,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more counties?',
-                a: 'Yes — Gwinnett, Forsyth, and Jackson are on the roadmap. Pro subscribers get early access.',
+                a: 'Yes — Forsyth, Jackson, and more are on the roadmap. Pro subscribers get early access.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-gray-200 pb-6">
@@ -156,7 +156,7 @@ export default function HomePage() {
       {/* Bottom CTA */}
       <section className="py-20 text-center px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to stay ahead?</h2>
-        <p className="text-gray-500 mb-8">Join contractors and investors already tracking Hall County permits.</p>
+        <p className="text-gray-500 mb-8">Join contractors and investors already tracking permits across Hall and Gwinnett County.</p>
         <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-medium text-sm">
           Get started today
         </Link>
