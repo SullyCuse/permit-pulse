@@ -22,7 +22,7 @@ function alertHtml(permit: {
     <tr><td style="padding:6px 0;color:#6b7280;width:140px">Permit #</td><td style="padding:6px 0"><strong>${permit.permit_number ?? '—'}</strong></td></tr>
     <tr><td style="padding:6px 0;color:#6b7280">Type</td><td style="padding:6px 0">${permit.permit_type ?? '—'}</td></tr>
     <tr><td style="padding:6px 0;color:#6b7280">Address</td><td style="padding:6px 0">${permit.address ?? '—'}</td></tr>
-    <tr><td style="padding:6px 0;color:#6b7280">Filed</td><td style="padding:6px 0">${permit.date_filed ?? '—'}</td></tr>
+    <tr><td style="padding:6px 0;color:#6b7280">Filed</td><td style="padding:6px 0">${permit.date_filed ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td></tr>
     <tr><td style="padding:6px 0;color:#6b7280">Est. Value</td><td style="padding:6px 0">${estValue ? `$${Number(estValue).toLocaleString()}` : '—'}</td></tr>
     <tr><td style="padding:6px 0;color:#6b7280">Contractor</td><td style="padding:6px 0">${contractor ?? '—'}</td></tr>
     ${permit.description ? `<tr><td style="padding:6px 0;color:#6b7280">Description</td><td style="padding:6px 0">${permit.description}</td></tr>` : ''}

@@ -21,7 +21,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.address ?? '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.zip_code ?? '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${estValue ? `$${Number(estValue).toLocaleString()}` : '—'}</td>
-      <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.date_filed ?? '—'}</td>
+      <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.date_filed ? new Date(p.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
     </tr>`
   }).join('')
 
