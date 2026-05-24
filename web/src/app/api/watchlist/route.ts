@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         zip_code: zipCode,
         county: 'Hall',
       })
-      if (error) console.error('watchlist insert error:', error.message, error.details)
+      if (error) console.error('watchlist insert error:', JSON.stringify(error))
     }
   }
 
