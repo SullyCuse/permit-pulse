@@ -1,5 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
+const { geocodeAddress } = require('./gwinnett-geocode');
 
 const PERMITS_URL = 'https://geo.forsythco.com/gis3/rest/services/Public_EnerGovPlans/Building_Permits/MapServer/0/query';
 const ADDRESS_URL = 'https://geo.forsythco.com/gis/rest/services/EnerGov/EnerGovParcelAddressMapService/MapServer/0/query';
@@ -131,6 +132,13 @@ async function fetchNewPermits(lastTimestampMs = 0) {
       raw_data:       a,
     };
   });
+
+  // Fallback: geocode any permits that still have no zip code
+  for (const permit of permits) {
+    if (!permit.zip_code && permit.address) {
+      permit.zip_code = await geocodeAddress(permit.address);
+    }
+  }
 
   const maxTimestamp = features.reduce((max, f) => Math.max(max, f.attributes.IssueDate || 0), lastTimestampMs);
 
