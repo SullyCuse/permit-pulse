@@ -30,7 +30,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
   <h2 style="color:#2563eb">Permit Pulse — Weekly Digest</h2>
-  <p style="color:#6b7280">New permits filed in Hall County since ${sinceDate}. <strong>${permits.length} permits</strong> found.</p>
+  <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${permits.length} permits</strong> found.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
       <tr style="background:#f9fafb">
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
   since.setDate(since.getDate() - 7)
   const sinceStr = since.toISOString().split('T')[0]
 
-  const { data: permits, error: permitsError } = await supabase
+  const { data: allPermits, error: permitsError } = await supabase
     .from('permits')
     .select('permit_number, address, zip_code, permit_type, date_filed, raw_data')
     .gte('date_filed', sinceStr)
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: permitsError.message }, { status: 500 })
   }
 
-  if (!permits?.length) {
+  if (!allPermits?.length) {
     return NextResponse.json({ sent: 0, message: `No permits since ${sinceStr}` })
   }
 
@@ -87,17 +87,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: usersError.message }, { status: 500 })
   }
 
-  const html = digestHtml(permits, sinceStr)
+  const { data: watchlists } = await supabase
+    .from('watchlists')
+    .select('user_id, zip_codes')
+
+  const zipsByUser = new Map<string, Set<string>>()
+  for (const w of watchlists ?? []) {
+    if (w.zip_codes?.length) {
+      zipsByUser.set(w.user_id, new Set(w.zip_codes))
+    }
+  }
+
   let sent = 0
 
   for (const user of users ?? []) {
     if (!user.email) continue
+
+    const watchedZips = zipsByUser.get(user.id)
+    const permits = watchedZips
+      ? allPermits.filter(p => p.zip_code && watchedZips.has(p.zip_code))
+      : allPermits
+
+    if (!permits.length) continue
+
     try {
       await resend.emails.send({
         from: FROM,
         to: user.email,
-        subject: `Hall County Permits — ${permits.length} new this week`,
-        html,
+        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} this week`,
+        html: digestHtml(permits, sinceStr),
       })
       sent++
     } catch (err: any) {
@@ -105,5 +123,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ sent, permits_found: permits.length })
+  return NextResponse.json({ sent, permits_found: allPermits.length })
 }

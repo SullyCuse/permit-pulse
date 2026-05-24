@@ -1,8 +1,10 @@
 require('dotenv').config();
 const { fetchLatestPdfUrls } = require('./fetch-archive');
 const { downloadAndParsePdf } = require('./parse-permit-pdf');
+const { fetchNewReportUrls, downloadPdf } = require('./gwinnett-fetch-reports');
+const { parsePdfBuffer } = require('./gwinnett-parse-permit-pdf');
 const { savePermits } = require('./save-permits');
-const { getLastItemNumber, setLastItemNumber } = require('./state');
+const { getLastItemNumber, setLastItemNumber, getGwinnettLastDate, setGwinnettLastDate } = require('./state');
 
 const APP_URL = process.env.APP_URL ?? 'https://web-chi-nine-72.vercel.app';
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -30,49 +32,83 @@ async function main() {
   }
 
   try {
-    const lastItem = await getLastItemNumber();
     console.log(`\n=== Permit Pulse Scraper ===`);
-    console.log(`Last processed item: #${lastItem}`);
-    console.log(`Checking items #${lastItem + 1} – #${lastItem + CHECK_AHEAD}\n`);
 
-    const found = await fetchLatestPdfUrls(lastItem);
+    let totalInserted = 0;
+    let totalErrors = 0;
 
-    if (found.length === 0) {
-      console.log('No new permit PDFs found.');
+    // --- Hall County ---
+    const lastItem = await getLastItemNumber();
+    console.log(`\n[Hall County] Last processed item: #${lastItem}`);
+    console.log(`Checking items #${lastItem + 1} – #${lastItem + CHECK_AHEAD}`);
+
+    const hallFound = await fetchLatestPdfUrls(lastItem);
+
+    if (hallFound.length === 0) {
+      console.log('[Hall County] No new permit PDFs found.');
     } else {
-      let totalInserted = 0;
-      let totalErrors = 0;
-
-      for (const pdf of found) {
+      for (const pdf of hallFound) {
         try {
-          console.log(`\nProcessing item #${pdf.itemNumber}...`);
+          console.log(`\n[Hall County] Processing item #${pdf.itemNumber}...`);
           const permits = await downloadAndParsePdf(pdf.url);
           const result = await savePermits(permits);
           totalInserted += result.inserted;
           totalErrors += result.errors;
         } catch (err) {
-          console.error(`  ❌ Failed on item #${pdf.itemNumber}: ${err.message}`);
+          console.error(`  ❌ [Hall County] Failed on item #${pdf.itemNumber}: ${err.message}`);
+          totalErrors++;
+        }
+      }
+    }
+
+    const newLast = lastItem + CHECK_AHEAD;
+    await setLastItemNumber(newLast);
+    console.log(`\n[Hall County] State advanced to item #${newLast}`);
+
+    // --- Gwinnett County ---
+    const gwinnettLastDate = await getGwinnettLastDate();
+    console.log(`\n[Gwinnett County] Last processed report date: ${gwinnettLastDate}`);
+
+    const gwinnettReports = await fetchNewReportUrls(gwinnettLastDate);
+
+    if (gwinnettReports.length === 0) {
+      console.log('[Gwinnett County] No new reports found.');
+    } else {
+      let latestDate = gwinnettLastDate;
+
+      for (const report of gwinnettReports) {
+        try {
+          console.log(`\n[Gwinnett County] Processing report ${report.startDate}–${report.endDate}...`);
+          const buffer = await downloadPdf(report.url);
+          const permits = await parsePdfBuffer(buffer);
+          const result = await savePermits(permits);
+          totalInserted += result.inserted;
+          totalErrors += result.errors;
+
+          if (report.startDate > latestDate) latestDate = report.startDate;
+        } catch (err) {
+          console.error(`  ❌ [Gwinnett County] Failed on ${report.startDate}: ${err.message}`);
           totalErrors++;
         }
       }
 
-      console.log(`\n=== Run Summary ===`);
-      console.log(`  PDFs processed: ${found.length}`);
-      console.log(`  Permits inserted: ${totalInserted}`);
-      console.log(`  Errors: ${totalErrors}`);
-
-      if (totalInserted > 0 && CRON_SECRET) {
-        const runDate = new Date().toISOString().split('T')[0];
-        console.log(`\n=== Sending Emails ===`);
-        await callApi('/api/send-alerts', { run_date: runDate });
-        await callApi('/api/send-digest');
-      }
+      await setGwinnettLastDate(latestDate);
+      console.log(`\n[Gwinnett County] State advanced to ${latestDate}`);
     }
 
-    // Advance state past the entire checked range so next run starts fresh
-    const newLast = lastItem + CHECK_AHEAD;
-    await setLastItemNumber(newLast);
-    console.log(`\nState advanced to item #${newLast}. Next run checks #${newLast + 1}+`);
+    // --- Summary & emails ---
+    console.log(`\n=== Run Summary ===`);
+    console.log(`  Hall PDFs checked: ${hallFound.length}`);
+    console.log(`  Gwinnett reports processed: ${gwinnettReports.length}`);
+    console.log(`  Permits inserted: ${totalInserted}`);
+    console.log(`  Errors: ${totalErrors}`);
+
+    if (totalInserted > 0 && CRON_SECRET) {
+      const runDate = new Date().toISOString().split('T')[0];
+      console.log(`\n=== Sending Emails ===`);
+      await callApi('/api/send-alerts', { run_date: runDate });
+      await callApi('/api/send-digest');
+    }
 
   } finally {
     if (isApify) {
