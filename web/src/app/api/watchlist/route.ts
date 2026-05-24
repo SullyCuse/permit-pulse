@@ -32,7 +32,6 @@ export async function POST(req: NextRequest) {
       const { error } = await admin.from('watchlists').insert({
         user_id: user.id,
         zip_code: zipCode,
-        county: 'Hall',
       })
       if (error) console.error('watchlist insert error:', JSON.stringify(error))
     }

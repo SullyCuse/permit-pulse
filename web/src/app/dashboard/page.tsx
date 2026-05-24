@@ -90,7 +90,7 @@ export default async function DashboardPage() {
                 {watchlist.map((w: any) => (
                   <li key={w.id} className="text-sm text-gray-600 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    {w.zip_code} — {w.county}
+                    {w.zip_code}
                   </li>
                 ))}
               </ul>
