@@ -88,9 +88,16 @@ export default async function DashboardPage() {
             {watchlist && watchlist.length > 0 && (watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).length > 0 ? (
               <ul className="space-y-2">
                 {(watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).map((zip: string) => (
-                  <li key={zip} className="text-sm text-gray-600 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    {zip}
+                  <li key={zip} className="text-sm text-gray-600 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                      {zip}
+                    </div>
+                    <form action="/api/watchlist" method="POST">
+                      <input type="hidden" name="zip_code" value={zip} />
+                      <input type="hidden" name="action" value="remove" />
+                      <button type="submit" className="text-gray-300 hover:text-red-400 transition-colors text-xs leading-none">✕</button>
+                    </form>
                   </li>
                 ))}
               </ul>
