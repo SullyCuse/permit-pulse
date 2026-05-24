@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resend, FROM } from '@/lib/resend'
+import { getResend, FROM } from '@/lib/resend'
 import { createAdminClient } from '@/lib/supabase/server'
 
 function alertHtml(permit: {
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       if (sentSet.has(key)) continue
 
       try {
-        await resend.emails.send({
+        await getResend().emails.send({
           from: FROM,
           to: user.email,
           subject: `New ${permit.permit_type ?? 'permit'} in ${permit.zip_code} — Permit Pulse`,

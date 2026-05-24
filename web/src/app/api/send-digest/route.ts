@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { resend, FROM } from '@/lib/resend'
+import { getResend, FROM } from '@/lib/resend'
 import { createAdminClient } from '@/lib/supabase/server'
 
 type Permit = {
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     if (!permits.length) continue
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: FROM,
         to: user.email,
         subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} this week`,
