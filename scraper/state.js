@@ -47,7 +47,7 @@ async function setGwinnettLastDate(yyyymmdd) {
 
 // Forsyth County — last processed IssueDate as Unix ms timestamp
 async function getForsythLastTimestamp() {
-  return getStateValue('forsyth_last_timestamp', 0);
+  return getStateValue('forsyth_last_timestamp', 1751328000000); // default: 2025-07-31
 }
 async function setForsythLastTimestamp(ms) {
   return setStateValue('forsyth_last_timestamp', ms);
