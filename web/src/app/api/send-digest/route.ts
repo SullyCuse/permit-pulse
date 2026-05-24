@@ -8,6 +8,7 @@ type Permit = {
   zip_code: string | null
   permit_type: string | null
   date_filed: string | null
+  county: string | null
   raw_data: Record<string, any> | null
 }
 
@@ -20,6 +21,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.permit_type ?? '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.address ?? '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.zip_code ?? '—'}</td>
+      <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.county ?? '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${estValue ? `$${Number(estValue).toLocaleString()}` : '—'}</td>
       <td style="padding:8px 6px;border-bottom:1px solid #f3f4f6">${p.date_filed ? new Date(p.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
     </tr>`
@@ -38,6 +40,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
         <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">Type</th>
         <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">Address</th>
         <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">Zip</th>
+        <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">County</th>
         <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">Est. Value</th>
         <th style="padding:8px 6px;text-align:left;color:#6b7280;font-weight:500">Filed</th>
       </tr>
@@ -64,7 +67,7 @@ export async function POST(req: NextRequest) {
 
   const { data: allPermits, error: permitsError } = await supabase
     .from('permits')
-    .select('permit_number, address, zip_code, permit_type, date_filed, raw_data')
+    .select('permit_number, address, zip_code, permit_type, date_filed, county, raw_data')
     .gte('date_filed', sinceStr)
     .order('date_filed', { ascending: false })
 
