@@ -57,6 +57,7 @@ async function fetchPermitsSince(lastTimestampMs) {
 
 async function lookupAddressBatch(rawParcelNumbers) {
   // Query using raw values so they match DB exactly; normalize keys on return
+  // Use POST to avoid URL length limits with large IN clauses
   const quoted = rawParcelNumbers.map(p => `'${p.replace(/'/g, "''")}'`).join(',');
   const params = new URLSearchParams({
     where: `PIN IN (${quoted})`,
@@ -64,7 +65,10 @@ async function lookupAddressBatch(rawParcelNumbers) {
     f: 'json',
   });
 
-  const { data } = await axios.get(`${ADDRESS_URL}?${params}`, { timeout: 15000 });
+  const { data } = await axios.post(ADDRESS_URL, params.toString(), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    timeout: 15000,
+  });
   const features = data.features || [];
 
   const map = {};
