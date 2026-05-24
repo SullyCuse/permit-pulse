@@ -24,8 +24,8 @@ export default async function DashboardPage() {
     .order('date_filed', { ascending: false })
     .limit(50)
 
-  // Fetch user's watchlist
-  const { data: watchlist } = await supabase
+  // Fetch user's watchlist (admin client bypasses RLS — user already authenticated above)
+  const { data: watchlist } = await admin
     .from('watchlists')
     .select('*')
     .eq('user_id', user.id)
