@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
     const { data: existing } = await admin
       .from('watchlists')
-      .select('id')
+      .select('user_id')
       .eq('user_id', user.id)
       .eq('zip_code', zipCode)
       .single()
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         user_id: user.id,
         zip_code: zipCode,
         county: 'Hall',
+        permit_types: [],
       })
       if (error) console.error('watchlist insert error:', error)
     }
