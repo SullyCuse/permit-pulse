@@ -129,7 +129,10 @@ function PermitCard({ permit }: { permit: any }) {
             </span>
             <span className="text-xs text-gray-400">{permit.permit_number}</span>
           </div>
-          <p className="text-sm font-medium text-gray-900">{permit.address ?? 'No address'}</p>
+          <p className="text-sm font-medium text-gray-900">
+            {permit.address ?? 'No address'}
+            {permit.zip_code && !(permit.address ?? '').includes(permit.zip_code) ? `, ${permit.zip_code}` : ''}
+          </p>
           {permit.description && (
             <p className="text-xs text-gray-500 mt-1 line-clamp-2">{permit.description}</p>
           )}
