@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     customer_email: user.email,
     client_reference_id: user.id,
     success_url: `${appUrl}/dashboard?checkout=success`,
-    cancel_url: `${appUrl}/pricing`,
+    cancel_url: `${appUrl}/#pricing`,
     metadata: { user_id: user.id, plan },
   })
 
