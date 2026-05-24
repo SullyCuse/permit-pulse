@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
     const watchedZips = zipsByUser.get(user.id)
     const permits = watchedZips
-      ? allPermits.filter(p => p.zip_code && watchedZips.has(p.zip_code))
+      ? allPermits.filter((p: Permit) => p.zip_code && watchedZips.has(p.zip_code))
       : allPermits
 
     if (!permits.length) continue
