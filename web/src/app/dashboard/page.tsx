@@ -192,9 +192,20 @@ export default async function DashboardPage({
   )
 }
 
+const STATUS_STYLES: Record<string, string> = {
+  'Complete':  'bg-green-50 text-green-700',
+  'Issued':    'bg-blue-50 text-blue-700',
+  'Active':    'bg-blue-50 text-blue-700',
+  'Expired':   'bg-red-50 text-red-600',
+  'Voided':    'bg-red-50 text-red-600',
+  'Pending':   'bg-yellow-50 text-yellow-700',
+  'On Hold':   'bg-yellow-50 text-yellow-700',
+}
+
 function PermitCard({ permit }: { permit: any }) {
   const contractor = permit.raw_data?.contractor
   const estimatedValue = permit.raw_data?.estimated_value
+  const permitStatus = permit.raw_data?.PermitStatus as string | undefined
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—'
@@ -203,10 +214,15 @@ function PermitCard({ permit }: { permit: any }) {
     <div className="bg-white rounded-xl border border-gray-200 p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
               {permit.permit_type ?? 'Unknown type'}
             </span>
+            {permitStatus && (
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[permitStatus] ?? 'bg-gray-100 text-gray-600'}`}>
+                {permitStatus}
+              </span>
+            )}
             <span className="text-xs text-gray-400">{permit.permit_number}</span>
             <span className="text-xs text-gray-300">·</span>
             <span className="text-xs text-gray-400">{permit.county}</span>
