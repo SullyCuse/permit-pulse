@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   const { data: watchlists } = await supabase
     .from('watchlists')
-    .select('user_id, zip_code, permit_types')
+    .select('user_id, zip_codes, permit_types')
 
   if (!watchlists?.length) {
     return NextResponse.json({ sent: 0, message: 'No watchlists configured' })
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   const alreadySent = (alreadySentRaw ?? []) as { user_id: string; permit_id: string }[]
   const sentSet = new Set(alreadySent.map(a => `${a.user_id}:${a.permit_id}`))
 
-  const userIds = [...new Set((watchlists as { user_id: string; zip_code: string; permit_types: string[] | null }[]).map(w => w.user_id))]
+  const userIds = [...new Set((watchlists as { user_id: string; zip_codes: string[] | null; permit_types: string[] | null }[]).map(w => w.user_id))]
   const { data: usersRaw } = await supabase
     .from('users')
     .select('id, email, is_active')
@@ -89,15 +89,17 @@ export async function POST(req: NextRequest) {
   let sent = 0
   const logEntries: { user_id: string; permit_id: string; channel: string; sent_at: string }[] = []
 
-  type WatchlistRow = { user_id: string; zip_code: string; permit_types: string[] | null }
+  type WatchlistRow = { user_id: string; zip_codes: string[] | null; permit_types: string[] | null }
   type PermitRow = { id: string; permit_number: string | null; address: string | null; zip_code: string | null; permit_type: string | null; description: string | null; date_filed: string | null; raw_data: Record<string, any> | null }
 
   for (const watchlist of watchlists as WatchlistRow[]) {
     const user = userMap.get(watchlist.user_id) as UserRow | undefined
     if (!user?.email) continue
 
+    const watchedZips = watchlist.zip_codes ?? []
+
     for (const permit of permits as PermitRow[]) {
-      if (permit.zip_code !== watchlist.zip_code) continue
+      if (!watchedZips.includes(permit.zip_code ?? '')) continue
 
       if (watchlist.permit_types && watchlist.permit_types.length > 0 && !watchlist.permit_types.includes(permit.permit_type ?? '')) continue
 

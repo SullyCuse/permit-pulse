@@ -85,12 +85,12 @@ export default async function DashboardPage() {
         <div>
           <h2 className="text-lg font-semibold text-gray-900 mb-4">My Watchlist</h2>
           <div className="bg-white rounded-xl border border-gray-200 p-6">
-            {watchlist && watchlist.length > 0 ? (
+            {watchlist && watchlist.length > 0 && (watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).length > 0 ? (
               <ul className="space-y-2">
-                {watchlist.map((w: any) => (
-                  <li key={w.id} className="text-sm text-gray-600 flex items-center gap-2">
+                {(watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).map((zip: string) => (
+                  <li key={zip} className="text-sm text-gray-600 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    {w.zip_code}
+                    {zip}
                   </li>
                 ))}
               </ul>

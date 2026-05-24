@@ -21,17 +21,30 @@ export async function POST(req: NextRequest) {
     }, { onConflict: 'id', ignoreDuplicates: true })
     if (userError) console.error('users upsert error:', JSON.stringify(userError))
 
+    // Check if user already has a watchlist row
     const { data: existing } = await admin
       .from('watchlists')
-      .select('user_id')
+      .select('id, zip_codes')
       .eq('user_id', user.id)
-      .eq('zip_code', zipCode)
       .single()
 
-    if (!existing) {
+    if (existing) {
+      // Add to existing zip_codes array if not already present
+      const currentZips: string[] = existing.zip_codes ?? []
+      if (!currentZips.includes(zipCode)) {
+        const { error } = await admin
+          .from('watchlists')
+          .update({ zip_codes: [...currentZips, zipCode] })
+          .eq('id', existing.id)
+        if (error) console.error('watchlist update error:', JSON.stringify(error))
+      }
+    } else {
+      // Create new watchlist row for this user
       const { error } = await admin.from('watchlists').insert({
         user_id: user.id,
-        zip_code: zipCode,
+        county: 'Hall',
+        zip_codes: [zipCode],
+        permit_types: [],
       })
       if (error) console.error('watchlist insert error:', JSON.stringify(error))
     }
