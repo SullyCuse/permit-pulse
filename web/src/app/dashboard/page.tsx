@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import SubscribeButton from './SubscribeButton'
 
 export default async function DashboardPage() {
@@ -16,8 +16,9 @@ export default async function DashboardPage() {
 
   const isActive = userData?.is_active ?? false
 
-  // Fetch latest 50 permits
-  const { data: permits } = await supabase
+  // Fetch latest 50 permits (admin client bypasses RLS — permits are public county data)
+  const admin = createAdminClient()
+  const { data: permits } = await admin
     .from('permits')
     .select('*')
     .order('date_filed', { ascending: false })
