@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { Logo } from '@/components/Logo'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <span className="font-bold text-lg">Permit Pulse</span>
+        <Logo />
         <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
       </nav>
 
