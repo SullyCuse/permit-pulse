@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
       } else {
         const { error } = await admin.from('watchlists').insert({
           user_id: user.id,
-          county: 'Hall',
           zip_codes: [zipCode],
           permit_types: [],
         })
