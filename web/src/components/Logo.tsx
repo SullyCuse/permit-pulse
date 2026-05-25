@@ -24,13 +24,15 @@ export function LogoIcon({ size = 40 }: { size?: number }) {
   )
 }
 
+import Link from 'next/link'
+
 export function Logo() {
   return (
-    <div className="flex items-center gap-2">
+    <Link href="/" className="flex items-center gap-2">
       <LogoIcon size={36} />
       <span className="font-bold text-lg text-[#2563eb] tracking-tight">
         PermitPulse<span className="font-normal text-gray-400">.io</span>
       </span>
-    </div>
+    </Link>
   )
 }
