@@ -21,8 +21,11 @@ export default async function DashboardPage({
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const offset = (page - 1) * PAGE_SIZE
 
-  // Fetch user subscription status
-  const { data: userData } = await supabase
+  // Fetch permits (admin client bypasses RLS — permits are public county data)
+  const admin = createAdminClient()
+
+  // Fetch user subscription status via admin client to bypass RLS
+  const { data: userData } = await admin
     .from('users')
     .select('is_active, plan')
     .eq('auth_id', user.id)
@@ -30,9 +33,6 @@ export default async function DashboardPage({
 
   const isActive = userData?.is_active ?? false
   const pageSize = isActive ? PAGE_SIZE : 5
-
-  // Fetch permits (admin client bypasses RLS — permits are public county data)
-  const admin = createAdminClient()
 
   // Fetch distinct permit types for the active county filter via RPC (index-backed, returns only type strings)
   const { data: typeRows } = await admin.rpc('get_permit_types', {
