@@ -12,7 +12,11 @@ type Permit = {
   raw_data: Record<string, any> | null
 }
 
-function digestHtml(permits: Permit[], sinceDate: string) {
+function emailToToken(email: string) {
+  return Buffer.from(email).toString('base64url')
+}
+
+function digestHtml(permits: Permit[], sinceDate: string, unsubscribeUrl: string) {
   const rows = permits.map(p => {
     const estValue = p.raw_data?.estimated_value
     return `
@@ -31,7 +35,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
-  <h2 style="color:#2563eb">Permit Pulse — Weekly Digest</h2>
+  <h2 style="color:#2563eb">Permit Pulse — Permit Digest</h2>
   <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${permits.length} permits</strong> found.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
@@ -48,7 +52,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
     <tbody>${rows}</tbody>
   </table>
   <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
-  <p style="font-size:12px;color:#9ca3af">View your full dashboard at <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Permit Pulse</a>.</p>
+  <p style="font-size:12px;color:#9ca3af">View your full dashboard at <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Permit Pulse</a>. · <a href="${unsubscribeUrl}" style="color:#9ca3af">Unsubscribe</a></p>
 </body>
 </html>`
 }
@@ -85,6 +89,7 @@ export async function POST(req: NextRequest) {
     .select('id, email')
     .eq('is_active', true)
     .eq('plan', 'pro')
+    .eq('email_opted_out', false)
 
   if (usersError) {
     console.error('send-digest: users query error:', usersError)
@@ -115,11 +120,16 @@ export async function POST(req: NextRequest) {
     if (!permits.length) continue
 
     try {
+      const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?token=${emailToToken(user.email)}`
       await getResend().emails.send({
         from: FROM,
         to: user.email,
-        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} this week`,
-        html: digestHtml(permits, sinceStr),
+        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} in your area`,
+        html: digestHtml(permits, sinceStr, unsubscribeUrl),
+        headers: {
+          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       })
       sent++
     } catch (err: any) {
