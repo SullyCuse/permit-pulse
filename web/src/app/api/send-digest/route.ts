@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
     .from('users')
     .select('id, email')
     .eq('is_active', true)
+    .eq('plan', 'pro')
 
   if (usersError) {
     console.error('send-digest: users query error:', usersError)
