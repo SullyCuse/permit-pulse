@@ -23,7 +23,7 @@ export default function HomePage() {
           Know about new permits<br />before your competition
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse tracks every building permit filed across Hall, Gwinnett, and Forsyth County — plus the cities of Savannah and Alpharetta — and sends you instant alerts when new filings match your zip codes, so you can be first on the job.
+          Permit Pulse tracks every building permit filed across Hall, Gwinnett, and Forsyth County — plus the cities of Savannah and Alpharetta — and sends Pro subscribers a weekly digest when new filings match their zip codes, so you can be first on the job.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -90,7 +90,7 @@ export default function HomePage() {
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
               { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — for new filings automatically each week.' },
-              { step: '3', title: 'Get alerted instantly', desc: 'Receive a clear email alert the moment a matching permit is filed — with address, type, and value.' },
+              { step: '3', title: 'Get your weekly digest', desc: 'Pro subscribers receive a weekly email summary of every new permit matching their zip codes — with address, type, and value.' },
             ].map(item => (
               <div key={item.step}>
                 <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-4">
