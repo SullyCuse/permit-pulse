@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getResend, FROM } from '@/lib/resend'
 import { createAdminClient } from '@/lib/supabase/server'
 
+function emailToToken(email: string) {
+  return Buffer.from(email).toString('base64url')
+}
+
 function alertHtml(permit: {
   permit_number: string | null
   address: string | null
@@ -10,7 +14,7 @@ function alertHtml(permit: {
   description: string | null
   date_filed: string | null
   raw_data: Record<string, any> | null
-}) {
+}, unsubscribeUrl: string) {
   const estValue = permit.raw_data?.estimated_value
   const contractor = permit.raw_data?.contractor
   return `
@@ -28,7 +32,7 @@ function alertHtml(permit: {
     ${permit.description ? `<tr><td style="padding:6px 0;color:#6b7280">Description</td><td style="padding:6px 0">${permit.description}</td></tr>` : ''}
   </table>
   <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
-  <p style="font-size:12px;color:#9ca3af">You're receiving this because you have a watchlist alert set up at <a href="${process.env.NEXT_PUBLIC_APP_URL}">Permit Pulse</a>.</p>
+  <p style="font-size:12px;color:#9ca3af">You're receiving this because you have a watchlist set up at <a href="${process.env.NEXT_PUBLIC_APP_URL}">Permit Pulse</a>. · <a href="${unsubscribeUrl}" style="color:#9ca3af">Unsubscribe</a></p>
 </body>
 </html>`
 }
@@ -82,6 +86,7 @@ export async function POST(req: NextRequest) {
     .select('id, email, is_active')
     .in('id', userIds)
     .eq('is_active', true)
+    .eq('email_opted_out', false)
 
   type UserRow = { id: string; email: string; is_active: boolean }
   const userMap = new Map((usersRaw ?? [] as UserRow[]).map((u: UserRow) => [u.id, u]))
@@ -107,11 +112,16 @@ export async function POST(req: NextRequest) {
       if (sentSet.has(key)) continue
 
       try {
+        const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?token=${emailToToken(user.email)}`
         await getResend().emails.send({
           from: FROM,
           to: user.email,
           subject: `New ${permit.permit_type ?? 'permit'} in ${permit.zip_code} — Permit Pulse`,
-          html: alertHtml(permit),
+          html: alertHtml(permit, unsubscribeUrl),
+          headers: {
+            'List-Unsubscribe': `<${unsubscribeUrl}>`,
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+          },
         })
         logEntries.push({ user_id: watchlist.user_id, permit_id: permit.id, channel: 'email', sent_at: new Date().toISOString() })
         sentSet.add(key)
