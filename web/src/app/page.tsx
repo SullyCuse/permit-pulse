@@ -17,17 +17,17 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall, Gwinnett &amp; Forsyth County · Savannah &amp; Alpharetta, GA · Updated Mon, Wed &amp; Fri
+          Hall · Gwinnett · Forsyth · Savannah · Alpharetta, GA · Updated Mon, Wed &amp; Fri
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-          Know about new permits<br />before your competition
+          Be first on every permit<br />filed in your market.
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse tracks every building permit filed across Hall, Gwinnett, and Forsyth County — plus the cities of Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes, so you can be first on the job.
+          Permit Pulse monitors every building permit filed across Hall, Gwinnett &amp; Forsyth County — plus Savannah and Alpharetta — and sends you same-day alerts the moment something hits your zip codes.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
-            Get started
+            Browse free permits
           </Link>
           <a href="#pricing" className="border border-gray-300 hover:bg-gray-50 px-8 py-3 rounded-lg font-medium text-sm text-gray-700">
             See pricing
@@ -40,8 +40,8 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-4 text-center">
           {[
             { value: '10,000+', label: 'Permits tracked' },
-            { value: '3x / Week', label: 'Mon, Wed & Fri' },
-            { value: 'Same day', label: 'Digest delivery' },
+            { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
+            { value: 'Same day', label: 'Beat competitors to the quote' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -53,24 +53,24 @@ export default function HomePage() {
 
       {/* Who it's for */}
       <section className="py-20 max-w-5xl mx-auto px-6">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Built for Georgia professionals</h2>
-        <p className="text-center text-gray-500 mb-12 max-w-xl mx-auto">Whether you're chasing new construction leads or tracking neighborhood development, Permit Pulse keeps you ahead.</p>
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Built for the people who move first.</h2>
+        <p className="text-center text-gray-500 mb-12 max-w-xl mx-auto">In real estate and construction, timing is everything. Permit Pulse puts the data in your hands before your competition even knows to look.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               icon: '🔨',
               title: 'Contractors & Builders',
-              desc: 'Get notified the moment a new residential or commercial permit is filed in your service area. Beat competitors to the quote.',
+              desc: 'A new permit is a new job opportunity. Get notified the moment a residential or commercial permit is filed in your service area — and show up to quote before anyone else does.',
             },
             {
               icon: '🏠',
               title: 'Real Estate Investors',
-              desc: 'Spot development trends before they hit the market. Track new construction, additions, and remodels by zip code.',
+              desc: 'Spot neighborhoods heating up before they hit Zillow. Track new construction, additions, and remodels by zip code to find your next deal while others are still guessing.',
             },
             {
-              icon: '📊',
-              title: 'Inspectors & Suppliers',
-              desc: 'Know what\'s being built and where. Plan your schedule and sales calls around real permit data, not guesses.',
+              icon: '📋',
+              title: 'Agents & Realtors',
+              desc: 'Know which streets are growing before your clients do. Use permit data to prospect smarter, impress sellers, and have real answers about neighborhood development activity.',
             },
           ].map(item => (
             <div key={item.title} className="bg-gray-50 rounded-2xl p-6">
@@ -106,8 +106,8 @@ export default function HomePage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-20 max-w-4xl mx-auto px-6">
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">Simple pricing</h2>
-        <p className="text-center text-gray-500 mb-12">No contracts. Cancel anytime.</p>
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">One subscription. Every permit in your market.</h2>
+        <p className="text-center text-gray-500 mb-12">Less than the profit on a single lead. No contracts. Cancel anytime.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
           <PricingCard
             name="Basic"
