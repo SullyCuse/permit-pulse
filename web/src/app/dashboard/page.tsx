@@ -29,7 +29,7 @@ export default async function DashboardPage({
     .single()
 
   const isActive = userData?.is_active ?? false
-  const pageSize = isActive ? PAGE_SIZE : 2
+  const pageSize = isActive ? PAGE_SIZE : 5
 
   // Fetch permits (admin client bypasses RLS — permits are public county data)
   const admin = createAdminClient()
@@ -119,22 +119,24 @@ export default async function DashboardPage({
             <span className="text-sm text-gray-400">{totalCount?.toLocaleString() ?? 0} total</span>
           </div>
 
-          {/* County filter tabs */}
-          <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-lg w-fit">
-            {COUNTIES.map(county => (
-              <Link
-                key={county}
-                href={countyHref(county)}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  activeCounty === county
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {county}
-              </Link>
-            ))}
-          </div>
+          {/* County filter tabs — subscribers only */}
+          {isActive && (
+            <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-lg w-fit">
+              {COUNTIES.map(county => (
+                <Link
+                  key={county}
+                  href={countyHref(county)}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeCounty === county
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {county}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {permits && permits.length > 0 ? (
             <>
@@ -225,8 +227,8 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Permit type filter */}
-          <div>
+          {/* Permit type filter — subscribers only */}
+          {isActive && <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter by Type</h2>
             <div className="bg-white rounded-xl border border-gray-200 p-6">
               <form method="GET" action="/dashboard" className="space-y-2">
@@ -255,7 +257,7 @@ export default async function DashboardPage({
                 </Link>
               )}
             </div>
-          </div>
+          </div>}
         </div>
       </main>
     </div>
