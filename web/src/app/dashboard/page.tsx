@@ -10,7 +10,7 @@ const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta'
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ county?: string; page?: string }>
+  searchParams: Promise<{ county?: string; page?: string; type?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -32,6 +32,14 @@ export default async function DashboardPage({
 
   // Fetch permits (admin client bypasses RLS — permits are public county data)
   const admin = createAdminClient()
+
+  // Fetch distinct permit types for the active county filter via RPC (index-backed, returns only type strings)
+  const { data: typeRows } = await admin.rpc('get_permit_types', {
+    p_county: activeCounty !== 'All' ? activeCounty : null,
+  })
+  const permitTypes = ['All', ...((typeRows ?? []) as { permit_type: string }[]).map(r => r.permit_type)]
+  const activeType = permitTypes.includes(params.type ?? '') ? params.type! : 'All'
+
   let query = admin
     .from('permits')
     .select('*', { count: 'exact' })
@@ -40,6 +48,9 @@ export default async function DashboardPage({
 
   if (activeCounty !== 'All') {
     query = query.eq('county', activeCounty)
+  }
+  if (activeType !== 'All') {
+    query = query.eq('permit_type', activeType)
   }
 
   const { data: permits, count: totalCount } = await query
@@ -52,12 +63,17 @@ export default async function DashboardPage({
     .select('*')
     .eq('user_id', user.id)
 
-  function countyHref(county: string, p = 1) {
+  function filterHref(county: string, type: string, p = 1) {
     const q = new URLSearchParams()
     if (county !== 'All') q.set('county', county)
+    if (type !== 'All') q.set('type', type)
     if (p > 1) q.set('page', String(p))
     const qs = q.toString()
     return `/dashboard${qs ? `?${qs}` : ''}`
+  }
+
+  function countyHref(county: string, p = 1) {
+    return filterHref(county, 'All', p)
   }
 
   return (
@@ -103,7 +119,7 @@ export default async function DashboardPage({
           </div>
 
           {/* County filter tabs */}
-          <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg w-fit">
+          <div className="flex gap-1 mb-3 bg-gray-100 p-1 rounded-lg w-fit">
             {COUNTIES.map(county => (
               <Link
                 key={county}
@@ -115,6 +131,23 @@ export default async function DashboardPage({
                 }`}
               >
                 {county}
+              </Link>
+            ))}
+          </div>
+
+          {/* Permit type filter */}
+          <div className="flex flex-wrap gap-1 mb-4">
+            {permitTypes.map(type => (
+              <Link
+                key={type}
+                href={filterHref(activeCounty, type)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  activeType === type
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+                }`}
+              >
+                {type}
               </Link>
             ))}
           </div>
@@ -136,7 +169,7 @@ export default async function DashboardPage({
                   <div className="flex gap-2">
                     {page > 1 && (
                       <Link
-                        href={countyHref(activeCounty, page - 1)}
+                        href={filterHref(activeCounty, activeType, page - 1)}
                         className="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-gray-700"
                       >
                         ← Previous
@@ -144,7 +177,7 @@ export default async function DashboardPage({
                     )}
                     {page < totalPages && (
                       <Link
-                        href={countyHref(activeCounty, page + 1)}
+                        href={filterHref(activeCounty, activeType, page + 1)}
                         className="px-4 py-2 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-gray-700"
                       >
                         Next →
