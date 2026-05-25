@@ -17,13 +17,13 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall, Gwinnett &amp; Forsyth County · Savannah &amp; Alpharetta, GA · Updated weekly
+          Hall, Gwinnett &amp; Forsyth County · Savannah &amp; Alpharetta, GA · Updated Mon, Wed &amp; Fri
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
           Know about new permits<br />before your competition
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse tracks every building permit filed across Hall, Gwinnett, and Forsyth County — plus the cities of Savannah and Alpharetta — and sends Pro subscribers a weekly digest when new filings match their zip codes, so you can be first on the job.
+          Permit Pulse tracks every building permit filed across Hall, Gwinnett, and Forsyth County — plus the cities of Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes, so you can be first on the job.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -90,7 +90,7 @@ export default function HomePage() {
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
               { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — for new filings automatically each week.' },
-              { step: '3', title: 'Get your weekly digest', desc: 'Pro subscribers receive a weekly email summary of every new permit matching their zip codes — with address, type, and value.' },
+              { step: '3', title: 'Get your permit digest', desc: 'Pro subscribers receive an email digest every Monday, Wednesday, and Friday with every new permit matching their zip codes — address, type, and value included.' },
             ].map(item => (
               <div key={item.step}>
                 <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-4">
@@ -120,7 +120,7 @@ export default function HomePage() {
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Weekly digest email', 'Unlimited zip codes']}
+            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Permit digest emails (Mon, Wed & Fri)', 'Unlimited zip codes']}
             highlight={true}
           />
         </div>
@@ -134,7 +134,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — updated weekly.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',

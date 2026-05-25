@@ -31,7 +31,7 @@ function digestHtml(permits: Permit[], sinceDate: string) {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
-  <h2 style="color:#2563eb">Permit Pulse — Weekly Digest</h2>
+  <h2 style="color:#2563eb">Permit Pulse — Permit Digest</h2>
   <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${permits.length} permits</strong> found.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       await getResend().emails.send({
         from: FROM,
         to: user.email,
-        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} this week`,
+        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} in your area`,
         html: digestHtml(permits, sinceStr),
       })
       sent++
