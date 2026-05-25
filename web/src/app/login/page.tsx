@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 
 function getSupabase() {
@@ -37,7 +38,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Permit Pulse</h1>
+          <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-blue-600">
+            Permit Pulse
+          </Link>
           <p className="text-gray-500 mt-1 text-sm">Sign in to your account</p>
         </div>
 
@@ -86,6 +89,12 @@ export default function LoginPage() {
             </button>
           </>
         )}
+
+        <p className="text-center text-xs text-gray-400 mt-6">
+          <Link href="/" className="hover:text-gray-600 underline">
+            Back to home
+          </Link>
+        </p>
       </div>
     </div>
   )
