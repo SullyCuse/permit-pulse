@@ -12,6 +12,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
+      <head>
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="eDaU8I4k8YTPmKRwx/mQqg" async></script>
+      </head>
       <body className="min-h-full bg-white text-gray-900">{children}</body>
     </html>
   );
