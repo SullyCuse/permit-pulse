@@ -29,7 +29,7 @@ export default async function DashboardPage({
     .single()
 
   const isActive = userData?.is_active ?? false
-  const pageSize = isActive ? PAGE_SIZE : 2
+  const pageSize = isActive ? PAGE_SIZE : 5
 
   // Fetch permits (admin client bypasses RLS — permits are public county data)
   const admin = createAdminClient()
