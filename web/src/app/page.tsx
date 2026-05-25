@@ -39,7 +39,7 @@ export default function HomePage() {
       <section className="border-y border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-4 text-center">
           {[
-            { value: '83+', label: 'Permits tracked' },
+            { value: '10,000+', label: 'Permits tracked' },
             { value: 'Weekly', label: 'Monday updates' },
             { value: '5 min', label: 'Alert delivery' },
           ].map(stat => (
