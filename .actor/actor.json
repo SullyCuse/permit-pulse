@@ -1,8 +1,8 @@
 {
   "actorSpecification": 1,
   "name": "permit-pulse-scraper",
-  "title": "Permit Pulse — Hall, Gwinnett & Forsyth County Scraper",
-  "description": "Detects new Hall, Gwinnett, and Forsyth County building permits and saves them to Supabase.",
+  "title": "Permit Pulse — Hall, Gwinnett, Forsyth, Savannah & Alpharetta Scraper",
+  "description": "Detects new building permits across Hall, Gwinnett, and Forsyth counties and the cities of Savannah and Alpharetta, then saves them to Supabase.",
   "version": "0.1",
   "buildTag": "latest",
   "dockerfile": "./Dockerfile"
