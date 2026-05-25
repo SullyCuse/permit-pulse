@@ -4,11 +4,15 @@ const { downloadAndParsePdf } = require('./parse-permit-pdf');
 const { fetchNewReportUrls, downloadPdf } = require('./gwinnett-fetch-reports');
 const { parsePdfBuffer } = require('./gwinnett-parse-permit-pdf');
 const { fetchNewPermits } = require('./forsyth-fetch-permits');
+const { fetchNewPermits: fetchSavannahPermits } = require('./savannah-fetch-permits');
+const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
   getGwinnettLastDate, setGwinnettLastDate,
   getForsythLastTimestamp, setForsythLastTimestamp,
+  getSavannahLastTimestamp, setSavannahLastTimestamp,
+  getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
 } = require('./state');
 
 const APP_URL = process.env.APP_URL ?? 'https://web-chi-nine-72.vercel.app';
@@ -124,11 +128,59 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Savannah ---
+    const savannahLastTs = await getSavannahLastTimestamp();
+    console.log(`\n[Savannah] Last processed timestamp: ${savannahLastTs ? new Date(savannahLastTs).toISOString() : 'none'}`);
+
+    let savannahCount = 0;
+    try {
+      const { permits: savannahPermits, maxTimestamp: savannahMax } = await fetchSavannahPermits(savannahLastTs);
+      savannahCount = savannahPermits.length;
+
+      if (savannahPermits.length === 0) {
+        console.log('[Savannah] No new permits found.');
+      } else {
+        const result = await savePermits(savannahPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setSavannahLastTimestamp(savannahMax);
+        console.log(`\n[Savannah] State advanced to ${new Date(savannahMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Savannah] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- Alpharetta ---
+    const alpharettaLastTs = await getAlpharettaLastTimestamp();
+    console.log(`\n[Alpharetta] Last processed timestamp: ${alpharettaLastTs ? new Date(alpharettaLastTs).toISOString() : 'none'}`);
+
+    let alpharettaCount = 0;
+    try {
+      const { permits: alpharettaPermits, maxTimestamp: alpharettaMax } = await fetchAlpharettaPermits(alpharettaLastTs);
+      alpharettaCount = alpharettaPermits.length;
+
+      if (alpharettaPermits.length === 0) {
+        console.log('[Alpharetta] No new permits found.');
+      } else {
+        const result = await savePermits(alpharettaPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setAlpharettaLastTimestamp(alpharettaMax);
+        console.log(`\n[Alpharetta] State advanced to ${new Date(alpharettaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Alpharetta] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
     console.log(`  Gwinnett reports processed: ${gwinnettReports.length}`);
     console.log(`  Forsyth permits fetched: ${forsythCount}`);
+    console.log(`  Savannah permits fetched: ${savannahCount}`);
+    console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 
