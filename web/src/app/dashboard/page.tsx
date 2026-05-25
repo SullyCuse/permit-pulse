@@ -148,7 +148,7 @@ export default async function DashboardPage({
               {!isActive && (
                 <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-6 text-center">
                   <p className="text-sm font-medium text-blue-900">
-                    Showing 5 of {totalCount?.toLocaleString()} permits
+                    Showing {permits?.length} of {totalCount?.toLocaleString()} permits
                   </p>
                   <p className="text-sm text-blue-700 mt-1 mb-4">Subscribe to unlock the full feed and email alerts.</p>
                   <div className="flex justify-center gap-3">
