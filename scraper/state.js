@@ -53,8 +53,26 @@ async function setForsythLastTimestamp(ms) {
   return setStateValue('forsyth_last_timestamp', ms);
 }
 
+// Savannah — last processed IssuedDate_DATE as Unix ms timestamp
+async function getSavannahLastTimestamp() {
+  return getStateValue('savannah_last_timestamp', 1775001600000); // default: 2026-04-01
+}
+async function setSavannahLastTimestamp(ms) {
+  return setStateValue('savannah_last_timestamp', ms);
+}
+
+// Alpharetta — last processed DATE_ENTERED as Unix ms timestamp
+async function getAlpharettaLastTimestamp() {
+  return getStateValue('alpharetta_last_timestamp', 1775001600000); // default: 2026-04-01
+}
+async function setAlpharettaLastTimestamp(ms) {
+  return setStateValue('alpharetta_last_timestamp', ms);
+}
+
 module.exports = {
   getLastItemNumber, setLastItemNumber,
   getGwinnettLastDate, setGwinnettLastDate,
   getForsythLastTimestamp, setForsythLastTimestamp,
+  getSavannahLastTimestamp, setSavannahLastTimestamp,
+  getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
 };
