@@ -29,6 +29,7 @@ export default async function DashboardPage({
     .single()
 
   const isActive = userData?.is_active ?? false
+  const pageSize = isActive ? PAGE_SIZE : 5
 
   // Fetch permits (admin client bypasses RLS — permits are public county data)
   const admin = createAdminClient()
@@ -44,7 +45,7 @@ export default async function DashboardPage({
     .from('permits')
     .select('*', { count: 'exact' })
     .order('date_filed', { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1)
+    .range(offset, offset + pageSize - 1)
 
   if (activeCounty !== 'All') {
     query = query.eq('county', activeCounty)
@@ -55,7 +56,7 @@ export default async function DashboardPage({
 
   const { data: permits, count: totalCount } = await query
 
-  const totalPages = Math.ceil((totalCount ?? 0) / PAGE_SIZE)
+  const totalPages = isActive ? Math.ceil((totalCount ?? 0) / pageSize) : 1
 
   // Fetch user's watchlist (admin client bypasses RLS — user already authenticated above)
   const { data: watchlist } = await admin
@@ -142,6 +143,24 @@ export default async function DashboardPage({
                   <PermitCard key={permit.id} permit={permit} />
                 ))}
               </div>
+
+              {/* Free user upsell */}
+              {!isActive && (
+                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-6 text-center">
+                  <p className="text-sm font-medium text-blue-900">
+                    Showing 5 of {totalCount?.toLocaleString()} permits
+                  </p>
+                  <p className="text-sm text-blue-700 mt-1 mb-4">Subscribe to unlock the full feed and email alerts.</p>
+                  <div className="flex justify-center gap-3">
+                    <div className="w-32">
+                      <SubscribeButton plan="basic" label="Basic — $29/mo" highlight={false} />
+                    </div>
+                    <div className="w-32">
+                      <SubscribeButton plan="pro" label="Pro — $49/mo" highlight={true} />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Pagination */}
               {totalPages > 1 && (
