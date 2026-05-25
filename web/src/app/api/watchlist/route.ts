@@ -47,6 +47,15 @@ export async function POST(req: NextRequest) {
       if (existing) {
         const currentZips: string[] = existing.zip_codes ?? []
         if (!currentZips.includes(zipCode)) {
+          // Enforce 3 zip code limit for basic plan users
+          const { data: userData } = await admin
+            .from('users')
+            .select('plan')
+            .eq('auth_id', user.id)
+            .single()
+          if (userData?.plan === 'basic' && currentZips.length >= 3) {
+            return NextResponse.redirect(new URL('/dashboard?error=zip_limit', req.url))
+          }
           const { error } = await admin
             .from('watchlists')
             .update({ zip_codes: [...currentZips, zipCode] })

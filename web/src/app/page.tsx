@@ -113,14 +113,14 @@ export default function HomePage() {
             name="Basic"
             price={29}
             description="Perfect for contractors focused on one area."
-            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Weekly digest email', 'Up to 3 zip codes', 'Permit feed dashboard']}
+            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Permit feed dashboard', 'Up to 3 zip codes']}
             highlight={false}
           />
           <PricingCard
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Instant alerts', 'Unlimited zip codes', 'Priority support']}
+            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Weekly digest email', 'Unlimited zip codes']}
             highlight={true}
           />
         </div>

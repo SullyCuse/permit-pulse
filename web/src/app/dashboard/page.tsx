@@ -10,7 +10,7 @@ const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta'
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ county?: string; page?: string; type?: string }>
+  searchParams: Promise<{ county?: string; page?: string; type?: string; error?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -18,6 +18,7 @@ export default async function DashboardPage({
 
   const params = await searchParams
   const activeCounty = COUNTIES.includes(params.county as any) ? params.county! : 'All'
+  const zipLimitReached = params.error === 'zip_limit'
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const offset = (page - 1) * PAGE_SIZE
 
@@ -222,6 +223,9 @@ export default async function DashboardPage({
                 </ul>
               ) : (
                 <p className="text-sm text-gray-400">No watchlist zones yet.</p>
+              )}
+              {zipLimitReached && (
+                <p className="mt-3 text-xs text-red-600">Basic plan is limited to 3 zip codes. <a href="/dashboard" className="underline">Upgrade to Pro</a> for unlimited.</p>
               )}
               <WatchlistForm userId={user.id} />
             </div>
