@@ -135,23 +135,6 @@ export default async function DashboardPage({
             ))}
           </div>
 
-          {/* Permit type filter */}
-          <div className="flex flex-wrap gap-1 mb-4">
-            {permitTypes.map(type => (
-              <Link
-                key={type}
-                href={filterHref(activeCounty, type)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  activeType === type
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-                }`}
-              >
-                {type}
-              </Link>
-            ))}
-          </div>
-
           {permits && permits.length > 0 ? (
             <>
               <div className="space-y-3">
@@ -194,30 +177,65 @@ export default async function DashboardPage({
           )}
         </div>
 
-        {/* Watchlist sidebar */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">My Watchlist</h2>
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            {watchlist && watchlist.length > 0 && (watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).length > 0 ? (
-              <ul className="space-y-2">
-                {(watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).map((zip: string) => (
-                  <li key={zip} className="text-sm text-gray-600 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                      {zip}
-                    </div>
-                    <form action="/api/watchlist" method="POST">
-                      <input type="hidden" name="zip_code" value={zip} />
-                      <input type="hidden" name="action" value="remove" />
-                      <button type="submit" className="text-gray-400 hover:text-red-500 transition-colors text-sm font-bold leading-none">✕</button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-400">No watchlist zones yet.</p>
-            )}
-            <WatchlistForm userId={user.id} />
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Watchlist */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">My Watchlist</h2>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              {watchlist && watchlist.length > 0 && (watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).length > 0 ? (
+                <ul className="space-y-2">
+                  {(watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).map((zip: string) => (
+                    <li key={zip} className="text-sm text-gray-600 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                        {zip}
+                      </div>
+                      <form action="/api/watchlist" method="POST">
+                        <input type="hidden" name="zip_code" value={zip} />
+                        <input type="hidden" name="action" value="remove" />
+                        <button type="submit" className="text-gray-400 hover:text-red-500 transition-colors text-sm font-bold leading-none">✕</button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-400">No watchlist zones yet.</p>
+              )}
+              <WatchlistForm userId={user.id} />
+            </div>
+          </div>
+
+          {/* Permit type filter */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Filter by Type</h2>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <form method="GET" action="/dashboard" className="space-y-2">
+                {activeCounty !== 'All' && (
+                  <input type="hidden" name="county" value={activeCounty} />
+                )}
+                <select
+                  name="type"
+                  defaultValue={activeType}
+                  className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  {permitTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+                <button type="submit" className="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">
+                  Apply
+                </button>
+              </form>
+              {activeType !== 'All' && (
+                <Link
+                  href={filterHref(activeCounty, 'All')}
+                  className="mt-3 block text-xs text-center text-blue-600 hover:text-blue-800"
+                >
+                  Clear filter
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </main>
