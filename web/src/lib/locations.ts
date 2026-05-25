@@ -40,7 +40,7 @@ export const LOCATIONS: Location[] = [
     ],
     faqWhere: 'We pull directly from Hall County\'s official public permit records, updated Monday, Wednesday, and Friday.',
     faqAreas: 'Yes — we also cover Gwinnett County, Forsyth County, the city of Savannah, and Alpharetta.',
-    metaTitle: 'Hall County GA Building Permits — Track Every Filing | Permit Pulse',
+    metaTitle: 'Hall County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Hall County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
@@ -71,7 +71,7 @@ export const LOCATIONS: Location[] = [
     ],
     faqWhere: 'We pull directly from Gwinnett County\'s official public permit records, updated Monday, Wednesday, and Friday.',
     faqAreas: 'Yes — we also cover Hall County, Forsyth County, the city of Savannah, and Alpharetta.',
-    metaTitle: 'Gwinnett County GA Building Permits — Track Every Filing | Permit Pulse',
+    metaTitle: 'Gwinnett County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Gwinnett County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
@@ -102,7 +102,7 @@ export const LOCATIONS: Location[] = [
     ],
     faqWhere: 'We pull directly from Forsyth County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
     faqAreas: 'Yes — we also cover Hall County, Gwinnett County, the city of Savannah, and Alpharetta.',
-    metaTitle: 'Forsyth County GA Building Permits — Track Every Filing | Permit Pulse',
+    metaTitle: 'Forsyth County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Forsyth County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
@@ -133,7 +133,7 @@ export const LOCATIONS: Location[] = [
     ],
     faqWhere: 'We pull directly from the City of Savannah\'s official public permit records, updated Monday, Wednesday, and Friday.',
     faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, and Alpharetta.',
-    metaTitle: 'Savannah GA Building Permits — Track Every Filing | Permit Pulse',
+    metaTitle: 'Savannah GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Savannah, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
@@ -164,7 +164,7 @@ export const LOCATIONS: Location[] = [
     ],
     faqWhere: 'We pull directly from the City of Alpharetta\'s official public permit records, updated Monday, Wednesday, and Friday.',
     faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, and the city of Savannah.',
-    metaTitle: 'Alpharetta GA Building Permits — Track Every Filing | Permit Pulse',
+    metaTitle: 'Alpharetta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Alpharetta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
