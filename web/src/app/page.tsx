@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Logo } from '@/components/Logo'
+import { LOCATIONS } from '@/lib/locations'
 
 export default function HomePage() {
   return (
@@ -155,6 +156,23 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Browse by area */}
+      <section className="py-16 max-w-4xl mx-auto px-6 text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Browse permits by area</h2>
+        <p className="text-gray-500 mb-8 text-sm">We cover 5 Georgia counties and cities. Click an area to see what's being built.</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {LOCATIONS.map(loc => (
+            <Link
+              key={loc.slug}
+              href={`/${loc.slug}`}
+              className="border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-5 py-2.5 rounded-full text-sm text-gray-600 transition-colors font-medium"
+            >
+              {loc.fullName}
+            </Link>
+          ))}
         </div>
       </section>
 
