@@ -23,7 +23,7 @@ export default function HomePage() {
           Be first on every permit<br />filed in your market.
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse monitors every building permit filed across Hall, Gwinnett &amp; Forsyth County — plus Savannah and Alpharetta — and sends you same-day alerts the moment something hits your zip codes.
+          Permit Pulse monitors every building permit filed across Hall, Gwinnett &amp; Forsyth County — plus Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -41,7 +41,7 @@ export default function HomePage() {
           {[
             { value: '10,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: 'Same day', label: 'Beat competitors to the quote' },
+            { value: 'M / W / F', label: 'Beat competitors to the quote' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
