@@ -41,7 +41,7 @@ export default function HomePage() {
           {[
             { value: '10,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: 'M / W / F', label: 'Beat competitors to the quote' },
+            { value: '5 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -60,7 +60,7 @@ export default function HomePage() {
             {
               icon: '🔨',
               title: 'Contractors & Builders',
-              desc: 'A new permit is a new job opportunity. Get notified the moment a residential or commercial permit is filed in your service area — and show up to quote before anyone else does.',
+              desc: 'A new permit is a new job opportunity. Get a digest of every residential and commercial permit filed in your service area three times a week — and show up to quote before anyone else does.',
             },
             {
               icon: '🏠',
