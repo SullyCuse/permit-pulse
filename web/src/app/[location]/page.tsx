@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Logo } from '@/components/Logo'
 import { LOCATIONS, getLocation } from '@/lib/locations'
+import { COUNTY_META, getAllMonths, buildSlug, formatMonthYear } from '@/lib/reports'
 
 export function generateStaticParams() {
   return LOCATIONS.map(l => ({ location: l.slug }))
@@ -29,12 +30,23 @@ export default async function LocationPage(
 
   const [headlineLine1, headlineLine2] = loc.headline.split('\n')
 
+  // Find the county key matching this location (e.g. 'Gwinnett')
+  const countyKey = Object.keys(COUNTY_META).find(k =>
+    COUNTY_META[k].display.toLowerCase() === loc.name.toLowerCase()
+  )
+  const latestMonth = getAllMonths()[0]
+  const latestReportSlug = countyKey ? buildSlug(countyKey, latestMonth.year, latestMonth.month) : null
+  const latestReportLabel = formatMonthYear(latestMonth.year, latestMonth.month)
+
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <Link href="/"><Logo /></Link>
-        <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+        <div className="flex items-center gap-6">
+          <Link href="/reports" className="text-sm text-gray-600 hover:text-gray-900">Reports</Link>
+          <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -166,6 +178,27 @@ export default async function LocationPage(
           </div>
         </div>
       </section>
+
+      {/* Latest report callout */}
+      {latestReportSlug && (
+        <section className="bg-gray-50 border-y border-gray-100 py-10">
+          <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Free · No account needed</div>
+              <p className="text-gray-900 font-semibold">
+                {latestReportLabel} permit report — {loc.name}
+              </p>
+              <p className="text-gray-500 text-sm mt-0.5">Top zip codes, permit types, and month-over-month trends.</p>
+            </div>
+            <Link
+              href={`/reports/${latestReportSlug}`}
+              className="flex-shrink-0 border border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2 rounded-lg font-medium text-sm transition-colors"
+            >
+              View report →
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Other locations */}
       <section className="py-16 max-w-4xl mx-auto px-6 text-center">
