@@ -29,7 +29,7 @@ async function fetchPermitsSince(lastTimestampMs) {
   while (true) {
     const params = new URLSearchParams({
       where: `IssuedDate_DATE > ${msToArcgisTimestamp(lastTimestampMs)}`,
-      outFields: 'PermitNumber,PermitType,WorkClass,PermitStatus,Address,IssuedDate,IssuedDate_DATE,Permit_Value,Description,PIN',
+      outFields: 'PermitNumber,PermitType,WorkClass,PermitStatus,Address,IssuedDate,IssuedDate_DATE,Permit_Value,Description,PIN,ApplicantName',
       orderByFields: 'IssuedDate_DATE ASC',
       resultOffset: String(offset),
       resultRecordCount: String(PAGE_SIZE),
@@ -64,15 +64,16 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     const streetAddress = a.Address ? `${a.Address}, Savannah, GA` : null;
 
     return {
-      permit_number:  a.PermitNumber,
-      address:        streetAddress,
-      zip_code:       null,
-      permit_type:    a.PermitType ?? null,
-      description:    a.Description ?? a.WorkClass ?? null,
-      date_filed:     msToIsoDate(a.IssuedDate_DATE),
-      county:         'Savannah',
-      parcel_number:  a.PIN ?? null,
-      raw_data:       a,
+      permit_number:   a.PermitNumber,
+      address:         streetAddress,
+      zip_code:        null,
+      permit_type:     a.PermitType ?? null,
+      description:     a.Description ?? a.WorkClass ?? null,
+      date_filed:      msToIsoDate(a.IssuedDate_DATE),
+      applicant_name:  a.ApplicantName ?? null,
+      county:          'Savannah',
+      parcel_number:   a.PIN ?? null,
+      raw_data:        a,
     };
   });
 

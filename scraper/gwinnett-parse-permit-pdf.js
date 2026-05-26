@@ -91,7 +91,7 @@ async function parsePdfBuffer(buffer) {
       if (dollarIdx >= 0 && nonEmpty[dollarIdx + 1]) {
         const next = nonEmpty[dollarIdx + 1];
         if (!next.match(/^(Sewer|USE OF|City Limit|CENSUS CODE|PRINTED)/i)) {
-          permit.contractor = next;
+          permit.contractor_name = next;
         }
       }
 
