@@ -26,6 +26,8 @@ function msToArcgisTimestamp(ms) {
   return `timestamp '${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}'`;
 }
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 // Reverse geocode lat/lng → zip code using Google Maps API
 async function reverseGeocodeZip(lat, lng) {
   const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
@@ -37,29 +39,39 @@ async function reverseGeocodeZip(lat, lng) {
     return null;
   }
 
-  try {
-    const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
-      params: { latlng: `${lat},${lng}`, key: apiKey },
-      timeout: 5000,
-    });
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      if (attempt > 0) await sleep(1000 * attempt);
 
-    if (data.status !== 'OK' || !data.results?.length) {
-      zipCache.set(key, null);
-      return null;
+      const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+        params: { latlng: `${lat},${lng}`, key: apiKey },
+        timeout: 5000,
+      });
+
+      if (data.status === 'OVER_QUERY_LIMIT') {
+        console.warn(`  Rate limited by Google Maps API, retrying (attempt ${attempt + 1})...`);
+        continue;
+      }
+
+      if (data.status !== 'OK' || !data.results?.length) {
+        zipCache.set(key, null);
+        return null;
+      }
+
+      const zipComponent = data.results[0].address_components.find(c =>
+        c.types.includes('postal_code')
+      );
+
+      const zip = zipComponent?.short_name ?? null;
+      zipCache.set(key, zip);
+      return zip;
+    } catch (err) {
+      console.warn(`  Reverse geocode failed for (${lat}, ${lng}): ${err.message}`);
     }
-
-    const zipComponent = data.results[0].address_components.find(c =>
-      c.types.includes('postal_code')
-    );
-
-    const zip = zipComponent?.short_name ?? null;
-    zipCache.set(key, zip);
-    return zip;
-  } catch (err) {
-    console.warn(`  Reverse geocode failed for (${lat}, ${lng}): ${err.message}`);
-    zipCache.set(key, null);
-    return null;
   }
+
+  zipCache.set(key, null);
+  return null;
 }
 
 async function fetchNewPermits(lastTimestampMs = 0) {
@@ -116,8 +128,11 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   for (const permit of permits) {
     const geo = permit._geometry;
     if (geo?.x && geo?.y) {
+      const cacheKey = `${geo.y.toFixed(5)},${geo.x.toFixed(5)}`;
+      const cached = zipCache.has(cacheKey);
       permit.zip_code = await reverseGeocodeZip(geo.y, geo.x);
       if (permit.zip_code) geocoded++;
+      if (!cached) await sleep(150);
     }
     delete permit._geometry;
   }
