@@ -12,7 +12,10 @@ export default function HomePage() {
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <Logo />
-        <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+        <div className="flex items-center gap-6">
+          <Link href="/reports" className="text-sm text-gray-600 hover:text-gray-900">Reports</Link>
+          <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -173,6 +176,25 @@ export default function HomePage() {
               {loc.fullName}
             </Link>
           ))}
+        </div>
+      </section>
+
+      {/* Monthly reports */}
+      <section className="bg-gray-50 border-y border-gray-100 py-12">
+        <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div>
+            <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Free · No account needed</div>
+            <h2 className="text-xl font-bold text-gray-900">Monthly permit activity reports</h2>
+            <p className="text-gray-500 text-sm mt-1 max-w-md">
+              See where construction is happening across Georgia — top zip codes, permit types, and month-over-month trends.
+            </p>
+          </div>
+          <Link
+            href="/reports"
+            className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm"
+          >
+            Browse reports →
+          </Link>
         </div>
       </section>
 
