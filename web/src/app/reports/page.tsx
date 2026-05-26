@@ -15,16 +15,14 @@ export const metadata: Metadata = {
 export default async function ReportsIndexPage() {
   const summaries = await getAllReportSummaries()
 
-  // Group summaries by county, most recent month first, top 6
+  // Group summaries by county, most recent month first — show ALL months so
+  // no report page is an internal-link orphan
   const byCounty: Record<string, { year: number; month: number; count: number }[]> = {}
   for (const s of summaries) {
     if (!byCounty[s.county]) byCounty[s.county] = []
     byCounty[s.county].push({ year: s.year, month: s.month, count: s.count })
   }
-  // summaries is already sorted most-recent-first; just cap at 6 per county
-  for (const county of COUNTIES) {
-    byCounty[county] = (byCounty[county] ?? []).slice(0, 6)
-  }
+  // summaries is already sorted most-recent-first; no cap
 
   const totalPermits = summaries.reduce((s, r) => s + r.count, 0)
 
@@ -60,26 +58,46 @@ export default async function ReportsIndexPage() {
               {countyMonths.length === 0 ? (
                 <p className="text-sm text-gray-400">No data yet for this area.</p>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                  {countyMonths.map(({ year, month, count }) => {
-                    const slug = buildSlug(county, year, month)
-                    return (
-                      <Link
-                        key={slug}
-                        href={`/reports/${slug}`}
-                        className="bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-xl p-4 text-center transition-colors group"
-                      >
-                        <div className="text-xs text-gray-500 mb-2 leading-tight">
-                          {formatMonthYear(year, month)}
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900 group-hover:text-blue-700">
-                          {count.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">permits</div>
-                      </Link>
-                    )
-                  })}
-                </div>
+                <>
+                  {/* Featured months — large cards */}
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {countyMonths.slice(0, 6).map(({ year, month, count }) => {
+                      const slug = buildSlug(county, year, month)
+                      return (
+                        <Link
+                          key={slug}
+                          href={`/reports/${slug}`}
+                          className="bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-xl p-4 text-center transition-colors group"
+                        >
+                          <div className="text-xs text-gray-500 mb-2 leading-tight">
+                            {formatMonthYear(year, month)}
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 group-hover:text-blue-700">
+                            {count.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">permits</div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                  {/* Archive months — compact text links so older reports are never orphaned */}
+                  {countyMonths.length > 6 && (
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                      {countyMonths.slice(6).map(({ year, month, count }) => {
+                        const slug = buildSlug(county, year, month)
+                        return (
+                          <Link
+                            key={slug}
+                            href={`/reports/${slug}`}
+                            className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                          >
+                            {formatMonthYear(year, month)} ({count.toLocaleString()})
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )

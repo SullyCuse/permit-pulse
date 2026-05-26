@@ -45,10 +45,9 @@ export default async function ReportPage(
   const topType = report.byType[0]
   const totalTyped = report.byType.reduce((s, t) => s + t.count, 0)
 
+  // Show ALL other months for this county so no report page is an orphan
   const allMonths = getAllMonths()
-  const otherMonths = allMonths
-    .filter(m => !(m.year === year && m.month === month))
-    .slice(0, 5)
+  const otherMonths = allMonths.filter(m => !(m.year === year && m.month === month))
 
   return (
     <div className="min-h-screen bg-white">
