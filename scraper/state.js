@@ -69,10 +69,19 @@ async function setAlpharettaLastTimestamp(ms) {
   return setStateValue('alpharetta_last_timestamp', ms);
 }
 
+// Bryan County — last processed LASTUPDATE as Unix ms timestamp
+async function getBryanLastTimestamp() {
+  return getStateValue('bryan_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setBryanLastTimestamp(ms) {
+  return setStateValue('bryan_last_timestamp', ms);
+}
+
 module.exports = {
   getLastItemNumber, setLastItemNumber,
   getGwinnettLastDate, setGwinnettLastDate,
   getForsythLastTimestamp, setForsythLastTimestamp,
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
+  getBryanLastTimestamp, setBryanLastTimestamp,
 };

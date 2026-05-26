@@ -5,7 +5,8 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   Gwinnett:   { slug: 'gwinnett-county', display: 'Gwinnett County', fullName: 'Gwinnett County, GA' },
   Forsyth:    { slug: 'forsyth-county',  display: 'Forsyth County', fullName: 'Forsyth County, GA' },
   Savannah:   { slug: 'savannah',        display: 'Savannah',      fullName: 'Savannah, GA' },
-  Alpharetta: { slug: 'alpharetta',      display: 'Alpharetta',    fullName: 'Alpharetta, GA' },
+  Alpharetta:    { slug: 'alpharetta',      display: 'Alpharetta',      fullName: 'Alpharetta, GA' },
+  'Bryan County': { slug: 'bryan-county',   display: 'Bryan County',    fullName: 'Bryan County, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
