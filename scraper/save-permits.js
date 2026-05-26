@@ -33,7 +33,7 @@ async function savePermits(permits) {
         raw_data:        permit
       }, {
         onConflict: 'permit_number,county',
-        ignoreDuplicates: true
+        ignoreDuplicates: false
       });
 
     if (error) {
