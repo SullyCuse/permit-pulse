@@ -6,6 +6,7 @@ const { parsePdfBuffer } = require('./gwinnett-parse-permit-pdf');
 const { fetchNewPermits } = require('./forsyth-fetch-permits');
 const { fetchNewPermits: fetchSavannahPermits } = require('./savannah-fetch-permits');
 const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-permits');
+const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -13,6 +14,7 @@ const {
   getForsythLastTimestamp, setForsythLastTimestamp,
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
+  getBryanLastTimestamp, setBryanLastTimestamp,
 } = require('./state');
 
 const APP_URL = process.env.APP_URL ?? 'https://web-chi-nine-72.vercel.app';
@@ -174,6 +176,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Bryan County ---
+    const bryanLastTs = await getBryanLastTimestamp();
+    console.log(`\n[Bryan County] Last processed timestamp: ${bryanLastTs ? new Date(bryanLastTs).toISOString() : 'none'}`);
+
+    let bryanCount = 0;
+    try {
+      const { permits: bryanPermits, maxTimestamp: bryanMax } = await fetchBryanPermits(bryanLastTs);
+      bryanCount = bryanPermits.length;
+
+      if (bryanPermits.length === 0) {
+        console.log('[Bryan County] No new permits found.');
+      } else {
+        const result = await savePermits(bryanPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setBryanLastTimestamp(bryanMax);
+        console.log(`\n[Bryan County] State advanced to ${new Date(bryanMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Bryan County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -181,6 +206,7 @@ async function main() {
     console.log(`  Forsyth permits fetched: ${forsythCount}`);
     console.log(`  Savannah permits fetched: ${savannahCount}`);
     console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
+    console.log(`  Bryan County permits fetched: ${bryanCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

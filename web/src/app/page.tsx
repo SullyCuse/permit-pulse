@@ -21,13 +21,13 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall · Gwinnett · Forsyth · Savannah · Alpharetta, GA · Updated Mon, Wed &amp; Fri
+          Hall · Gwinnett · Forsyth · Bryan · Savannah · Alpharetta, GA · Updated Mon, Wed &amp; Fri
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
           Be first on every permit<br />filed in your market.
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse monitors every building permit filed across Hall, Gwinnett &amp; Forsyth County — plus Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes.
+          Permit Pulse monitors every building permit filed across Hall, Gwinnett, Forsyth &amp; Bryan County — plus Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -45,7 +45,7 @@ export default function HomePage() {
           {[
             { value: '10,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: '5 Areas', label: 'GA counties & cities covered' },
+            { value: '6 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -93,7 +93,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
-              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — for new filings automatically each week.' },
+              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta — for new filings automatically each week.' },
               { step: '3', title: 'Get your permit digest', desc: 'Pro subscribers receive an email digest every Monday, Wednesday, and Friday with every new permit matching their zip codes — address, type, and value included.' },
             ].map(item => (
               <div key={item.step}>
@@ -117,14 +117,14 @@ export default function HomePage() {
             name="Basic"
             price={29}
             description="Perfect for contractors focused on one area."
-            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Permit feed dashboard', 'Up to 3 zip codes']}
+            features={['Hall, Gwinnett, Forsyth & Bryan County + Savannah & Alpharetta', 'Permit feed dashboard', 'Up to 3 zip codes']}
             highlight={false}
           />
           <PricingCard
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={['Hall, Gwinnett & Forsyth County + Savannah & Alpharetta', 'Permit digest emails (Mon, Wed & Fri)', 'Unlimited zip codes']}
+            features={['Hall, Gwinnett, Forsyth & Bryan County + Savannah & Alpharetta', 'Permit digest emails (Mon, Wed & Fri)', 'Unlimited zip codes']}
             highlight={true}
           />
         </div>
@@ -138,7 +138,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -150,7 +150,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more areas?',
-                a: 'Yes — we recently added the cities of Savannah and Alpharetta and are actively expanding. Pro subscribers get early access to new areas.',
+                a: 'Yes — we recently added Bryan County and are actively expanding. Pro subscribers get early access to new areas.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-gray-200 pb-6">
@@ -165,7 +165,7 @@ export default function HomePage() {
       {/* Browse by area */}
       <section className="py-16 max-w-4xl mx-auto px-6 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Browse permits by area</h2>
-        <p className="text-gray-500 mb-8 text-sm">We cover 5 Georgia counties and cities. Click an area to see what's being built.</p>
+        <p className="text-gray-500 mb-8 text-sm">We cover 6 Georgia counties and cities. Click an area to see what's being built.</p>
         <div className="flex flex-wrap justify-center gap-3">
           {LOCATIONS.map(loc => (
             <Link
@@ -208,7 +208,7 @@ export default function HomePage() {
       {/* Bottom CTA */}
       <section className="py-20 text-center px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to stay ahead?</h2>
-        <p className="text-gray-500 mb-8">Join contractors and investors already tracking permits across Hall, Gwinnett, and Forsyth County — and the cities of Savannah and Alpharetta.</p>
+        <p className="text-gray-500 mb-8">Join contractors and investors already tracking permits across Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta.</p>
         <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-medium text-sm">
           Get started today
         </Link>

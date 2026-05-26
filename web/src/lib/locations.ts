@@ -39,7 +39,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Hall County\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Gwinnett County, Forsyth County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Gwinnett County, Forsyth County, Bryan County, the city of Savannah, and Alpharetta.',
     metaTitle: 'Hall County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Hall County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -70,7 +70,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Gwinnett County\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Forsyth County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Forsyth County, Bryan County, the city of Savannah, and Alpharetta.',
     metaTitle: 'Gwinnett County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Gwinnett County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -101,7 +101,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Forsyth County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Bryan County, the city of Savannah, and Alpharetta.',
     metaTitle: 'Forsyth County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Forsyth County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -132,7 +132,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Savannah\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, Bryan County, and Alpharetta.',
     metaTitle: 'Savannah GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Savannah, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -163,10 +163,41 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Alpharetta\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, and the city of Savannah.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, Bryan County, and the city of Savannah.',
     metaTitle: 'Alpharetta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Alpharetta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
+  },
+  {
+    slug: 'bryan-county-ga-building-permits',
+    name: 'Bryan County',
+    region: 'GA',
+    fullName: 'Bryan County, GA',
+    headline: 'Every Bryan County building permit.\nDelivered before your competition sees it.',
+    subheadline:
+      'Permit Pulse monitors every building permit filed in Bryan County and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Bryan County is one of Georgia\'s fastest-growing coastal counties. Get a digest of every new residential and commercial permit filed in your service area three times a week — and show up to quote before anyone else does.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Bryan County zip codes. Spot the neighborhoods heating up before they hit the MLS.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Bryan County areas are seeing new development before your clients do. Use permit data to prospect smarter and have real answers about neighborhood growth.',
+      },
+    ],
+    faqWhere: 'We pull directly from Bryan County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, and the cities of Savannah and Alpharetta.',
+    metaTitle: 'Bryan County GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Bryan County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
 ]
 
