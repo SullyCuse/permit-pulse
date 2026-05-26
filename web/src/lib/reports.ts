@@ -104,13 +104,13 @@ export async function getReportData(county: string, year: number, month: number)
   const prevYear = month === 0 ? year - 1 : year
   const { start: prevStart } = monthBounds(prevYear, prevMonth)
 
-  const [permitsResult, prevResult] = await Promise.all([
-    admin
-      .from('permits')
-      .select('zip_code, permit_type')
-      .eq('county', county)
-      .gte('date_filed', start)
-      .lt('date_filed', end),
+  const [permits, prevResult] = await Promise.all([
+    fetchAllRows<{ zip_code: string | null; permit_type: string | null }>(
+      admin,
+      'permits',
+      'zip_code, permit_type',
+      q => q.eq('county', county).gte('date_filed', start).lt('date_filed', end)
+    ),
     admin
       .from('permits')
       .select('*', { count: 'exact', head: true })
@@ -118,8 +118,6 @@ export async function getReportData(county: string, year: number, month: number)
       .gte('date_filed', prevStart)
       .lt('date_filed', start),
   ])
-
-  const permits = permitsResult.data ?? []
   const prevTotal = prevResult.count ?? null
 
   const zipCounts: Record<string, number> = {}
@@ -143,23 +141,46 @@ export async function getReportData(county: string, year: number, month: number)
   return { county, year, month, total: permits.length, prevTotal, byZip, byType }
 }
 
+// Paginate through all rows for a Supabase query builder, 1000 rows at a time.
+// Pass a factory fn that accepts (from, to) and returns a Supabase query.
+async function fetchAllRows<T>(
+  admin: ReturnType<typeof createAdminClient>,
+  table: string,
+  columns: string,
+  filters: (q: ReturnType<ReturnType<typeof createAdminClient>['from']>) => ReturnType<ReturnType<typeof createAdminClient>['from']>
+): Promise<T[]> {
+  const PAGE = 1000
+  const all: T[] = []
+  let from = 0
+  while (true) {
+    const base = admin.from(table).select(columns)
+    const { data, error } = await (filters(base) as any).range(from, from + PAGE - 1)
+    if (error || !data || data.length === 0) break
+    all.push(...(data as T[]))
+    if (data.length < PAGE) break
+    from += PAGE
+  }
+  return all
+}
+
 // Aggregate permit counts per county per month — used on index page
 export async function getAllReportSummaries(): Promise<
   { county: string; year: number; month: number; count: number }[]
 > {
   const admin = createAdminClient()
 
-  const { data } = await admin
-    .from('permits')
-    .select('county, date_filed')
-    .not('date_filed', 'is', null)
-    .gte('date_filed', `${DATA_START_YEAR}-${String(DATA_START_MONTH + 1).padStart(2, '0')}-01`)
+  const rows = await fetchAllRows<{ county: string; date_filed: string }>(
+    admin,
+    'permits',
+    'county, date_filed',
+    q => q.not('date_filed', 'is', null)
+  )
 
   const countMap: Record<string, number> = {}
-  for (const row of data ?? []) {
+  for (const row of rows) {
     if (!row.date_filed) continue
     // Parse date string directly to avoid timezone shifting
-    const [yearStr, monthStr] = (row.date_filed as string).split('-')
+    const [yearStr, monthStr] = row.date_filed.split('-')
     const key = `${row.county}|${yearStr}|${parseInt(monthStr, 10) - 1}`
     countMap[key] = (countMap[key] ?? 0) + 1
   }

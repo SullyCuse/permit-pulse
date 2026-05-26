@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
 import {
-  COUNTY_META, COUNTIES, getAllMonths, buildSlug, formatMonthYear, getAllReportSummaries,
+  COUNTY_META, COUNTIES, buildSlug, formatMonthYear, getAllReportSummaries,
 } from '@/lib/reports'
 
 export const dynamic = 'force-dynamic'
@@ -14,13 +14,19 @@ export const metadata: Metadata = {
 
 export default async function ReportsIndexPage() {
   const summaries = await getAllReportSummaries()
-  const months = getAllMonths() // most recent first
-  const recentMonths = months.slice(0, 6)
 
-  const countLookup: Record<string, number> = {}
+  // Group summaries by county, most recent month first, top 6
+  const byCounty: Record<string, { year: number; month: number; count: number }[]> = {}
   for (const s of summaries) {
-    countLookup[`${s.county}|${s.year}|${s.month}`] = s.count
+    if (!byCounty[s.county]) byCounty[s.county] = []
+    byCounty[s.county].push({ year: s.year, month: s.month, count: s.count })
   }
+  // summaries is already sorted most-recent-first; just cap at 6 per county
+  for (const county of COUNTIES) {
+    byCounty[county] = (byCounty[county] ?? []).slice(0, 6)
+  }
+
+  const totalPermits = summaries.reduce((s, r) => s + r.count, 0)
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,41 +43,44 @@ export default async function ReportsIndexPage() {
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
           Monthly permit data across Hall, Gwinnett, Forsyth, Savannah, and Alpharetta — pulled directly from official county sources.
         </p>
+        {totalPermits > 0 && (
+          <p className="mt-3 text-sm text-gray-400">{totalPermits.toLocaleString()} permits tracked across all areas</p>
+        )}
       </section>
 
       <section className="max-w-5xl mx-auto px-6 pb-24">
         {COUNTIES.map(county => {
           const meta = COUNTY_META[county]
+          const countyMonths = byCounty[county] ?? []
           return (
             <div key={county} className="mb-12">
               <h2 className="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-3">
                 {meta.fullName}
               </h2>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                {recentMonths.map(({ year, month }) => {
-                  const count = countLookup[`${county}|${year}|${month}`]
-                  const slug = buildSlug(county, year, month)
-                  return (
-                    <Link
-                      key={slug}
-                      href={`/reports/${slug}`}
-                      className="bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-xl p-4 text-center transition-colors group"
-                    >
-                      <div className="text-xs text-gray-500 mb-2 leading-tight">
-                        {formatMonthYear(year, month)}
-                      </div>
-                      {count != null ? (
-                        <>
-                          <div className="text-2xl font-bold text-gray-900 group-hover:text-blue-700">{count}</div>
-                          <div className="text-xs text-gray-400 mt-1">permits</div>
-                        </>
-                      ) : (
-                        <div className="text-2xl font-bold text-gray-300">—</div>
-                      )}
-                    </Link>
-                  )
-                })}
-              </div>
+              {countyMonths.length === 0 ? (
+                <p className="text-sm text-gray-400">No data yet for this area.</p>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                  {countyMonths.map(({ year, month, count }) => {
+                    const slug = buildSlug(county, year, month)
+                    return (
+                      <Link
+                        key={slug}
+                        href={`/reports/${slug}`}
+                        className="bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-xl p-4 text-center transition-colors group"
+                      >
+                        <div className="text-xs text-gray-500 mb-2 leading-tight">
+                          {formatMonthYear(year, month)}
+                        </div>
+                        <div className="text-2xl font-bold text-gray-900 group-hover:text-blue-700">
+                          {count.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">permits</div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })}
