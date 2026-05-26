@@ -279,7 +279,8 @@ const STATUS_STYLES: Record<string, string> = {
 }
 
 function PermitCard({ permit }: { permit: any }) {
-  const contractor = permit.raw_data?.contractor
+  const contractor = permit.contractor_name
+  const applicant = permit.applicant_name
   const estimatedValue = permit.raw_data?.estimated_value
   const permitStatus = permit.raw_data?.PermitStatus as string | undefined
   const filedDate = permit.date_filed
@@ -313,6 +314,11 @@ function PermitCard({ permit }: { permit: any }) {
           {contractor && (
             <p className="text-xs text-gray-400 mt-1.5">
               <span className="font-medium text-gray-500">Contractor:</span> {contractor}
+            </p>
+          )}
+          {applicant && (
+            <p className="text-xs text-gray-400 mt-1">
+              <span className="font-medium text-gray-500">Applicant:</span> {applicant}
             </p>
           )}
         </div>
