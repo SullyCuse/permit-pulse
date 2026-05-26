@@ -4,7 +4,7 @@ const axios = require('axios');
 const BASE_URL = 'https://bryangis.bryan-county.org/arcgis/rest/services/LandUsePermits/MapServer/0';
 const PAGE_SIZE = 2000;
 
-const OUT_FIELDS = 'PERMITID,PERMITTYPE,PERMITDESC,FULLADDR,APPROVEDT,LASTUPDATE';
+const OUT_FIELDS = 'PERMITID,PERMITTYPE,PERMITDESC,FULLADDR,APPROVEDT,LASTUPDATE,CONTRACTOR,APPLICANT';
 
 // Cache geocode results keyed by lat/lng to avoid duplicate API calls
 const geocodeCache = new Map();
@@ -110,15 +110,17 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   const permits = allFeatures.map(f => {
     const a = f.attributes;
     return {
-      permit_number: String(a.PERMITID),
-      address:       a.FULLADDR ?? null,
-      zip_code:      null,
-      permit_type:   a.PERMITTYPE ?? null,
-      description:   a.PERMITDESC ?? null,
-      date_filed:    msToIsoDate(a.APPROVEDT),
-      county:        'Bryan County',
-      raw_data:      a,
-      _geometry:     f.geometry ?? null,
+      permit_number:    String(a.PERMITID),
+      address:          a.FULLADDR ?? null,
+      zip_code:         null,
+      permit_type:      a.PERMITTYPE ?? null,
+      description:      a.PERMITDESC ?? null,
+      date_filed:       msToIsoDate(a.APPROVEDT),
+      contractor_name:  a.CONTRACTOR ?? null,
+      applicant_name:   a.APPLICANT ?? null,
+      county:           'Bryan County',
+      raw_data:         a,
+      _geometry:        f.geometry ?? null,
     };
   });
 

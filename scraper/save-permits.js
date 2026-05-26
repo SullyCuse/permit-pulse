@@ -23,14 +23,16 @@ async function savePermits(permits) {
     const { error } = await supabase
       .from('permits')
       .upsert({
-        permit_number:   permit.permit_number,
-        address:         permit.address,
-        permit_type:     permit.permit_type,
-        county:          permit.county,
-        zip_code:        permit.zip_code,
-        date_filed:      permit.date_filed,
-        description:     permit.description,
-        raw_data:        permit
+        permit_number:    permit.permit_number,
+        address:          permit.address,
+        permit_type:      permit.permit_type,
+        county:           permit.county,
+        zip_code:         permit.zip_code,
+        date_filed:       permit.date_filed,
+        description:      permit.description,
+        contractor_name:  permit.contractor_name ?? null,
+        applicant_name:   permit.applicant_name  ?? null,
+        raw_data:         permit
       }, {
         onConflict: 'permit_number,county',
         ignoreDuplicates: false
