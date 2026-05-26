@@ -1,11 +1,13 @@
 require('dotenv').config();
 const axios = require('axios');
-const { geocodeAddress } = require('./gwinnett-geocode');
 
 const BASE_URL = 'https://bryangis.bryan-county.org/arcgis/rest/services/LandUsePermits/MapServer/0';
 const PAGE_SIZE = 2000;
 
 const OUT_FIELDS = 'PERMITID,PERMITTYPE,PERMITDESC,FULLADDR,APPROVEDT,LASTUPDATE';
+
+// Cache reverse geocode results to avoid duplicate API calls
+const zipCache = new Map();
 
 function msToIsoDate(ms) {
   if (!ms) return null;
@@ -24,6 +26,42 @@ function msToArcgisTimestamp(ms) {
   return `timestamp '${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}'`;
 }
 
+// Reverse geocode lat/lng → zip code using Google Maps API
+async function reverseGeocodeZip(lat, lng) {
+  const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  if (zipCache.has(key)) return zipCache.get(key);
+
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    console.warn('  GOOGLE_MAPS_API_KEY not set — zip_code will be null');
+    return null;
+  }
+
+  try {
+    const { data } = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+      params: { latlng: `${lat},${lng}`, key: apiKey },
+      timeout: 5000,
+    });
+
+    if (data.status !== 'OK' || !data.results?.length) {
+      zipCache.set(key, null);
+      return null;
+    }
+
+    const zipComponent = data.results[0].address_components.find(c =>
+      c.types.includes('postal_code')
+    );
+
+    const zip = zipComponent?.short_name ?? null;
+    zipCache.set(key, zip);
+    return zip;
+  } catch (err) {
+    console.warn(`  Reverse geocode failed for (${lat}, ${lng}): ${err.message}`);
+    zipCache.set(key, null);
+    return null;
+  }
+}
+
 async function fetchNewPermits(lastTimestampMs = 0) {
   const since = lastTimestampMs
     ? new Date(lastTimestampMs).toISOString().split('T')[0]
@@ -37,6 +75,8 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     const params = new URLSearchParams({
       where: `LASTUPDATE > ${msToArcgisTimestamp(lastTimestampMs)}`,
       outFields: OUT_FIELDS,
+      returnGeometry: 'true',
+      outSR: '4326',
       orderByFields: 'LASTUPDATE ASC',
       resultOffset: String(offset),
       resultRecordCount: String(PAGE_SIZE),
@@ -66,17 +106,20 @@ async function fetchNewPermits(lastTimestampMs = 0) {
       date_filed:    msToIsoDate(a.APPROVEDT),
       county:        'Bryan County',
       raw_data:      a,
+      _geometry:     f.geometry ?? null,
     };
   });
 
-  // All Bryan County addresses lack zip codes — geocode every permit.
-  // Geocoder appends ", GA" internally, so pass "address, Bryan County" only.
+  // Reverse geocode lat/lng from ArcGIS geometry — more reliable than forward
+  // geocoding a bare street address with no city name.
   let geocoded = 0;
   for (const permit of permits) {
-    if (permit.address) {
-      permit.zip_code = await geocodeAddress(`${permit.address}, Bryan County`);
+    const geo = permit._geometry;
+    if (geo?.x && geo?.y) {
+      permit.zip_code = await reverseGeocodeZip(geo.y, geo.x);
       if (permit.zip_code) geocoded++;
     }
+    delete permit._geometry;
   }
   if (geocoded > 0) console.log(`  Geocoding: ${geocoded} zips resolved`);
 
