@@ -6,8 +6,8 @@ const PAGE_SIZE = 2000;
 
 const OUT_FIELDS = 'PERMITID,PERMITTYPE,PERMITDESC,FULLADDR,APPROVEDT,LASTUPDATE';
 
-// Cache reverse geocode results to avoid duplicate API calls
-const zipCache = new Map();
+// Cache geocode results keyed by lat/lng to avoid duplicate API calls
+const geocodeCache = new Map();
 
 function msToIsoDate(ms) {
   if (!ms) return null;
@@ -28,10 +28,10 @@ function msToArcgisTimestamp(ms) {
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-// Reverse geocode lat/lng → zip code using Google Maps API
-async function reverseGeocodeZip(lat, lng) {
+// Reverse geocode lat/lng → { zip, city } using Google Maps API
+async function reverseGeocode(lat, lng) {
   const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
-  if (zipCache.has(key)) return zipCache.get(key);
+  if (geocodeCache.has(key)) return geocodeCache.get(key);
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
@@ -54,23 +54,23 @@ async function reverseGeocodeZip(lat, lng) {
       }
 
       if (data.status !== 'OK' || !data.results?.length) {
-        zipCache.set(key, null);
+        geocodeCache.set(key, null);
         return null;
       }
 
-      const zipComponent = data.results[0].address_components.find(c =>
-        c.types.includes('postal_code')
-      );
+      const components = data.results[0].address_components;
+      const zip = components.find(c => c.types.includes('postal_code'))?.short_name ?? null;
+      const city = components.find(c => c.types.includes('locality'))?.long_name ?? null;
 
-      const zip = zipComponent?.short_name ?? null;
-      zipCache.set(key, zip);
-      return zip;
+      const result = { zip, city };
+      geocodeCache.set(key, result);
+      return result;
     } catch (err) {
       console.warn(`  Reverse geocode failed for (${lat}, ${lng}): ${err.message}`);
     }
   }
 
-  zipCache.set(key, null);
+  geocodeCache.set(key, null);
   return null;
 }
 
@@ -122,21 +122,29 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     };
   });
 
-  // Reverse geocode lat/lng from ArcGIS geometry — more reliable than forward
-  // geocoding a bare street address with no city name.
   let geocoded = 0;
+  let noGeometry = 0;
   for (const permit of permits) {
     const geo = permit._geometry;
     if (geo?.x && geo?.y) {
       const cacheKey = `${geo.y.toFixed(5)},${geo.x.toFixed(5)}`;
-      const cached = zipCache.has(cacheKey);
-      permit.zip_code = await reverseGeocodeZip(geo.y, geo.x);
-      if (permit.zip_code) geocoded++;
+      const cached = geocodeCache.has(cacheKey);
+      const result = await reverseGeocode(geo.y, geo.x);
+      if (result?.zip) {
+        permit.zip_code = result.zip;
+        geocoded++;
+      }
+      if (result?.city && permit.address) {
+        permit.address = `${permit.address}, ${result.city}`;
+      }
       if (!cached) await sleep(150);
+    } else {
+      noGeometry++;
     }
     delete permit._geometry;
   }
   if (geocoded > 0) console.log(`  Geocoding: ${geocoded} zips resolved`);
+  if (noGeometry > 0) console.log(`  No geometry: ${noGeometry} permits skipped`);
 
   const maxTimestamp = allFeatures.reduce(
     (max, f) => Math.max(max, f.attributes.LASTUPDATE || 0),
