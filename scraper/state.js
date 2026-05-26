@@ -3,10 +3,20 @@ const path = require('path');
 
 const STATE_FILE = path.join(__dirname, '..', 'state.json');
 
+// Named store so state persists across Apify runs (default store is per-run)
+let _apifyStore = null;
+async function getApifyStore() {
+  if (!_apifyStore) {
+    const { Actor } = require('apify');
+    _apifyStore = await Actor.openKeyValueStore('permit-pulse-state');
+  }
+  return _apifyStore;
+}
+
 async function getStateValue(key, defaultValue) {
   if (process.env.APIFY_IS_AT_HOME) {
-    const { Actor } = require('apify');
-    const val = await Actor.getValue(key);
+    const store = await getApifyStore();
+    const val = await store.getValue(key);
     return val !== null ? val : defaultValue;
   }
   try {
@@ -19,8 +29,8 @@ async function getStateValue(key, defaultValue) {
 
 async function setStateValue(key, value) {
   if (process.env.APIFY_IS_AT_HOME) {
-    const { Actor } = require('apify');
-    await Actor.setValue(key, value);
+    const store = await getApifyStore();
+    await store.setValue(key, value);
     return;
   }
   let data = {};
