@@ -87,6 +87,14 @@ async function setBryanLastTimestamp(ms) {
   return setStateValue('bryan_last_timestamp', ms);
 }
 
+// Digest cooldown — last time digest email was sent (Unix ms)
+async function getLastDigestSentMs() {
+  return getStateValue('last_digest_sent_ms', 0);
+}
+async function setLastDigestSentMs(ms) {
+  return setStateValue('last_digest_sent_ms', ms);
+}
+
 module.exports = {
   getLastItemNumber, setLastItemNumber,
   getGwinnettLastDate, setGwinnettLastDate,
@@ -94,4 +102,5 @@ module.exports = {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getLastDigestSentMs, setLastDigestSentMs,
 };
