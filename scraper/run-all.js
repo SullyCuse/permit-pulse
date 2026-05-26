@@ -15,6 +15,7 @@ const {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
 const APP_URL = process.env.APP_URL ?? 'https://web-chi-nine-72.vercel.app';
@@ -214,7 +215,16 @@ async function main() {
       const runDate = new Date().toISOString().split('T')[0];
       console.log(`\n=== Sending Emails ===`);
       await callApi('/api/send-alerts', { run_date: runDate });
-      await callApi('/api/send-digest');
+
+      const DIGEST_COOLDOWN_MS = 20 * 60 * 60 * 1000; // 20 hours
+      const lastDigestMs = await getLastDigestSentMs();
+      const hoursSinceLast = ((Date.now() - lastDigestMs) / 3600000).toFixed(1);
+      if (Date.now() - lastDigestMs >= DIGEST_COOLDOWN_MS) {
+        await callApi('/api/send-digest');
+        await setLastDigestSentMs(Date.now());
+      } else {
+        console.log(`  Digest skipped — sent ${hoursSinceLast}h ago (cooldown: 20h)`);
+      }
     }
 
   } finally {
