@@ -69,12 +69,12 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     };
   });
 
-  // All Bryan County addresses lack zip codes — geocode every permit
+  // All Bryan County addresses lack zip codes — geocode every permit.
+  // Geocoder appends ", GA" internally, so pass "address, Bryan County" only.
   let geocoded = 0;
   for (const permit of permits) {
     if (permit.address) {
-      const fullAddress = `${permit.address}, Bryan County, GA`;
-      permit.zip_code = await geocodeAddress(fullAddress);
+      permit.zip_code = await geocodeAddress(`${permit.address}, Bryan County`);
       if (permit.zip_code) geocoded++;
     }
   }
