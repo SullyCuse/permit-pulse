@@ -24,7 +24,7 @@ function parseDate(raw) {
   return `${yr}-${mo.padStart(2, '0')}-${da.padStart(2, '0')}`;
 }
 
-async function parsePdfBuffer(buffer) {
+async function parsePdfBuffer(buffer, reportUrl = null) {
   console.log(`Extracting text from Gwinnett PDF (${buffer.length} bytes)...`);
   const text = await extractText(buffer);
   console.log(`Extracted ${text.length} characters`);
@@ -98,6 +98,7 @@ async function parsePdfBuffer(buffer) {
       permit.permit_type = permit.description || permit.comm_res || null;
       permit.county = 'Gwinnett';
       permit.zip_code = null;
+      permit.source_url = reportUrl;
 
       permits.push(permit);
     } catch (err) {

@@ -329,6 +329,16 @@ function PermitCard({ permit }: { permit: any }) {
               ${Number(estimatedValue).toLocaleString()}
             </p>
           )}
+          {permit.source_url && (
+            <a
+              href={permit.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-500 hover:text-blue-700 mt-1 block"
+            >
+              View source →
+            </a>
+          )}
         </div>
       </div>
     </div>

@@ -92,7 +92,7 @@ async function main() {
         try {
           console.log(`\n[Gwinnett County] Processing report ${report.startDate}–${report.endDate}...`);
           const buffer = await downloadPdf(report.url);
-          const permits = await parsePdfBuffer(buffer);
+          const permits = await parsePdfBuffer(buffer, report.url);
           const result = await savePermits(permits);
           totalInserted += result.inserted;
           totalErrors += result.errors;
