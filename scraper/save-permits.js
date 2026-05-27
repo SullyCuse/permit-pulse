@@ -32,6 +32,7 @@ async function savePermits(permits) {
         description:      permit.description,
         contractor_name:  permit.contractor_name ?? null,
         applicant_name:   permit.applicant_name  ?? null,
+        source_url:       permit.source_url      ?? null,
         raw_data:         permit
       }, {
         onConflict: 'permit_number,county',

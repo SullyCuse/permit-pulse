@@ -127,6 +127,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
       permit_type:    a.PermitType ?? null,
       description:    a.PermitClassDescription || a.PermitClass || null,
       date_filed:     msToIsoDate(a.IssueDate),
+      source_url:     a.Link ?? null,
       county:         'Forsyth',
       parcel_number:  parcel || null,
       raw_data:       a,

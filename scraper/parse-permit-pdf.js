@@ -20,7 +20,7 @@ async function downloadAndParsePdf(url) {
   const text = await extractText(buffer);
   console.log(`Extracted ${text.length} characters.`);
 
-  const permits = parsePermits(text);
+  const permits = parsePermits(text, url);
   console.log(`Found ${permits.length} permits`);
   return permits;
 }
@@ -39,7 +39,7 @@ function extractText(buffer) {
   });
 }
 
-function parsePermits(text) {
+function parsePermits(text, sourceUrl = null) {
   const permits = [];
   const blocks = text.split(/Record No:/);
   blocks.shift();
@@ -88,6 +88,7 @@ function parsePermits(text) {
       permit.contractor = contractorMatch ? contractorMatch[1].replace(/\s+/g, ' ').trim() : null;
 
       permit.county = 'Hall';
+      permit.source_url = sourceUrl;
 
       if (permit.permit_number) permits.push(permit);
     } catch (err) {
