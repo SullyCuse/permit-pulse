@@ -281,7 +281,7 @@ const STATUS_STYLES: Record<string, string> = {
 function PermitCard({ permit }: { permit: any }) {
   const contractor = permit.contractor_name
   const applicant = permit.applicant_name
-  const estimatedValue = permit.raw_data?.estimated_value
+  const estimatedValue = permit.raw_data?.estimated_value ?? permit.raw_data?.raw_data?.Permit_Value
   const permitStatus = permit.raw_data?.PermitStatus as string | undefined
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
