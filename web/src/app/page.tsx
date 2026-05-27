@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Logo } from '@/components/Logo'
+import { ContactModal } from '@/components/ContactModal'
 import { LOCATIONS } from '@/lib/locations'
 
 export default function HomePage() {
@@ -215,7 +216,7 @@ export default function HomePage() {
       </section>
 
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
+        © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
   )

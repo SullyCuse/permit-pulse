@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { ContactModal } from '@/components/ContactModal'
 import {
   COUNTY_META, COUNTIES, buildSlug, formatMonthYear, getAllReportSummaries,
 } from '@/lib/reports'
@@ -118,7 +119,7 @@ export default async function ReportsIndexPage() {
       </section>
 
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
+        © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
   )
