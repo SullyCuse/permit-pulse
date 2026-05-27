@@ -71,6 +71,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
       description:     a.Description ?? a.WorkClass ?? null,
       date_filed:      msToIsoDate(a.IssuedDate_DATE),
       applicant_name:  a.ApplicantName ?? null,
+      estimated_value: a.Permit_Value ?? null,
       county:          'Savannah',
       parcel_number:   a.PIN ?? null,
       raw_data:        a,
