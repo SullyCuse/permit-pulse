@@ -87,6 +87,14 @@ async function setBryanLastTimestamp(ms) {
   return setStateValue('bryan_last_timestamp', ms);
 }
 
+// DeKalb County — last processed issuedDateTime as Unix ms timestamp
+async function getDeKalbLastTimestamp() {
+  return getStateValue('dekalb_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setDeKalbLastTimestamp(ms) {
+  return setStateValue('dekalb_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -102,5 +110,6 @@ module.exports = {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getDeKalbLastTimestamp, setDeKalbLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };

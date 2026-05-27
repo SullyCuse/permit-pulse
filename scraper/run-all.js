@@ -7,6 +7,7 @@ const { fetchNewPermits } = require('./forsyth-fetch-permits');
 const { fetchNewPermits: fetchSavannahPermits } = require('./savannah-fetch-permits');
 const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-permits');
 const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
+const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -15,6 +16,7 @@ const {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getDeKalbLastTimestamp, setDeKalbLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -200,6 +202,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- DeKalb County ---
+    const dekalbLastTs = await getDeKalbLastTimestamp();
+    console.log(`\n[DeKalb County] Last processed timestamp: ${dekalbLastTs ? new Date(dekalbLastTs).toISOString() : 'none'}`);
+
+    let dekalbCount = 0;
+    try {
+      const { permits: dekalbPermits, maxTimestamp: dekalbMax } = await fetchDeKalbPermits(dekalbLastTs);
+      dekalbCount = dekalbPermits.length;
+
+      if (dekalbPermits.length === 0) {
+        console.log('[DeKalb County] No new permits found.');
+      } else {
+        const result = await savePermits(dekalbPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setDeKalbLastTimestamp(dekalbMax);
+        console.log(`\n[DeKalb County] State advanced to ${new Date(dekalbMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [DeKalb County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -208,6 +233,7 @@ async function main() {
     console.log(`  Savannah permits fetched: ${savannahCount}`);
     console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
     console.log(`  Bryan County permits fetched: ${bryanCount}`);
+    console.log(`  DeKalb County permits fetched: ${dekalbCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

@@ -7,6 +7,7 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   Savannah:   { slug: 'savannah',        display: 'Savannah',      fullName: 'Savannah, GA' },
   Alpharetta:    { slug: 'alpharetta',      display: 'Alpharetta',      fullName: 'Alpharetta, GA' },
   'Bryan County': { slug: 'bryan-county',   display: 'Bryan County',    fullName: 'Bryan County, GA' },
+  'DeKalb County': { slug: 'dekalb-county', display: 'DeKalb County',   fullName: 'DeKalb County, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
