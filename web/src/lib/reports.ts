@@ -8,6 +8,7 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   Alpharetta:    { slug: 'alpharetta',      display: 'Alpharetta',      fullName: 'Alpharetta, GA' },
   'Bryan County': { slug: 'bryan-county',   display: 'Bryan County',    fullName: 'Bryan County, GA' },
   'DeKalb County': { slug: 'dekalb-county', display: 'DeKalb County',   fullName: 'DeKalb County, GA' },
+  'Johns Creek':   { slug: 'johns-creek',   display: 'Johns Creek',     fullName: 'Johns Creek, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

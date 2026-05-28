@@ -39,7 +39,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Hall County\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Gwinnett County, Forsyth County, DeKalb County, Bryan County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Gwinnett County, Forsyth County, DeKalb County, Bryan County, Johns Creek, the city of Savannah, and Alpharetta.',
     metaTitle: 'Hall County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Hall County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -70,7 +70,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Gwinnett County\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Forsyth County, DeKalb County, Bryan County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Forsyth County, DeKalb County, Bryan County, Johns Creek, the city of Savannah, and Alpharetta.',
     metaTitle: 'Gwinnett County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Gwinnett County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -101,7 +101,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Forsyth County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, DeKalb County, Bryan County, the city of Savannah, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, DeKalb County, Bryan County, Johns Creek, the city of Savannah, and Alpharetta.',
     metaTitle: 'Forsyth County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Forsyth County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -132,7 +132,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Savannah\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Johns Creek, and Alpharetta.',
     metaTitle: 'Savannah GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Savannah, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -163,7 +163,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Alpharetta\'s official public permit records, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the city of Savannah.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Johns Creek, and the city of Savannah.',
     metaTitle: 'Alpharetta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Alpharetta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -194,7 +194,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Bryan County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, and the cities of Savannah and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Johns Creek, and the cities of Savannah and Alpharetta.',
     metaTitle: 'Bryan County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Bryan County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -225,10 +225,41 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from DeKalb County\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, Bryan County, and the cities of Savannah and Alpharetta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, Bryan County, Johns Creek, and the cities of Savannah and Alpharetta.',
     metaTitle: 'DeKalb County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in DeKalb County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
+  },
+  {
+    slug: 'johns-creek-ga-building-permits',
+    name: 'Johns Creek',
+    region: 'GA',
+    fullName: 'Johns Creek, GA',
+    headline: 'Every Johns Creek building permit.\nDelivered before your competition sees it.',
+    subheadline:
+      'Permit Pulse monitors every building permit filed in Johns Creek and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Johns Creek is one of Metro Atlanta\'s most affluent and active markets. Get a digest of every new residential and commercial permit filed in your service area three times a week — and show up to quote before anyone else does.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Johns Creek zip codes. One of Georgia\'s top-income cities — spot deals before they hit the MLS.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Johns Creek streets are seeing new investment before your clients do. Use permit data to prospect smarter and win more listings in this high-value market.',
+      },
+    ],
+    faqWhere: 'We pull directly from the City of Johns Creek\'s official public permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Savannah and Alpharetta.',
+    metaTitle: 'Johns Creek GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Johns Creek, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
 ]
 
