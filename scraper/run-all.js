@@ -10,6 +10,7 @@ const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
 const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits');
 const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-permits');
 const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permits');
+const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -21,6 +22,7 @@ const {
   getDeKalbLastTimestamp, setDeKalbLastTimestamp,
   getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
+  getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -275,6 +277,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- City of Atlanta ---
+    const atlantaLastTs = await getAtlantaLastTimestamp();
+    console.log(`\n[City of Atlanta] Last processed timestamp: ${atlantaLastTs ? new Date(atlantaLastTs).toISOString() : 'none'}`);
+
+    let atlantaCount = 0;
+    try {
+      const { permits: atlantaPermits, maxTimestamp: atlantaMax } = await fetchAtlantaPermits(atlantaLastTs);
+      atlantaCount = atlantaPermits.length;
+
+      if (atlantaPermits.length === 0) {
+        console.log('[City of Atlanta] No new permits found.');
+      } else {
+        const result = await savePermits(atlantaPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setAtlantaLastTimestamp(atlantaMax);
+        console.log(`\n[City of Atlanta] State advanced to ${new Date(atlantaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [City of Atlanta] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -286,6 +311,7 @@ async function main() {
     console.log(`  DeKalb County permits fetched: ${dekalbCount}`);
     console.log(`  Augusta permits fetched: ${augustaCount}`);
     console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
+    console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

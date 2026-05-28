@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
-  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Savannah, and Alpharetta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
+  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
 }
 
 export default async function ReportsIndexPage() {
@@ -40,7 +40,7 @@ export default async function ReportsIndexPage() {
         </div>
         <h1 className="text-4xl font-bold text-gray-900">Building Permit Activity Reports</h1>
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Savannah, and Alpharetta — pulled directly from official county sources.
+          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta — pulled directly from official county sources.
         </p>
         {totalPermits > 0 && (
           <p className="mt-3 text-sm text-gray-400">{totalPermits.toLocaleString()} permits tracked across all areas</p>
