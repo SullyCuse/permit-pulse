@@ -119,6 +119,14 @@ async function setAtlantaLastTimestamp(ms) {
   return setStateValue('atlanta_last_timestamp', ms);
 }
 
+// Sandy Springs — last processed dateSubmitted as Unix ms timestamp
+async function getSandySpringsLastTimestamp() {
+  return getStateValue('sandysprings_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setSandySpringsLastTimestamp(ms) {
+  return setStateValue('sandysprings_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -138,5 +146,6 @@ module.exports = {
   getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
+  getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
