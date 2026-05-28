@@ -212,10 +212,10 @@ export default function HomePage() {
                     {/* Fade + CTA overlay */}
                     <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent flex items-end justify-center pb-4">
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">10,000+ more permits in the feed</p>
-                        <p className="text-xs text-gray-500 mb-3">Sign up free to browse the full database.</p>
-                        <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
-                          Browse permits free →
+                        <p className="text-sm font-semibold text-gray-900 mb-1">10,000+ permits tracked across Georgia</p>
+                        <p className="text-xs text-gray-500 mb-3">Subscribe to unlock the full feed and email alerts.</p>
+                        <Link href="#pricing" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
+                          See plans →
                         </Link>
                       </div>
                     </div>
