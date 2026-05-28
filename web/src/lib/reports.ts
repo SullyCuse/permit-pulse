@@ -10,6 +10,7 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'DeKalb County': { slug: 'dekalb-county', display: 'DeKalb County',   fullName: 'DeKalb County, GA' },
   'Augusta':       { slug: 'augusta',        display: 'Augusta',         fullName: 'Augusta, GA' },
   'Johns Creek':   { slug: 'johns-creek',   display: 'Johns Creek',     fullName: 'Johns Creek, GA' },
+  'Atlanta':       { slug: 'atlanta',        display: 'Atlanta',         fullName: 'Atlanta, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

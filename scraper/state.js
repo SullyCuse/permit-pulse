@@ -111,6 +111,14 @@ async function setJohnsCreekLastTimestamp(ms) {
   return setStateValue('johnscreek_last_timestamp', ms);
 }
 
+// City of Atlanta — last processed OrigOpened as Unix ms timestamp
+async function getAtlantaLastTimestamp() {
+  return getStateValue('atlanta_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setAtlantaLastTimestamp(ms) {
+  return setStateValue('atlanta_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -129,5 +137,6 @@ module.exports = {
   getDeKalbLastTimestamp, setDeKalbLastTimestamp,
   getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
+  getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
