@@ -318,10 +318,41 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Atlanta\'s official building permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Savannah, Alpharetta, Johns Creek, and Augusta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.',
     metaTitle: 'Atlanta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Atlanta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
+  },
+  {
+    slug: 'sandy-springs-ga-building-permits',
+    name: 'Sandy Springs',
+    region: 'GA',
+    fullName: 'Sandy Springs, GA',
+    headline: 'Every Sandy Springs building permit.\nDelivered before your competition sees it.',
+    subheadline:
+      'Permit Pulse monitors every building permit filed in Sandy Springs and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Sandy Springs is one of Metro Atlanta\'s most affluent and active markets. Get a digest of every new residential and commercial permit filed in your service area three times a week — and show up to quote before anyone else does.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Sandy Springs zip codes. From Roswell Road to the Perimeter — spot deals before they hit the MLS.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Sandy Springs streets are seeing new investment before your clients do. Use permit data to prospect smarter and win more listings in this high-value market.',
+      },
+    ],
+    faqWhere: 'We pull directly from the City of Sandy Springs\'s official public permit records, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta.',
+    metaTitle: 'Sandy Springs GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Sandy Springs, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
 ]
 
