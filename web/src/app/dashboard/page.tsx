@@ -5,7 +5,7 @@ import SubscribeButton from './SubscribeButton'
 import { Logo } from '@/components/Logo'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Johns Creek'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek'] as const
 
 export default async function DashboardPage({
   searchParams,
