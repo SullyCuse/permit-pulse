@@ -330,20 +330,49 @@ export default async function DashboardPage({
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  'Complete':  'bg-green-50 text-green-700',
-  'Issued':    'bg-blue-50 text-blue-700',
-  'Active':    'bg-blue-50 text-blue-700',
-  'Expired':   'bg-red-50 text-red-600',
-  'Voided':    'bg-red-50 text-red-600',
-  'Pending':   'bg-yellow-50 text-yellow-700',
-  'On Hold':   'bg-yellow-50 text-yellow-700',
+  'Complete':   'bg-green-50 text-green-700',
+  'Finaled':    'bg-green-50 text-green-700',
+  'Issued':     'bg-blue-50 text-blue-700',
+  'Active':     'bg-blue-50 text-blue-700',
+  'Approved':   'bg-blue-50 text-blue-700',
+  'Expired':    'bg-red-50 text-red-600',
+  'Voided':     'bg-red-50 text-red-600',
+  'Cancelled':  'bg-red-50 text-red-600',
+  'Pending':    'bg-yellow-50 text-yellow-700',
+  'Applied':    'bg-yellow-50 text-yellow-700',
+  'In Review':  'bg-yellow-50 text-yellow-700',
+  'On Hold':    'bg-yellow-50 text-yellow-700',
+}
+
+// Normalize raw status strings from various county sources to display values
+function normalizeStatus(raw: string | null | undefined): string | undefined {
+  if (!raw) return undefined
+  const s = raw.trim()
+  const lower = s.toLowerCase()
+  if (lower.includes('final') || lower.includes('complet') || lower === 'cls') return 'Finaled'
+  if (lower.includes('void') || lower.includes('cancel') || lower.includes('withdraw')) return 'Voided'
+  if (lower.includes('expir') || lower.includes('lapse')) return 'Expired'
+  if (lower.includes('hold')) return 'On Hold'
+  if (lower.includes('approv') || lower === 'approved') return 'Approved'
+  if (lower === 'issued' || lower === 'permit issued' || lower.includes('issue')) return 'Issued'
+  if (lower === 'active' || lower === 'in progress') return 'Active'
+  if (lower.includes('review') || lower.includes('plan check')) return 'In Review'
+  if (lower.includes('pending') || lower === 'applied' || lower.includes('submit')) return 'Applied'
+  // Return title-cased original if no match
+  return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
 function PermitCard({ permit }: { permit: any }) {
   const contractor = permit.contractor_name
   const applicant = permit.applicant_name
-  const estimatedValue = permit.raw_data?.estimated_value ?? permit.raw_data?.raw_data?.Permit_Value
-  const permitStatus = permit.raw_data?.PermitStatus as string | undefined
+  const estimatedValue = permit.raw_data?.estimated_value ?? permit.raw_data?.Permit_Value ?? permit.raw_data?.WORKCOST
+  const rawStatus =
+    permit.raw_data?.PermitStatus ??   // Forsyth, Savannah
+    permit.raw_data?.PERMIT_STATUS ??  // Augusta
+    permit.raw_data?.JobStatus ??      // Johns Creek
+    permit.raw_data?.STATUS_CODE ??    // Alpharetta
+    null
+  const permitStatus = normalizeStatus(rawStatus)
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—'
