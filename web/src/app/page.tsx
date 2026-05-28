@@ -109,6 +109,147 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Dashboard Preview */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Here's what you'll see inside</h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">Real-time permit data, filterable by county and type. Here's a preview of the dashboard you get after signing up.</p>
+          </div>
+
+          {/* Mock dashboard chrome */}
+          <div className="rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
+            {/* Mock header bar */}
+            <div className="bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between">
+              <Logo />
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400">you@example.com</span>
+                <span className="text-xs text-gray-300 border border-gray-200 rounded px-2 py-0.5">Sign out</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Permit feed */}
+                <div className="lg:col-span-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Recent Permits</h3>
+                    <span className="text-xs text-gray-400">10,240 total</span>
+                  </div>
+
+                  {/* Search bar */}
+                  <div className="relative mb-3">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <div className="w-full pl-9 pr-4 py-2 text-xs border border-gray-200 rounded-lg bg-white shadow-sm text-gray-400">
+                      Search by address or permit number…
+                    </div>
+                  </div>
+
+                  {/* County tabs */}
+                  <div className="flex gap-1 overflow-x-hidden mb-3 bg-gray-100 p-1 rounded-lg">
+                    {['All', 'Hall', 'Gwinnett', 'Forsyth', 'DeKalb', 'Atlanta'].map((county, i) => (
+                      <div key={county} className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap flex-shrink-0 ${i === 0 ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                        {county}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Permit cards */}
+                  <div className="relative">
+                    <div className="space-y-2.5">
+                      <MockPermitCard
+                        type="Residential - New Construction"
+                        status="Issued"
+                        statusStyle="bg-blue-50 text-blue-700"
+                        number="BP-2025-04821"
+                        county="Hall"
+                        address="412 Ridgecrest Dr, Gainesville, 30501"
+                        description="New single-family residence, 2,850 sq ft, 3 bed/2 bath with attached garage"
+                        contractor="Lakeside Home Builders LLC"
+                        date="May 21, 2025"
+                        value="$385,000"
+                      />
+                      <MockPermitCard
+                        type="Electrical"
+                        status="Approved"
+                        statusStyle="bg-blue-50 text-blue-700"
+                        number="EP-2025-01193"
+                        county="Gwinnett"
+                        address="887 Peachtree Industrial Blvd, Suwanee, 30024"
+                        description="200A service upgrade, panel replacement, EV charger installation"
+                        contractor="PowerUp Electric Co"
+                        date="May 20, 2025"
+                        value="$8,400"
+                      />
+                      <MockPermitCard
+                        type="Commercial - Renovation"
+                        status="In Review"
+                        statusStyle="bg-yellow-50 text-yellow-700"
+                        number="CP-2025-00762"
+                        county="Forsyth"
+                        address="1540 Market Place Blvd, Cumming, 30041"
+                        description="Interior build-out for new retail tenant, 3,200 sq ft, includes new MEP"
+                        contractor="Cornerstone Commercial Group"
+                        date="May 19, 2025"
+                        value="$142,000"
+                      />
+                      <MockPermitCard
+                        type="HVAC"
+                        status="Finaled"
+                        statusStyle="bg-green-50 text-green-700"
+                        number="HP-2025-03340"
+                        county="DeKalb County"
+                        address="2209 Briarcliff Rd NE, Atlanta, 30329"
+                        description="Replace existing 4-ton split system, gas furnace and AC unit"
+                        contractor="Cool Comfort HVAC Services"
+                        date="May 17, 2025"
+                        value="$12,500"
+                      />
+                    </div>
+
+                    {/* Fade + CTA overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent flex items-end justify-center pb-4">
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">10,000+ more permits in the feed</p>
+                        <p className="text-xs text-gray-500 mb-3">Sign up free to browse the full database.</p>
+                        <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
+                          Browse permits free →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sidebar */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">My Watchlist</h3>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <ul className="space-y-2 mb-3">
+                      {['30501', '30024', '30041', '30329'].map(zip => (
+                        <li key={zip} className="text-xs text-gray-600 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                          {zip}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="border-t border-gray-100 pt-3 space-y-2">
+                      <div className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-300 bg-gray-50">
+                        Add zip code (e.g. 30501)
+                      </div>
+                      <div className="w-full text-xs bg-blue-600 text-white py-2 rounded-lg font-medium text-center opacity-60">
+                        Add to watchlist
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 max-w-4xl mx-auto px-6">
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">One subscription. Every permit in your market.</h2>
@@ -266,6 +407,34 @@ function CountyRequestFormInner() {
         Request this county
       </button>
     </form>
+  )
+}
+
+function MockPermitCard({ type, status, statusStyle, number, county, address, description, contractor, date, value }: {
+  type: string; status: string; statusStyle: string; number: string; county: string
+  address: string; description: string; contractor: string; date: string; value: string
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{type}</span>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>{status}</span>
+            <span className="text-xs text-gray-400">{number}</span>
+            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-gray-400">{county}</span>
+          </div>
+          <p className="text-xs font-medium text-gray-900">{address}</p>
+          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{description}</p>
+          <p className="text-xs text-gray-400 mt-1"><span className="font-medium text-gray-500">Contractor:</span> {contractor}</p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-xs text-gray-400">{date}</p>
+          <p className="text-xs font-medium text-gray-700 mt-0.5">{value}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
