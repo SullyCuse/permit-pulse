@@ -11,6 +11,7 @@ const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits'
 const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-permits');
 const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permits');
 const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
+const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -23,6 +24,7 @@ const {
   getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
+  getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -300,6 +302,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Sandy Springs ---
+    const sandySpringsLastTs = await getSandySpringsLastTimestamp();
+    console.log(`\n[Sandy Springs] Last processed timestamp: ${sandySpringsLastTs ? new Date(sandySpringsLastTs).toISOString() : 'none'}`);
+
+    let sandySpringsCount = 0;
+    try {
+      const { permits: sandySpringsPermits, maxTimestamp: sandySpringsMax } = await fetchSandySpringsPermits(sandySpringsLastTs);
+      sandySpringsCount = sandySpringsPermits.length;
+
+      if (sandySpringsPermits.length === 0) {
+        console.log('[Sandy Springs] No new permits found.');
+      } else {
+        const result = await savePermits(sandySpringsPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setSandySpringsLastTimestamp(sandySpringsMax);
+        console.log(`\n[Sandy Springs] State advanced to ${new Date(sandySpringsMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Sandy Springs] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -312,6 +337,7 @@ async function main() {
     console.log(`  Augusta permits fetched: ${augustaCount}`);
     console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
     console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
+    console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 
