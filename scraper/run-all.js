@@ -9,6 +9,7 @@ const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-
 const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
 const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits');
 const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-permits');
+const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -18,6 +19,7 @@ const {
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
   getDeKalbLastTimestamp, setDeKalbLastTimestamp,
+  getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
@@ -227,6 +229,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Augusta ---
+    const augustaLastTs = await getAugustaLastTimestamp();
+    console.log(`\n[Augusta] Last processed timestamp: ${augustaLastTs ? new Date(augustaLastTs).toISOString() : 'none'}`);
+
+    let augustaCount = 0;
+    try {
+      const { permits: augustaPermits, maxTimestamp: augustaMax } = await fetchAugustaPermits(augustaLastTs);
+      augustaCount = augustaPermits.length;
+
+      if (augustaPermits.length === 0) {
+        console.log('[Augusta] No new permits found.');
+      } else {
+        const result = await savePermits(augustaPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setAugustaLastTimestamp(augustaMax);
+        console.log(`\n[Augusta] State advanced to ${new Date(augustaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Augusta] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Johns Creek ---
     const johnsCreekLastTs = await getJohnsCreekLastTimestamp();
     console.log(`\n[Johns Creek] Last processed timestamp: ${johnsCreekLastTs ? new Date(johnsCreekLastTs).toISOString() : 'none'}`);
@@ -259,6 +284,7 @@ async function main() {
     console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
     console.log(`  Bryan County permits fetched: ${bryanCount}`);
     console.log(`  DeKalb County permits fetched: ${dekalbCount}`);
+    console.log(`  Augusta permits fetched: ${augustaCount}`);
     console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);

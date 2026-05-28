@@ -95,6 +95,14 @@ async function setDeKalbLastTimestamp(ms) {
   return setStateValue('dekalb_last_timestamp', ms);
 }
 
+// Augusta — last processed DATE_ISSUE as Unix ms timestamp
+async function getAugustaLastTimestamp() {
+  return getStateValue('augusta_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setAugustaLastTimestamp(ms) {
+  return setStateValue('augusta_last_timestamp', ms);
+}
+
 // Johns Creek — last processed ISSUE_DATE as Unix ms timestamp
 async function getJohnsCreekLastTimestamp() {
   return getStateValue('johnscreek_last_timestamp', 1751328000000); // default: 2025-07-01
@@ -119,6 +127,7 @@ module.exports = {
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
   getDeKalbLastTimestamp, setDeKalbLastTimestamp,
+  getAugustaLastTimestamp, setAugustaLastTimestamp,
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
