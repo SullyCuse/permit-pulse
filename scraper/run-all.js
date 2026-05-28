@@ -8,6 +8,7 @@ const { fetchNewPermits: fetchSavannahPermits } = require('./savannah-fetch-perm
 const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-permits');
 const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
 const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits');
+const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -17,6 +18,7 @@ const {
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
   getDeKalbLastTimestamp, setDeKalbLastTimestamp,
+  getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -225,6 +227,29 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Johns Creek ---
+    const johnsCreekLastTs = await getJohnsCreekLastTimestamp();
+    console.log(`\n[Johns Creek] Last processed timestamp: ${johnsCreekLastTs ? new Date(johnsCreekLastTs).toISOString() : 'none'}`);
+
+    let johnsCreekCount = 0;
+    try {
+      const { permits: johnsCreekPermits, maxTimestamp: johnsCreekMax } = await fetchJohnsCreekPermits(johnsCreekLastTs);
+      johnsCreekCount = johnsCreekPermits.length;
+
+      if (johnsCreekPermits.length === 0) {
+        console.log('[Johns Creek] No new permits found.');
+      } else {
+        const result = await savePermits(johnsCreekPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setJohnsCreekLastTimestamp(johnsCreekMax);
+        console.log(`\n[Johns Creek] State advanced to ${new Date(johnsCreekMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Johns Creek] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -234,6 +259,7 @@ async function main() {
     console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
     console.log(`  Bryan County permits fetched: ${bryanCount}`);
     console.log(`  DeKalb County permits fetched: ${dekalbCount}`);
+    console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 
