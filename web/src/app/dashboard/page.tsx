@@ -170,24 +170,37 @@ export default async function DashboardPage({
             </div>
           )}
 
-          {/* Inline type chips + sort toggle — subscribers only */}
+          {/* Type filter + sort toggle — subscribers only */}
           {isActive && (
-            <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
-              <div className="flex flex-wrap gap-1.5">
-                {permitTypes.map(type => (
+            <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+              <form method="GET" action="/dashboard" className="flex items-center gap-0">
+                {activeCounty !== 'All' && <input type="hidden" name="county" value={activeCounty} />}
+                {activeSearch && <input type="hidden" name="search" value={activeSearch} />}
+                {activeSort === 'asc' && <input type="hidden" name="sort" value="asc" />}
+                <select
+                  name="type"
+                  defaultValue={activeType}
+                  className="text-sm border border-gray-200 rounded-l-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10 max-w-[220px] truncate"
+                >
+                  {permitTypes.map(type => (
+                    <option key={type} value={type}>{type === 'All' ? 'All Types' : type}</option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  className="text-sm border border-l-0 border-gray-200 rounded-r-lg px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-600 font-medium"
+                >
+                  Apply
+                </button>
+                {activeType !== 'All' && (
                   <Link
-                    key={type}
-                    href={buildHref({ type, page: 1 })}
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                      activeType === type
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600'
-                    }`}
+                    href={buildHref({ type: 'All', page: 1 })}
+                    className="ml-2 text-xs text-blue-600 hover:text-blue-800"
                   >
-                    {type === 'All' ? 'All Types' : type}
+                    Clear
                   </Link>
-                ))}
-              </div>
+                )}
+              </form>
               <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0">
                 <Link
                   href={buildHref({ sort: 'desc', page: 1 })}
