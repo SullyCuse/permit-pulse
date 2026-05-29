@@ -35,7 +35,8 @@ async function getStateValue(key, defaultValue) {
   }
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
     const sb = getSupabaseClient();
-    const { data } = await sb.from('scraper_state').select('value').eq('key', key).maybeSingle();
+    const { data, error } = await sb.from('scraper_state').select('value').eq('key', key).maybeSingle();
+    if (error) console.error(`[state] Error reading ${key}:`, error.message);
     return data !== null ? data.value : defaultValue;
   }
   // Local file fallback (dev only)
