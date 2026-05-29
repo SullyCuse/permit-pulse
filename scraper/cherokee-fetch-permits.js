@@ -238,7 +238,10 @@ async function fetchNewPermits(lastPermitNum) {
 
   try {
     browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
+      // Use the Chrome provided by the Apify base image if available,
+      // otherwise fall back to puppeteer's own bundled Chrome.
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

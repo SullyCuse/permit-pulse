@@ -53,8 +53,13 @@ export default async function ReportsIndexPage() {
           const countyMonths = byCounty[county] ?? []
           return (
             <div key={county} className="mb-12">
-              <h2 className="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-3">
+              <h2 className="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
                 {meta.fullName}
+                {meta.historicalThrough && (
+                  <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                    Historical · through {meta.historicalThrough}
+                  </span>
+                )}
               </h2>
               {countyMonths.length === 0 ? (
                 <p className="text-sm text-gray-400">No data yet for this area.</p>

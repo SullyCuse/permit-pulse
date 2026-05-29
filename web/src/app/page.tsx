@@ -22,8 +22,9 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall · Gwinnett · Forsyth · DeKalb · Bryan · Savannah · Alpharetta · Johns Creek · Augusta · Atlanta · Sandy Springs · Cherokee County, GA · Updated Mon, Wed &amp; Fri
+          Hall · Gwinnett · Forsyth · DeKalb · Bryan · Savannah · Alpharetta · Johns Creek · Augusta · <span className="text-amber-600">Atlanta*</span> · Sandy Springs · Cherokee County, GA · Updated Mon, Wed &amp; Fri
         </div>
+        <p className="text-xs text-amber-600 -mt-4 mb-6">* Atlanta data is historical only (through Jan 2026) — the city's public data feed is not currently being updated.</p>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
           Be first on every permit<br />filed in your market.
         </h1>
@@ -280,7 +281,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs — updated Monday, Wednesday, and Friday. Note: City of Atlanta data is currently historical only (through January 2026) — the city\'s public data feed stopped updating and we\'re monitoring for a replacement source.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -309,15 +310,22 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Browse permits by area</h2>
         <p className="text-gray-500 mb-8 text-sm">We cover 12 Georgia counties and cities. Click an area to see what's being built.</p>
         <div className="flex flex-wrap justify-center gap-3">
-          {LOCATIONS.map(loc => (
-            <Link
-              key={loc.slug}
-              href={`/${loc.slug}`}
-              className="border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-5 py-2.5 rounded-full text-sm text-gray-600 transition-colors font-medium"
-            >
-              {loc.fullName}
-            </Link>
-          ))}
+          {LOCATIONS.map(loc => {
+            const isAtlanta = loc.slug === 'atlanta-ga-building-permits'
+            return (
+              <Link
+                key={loc.slug}
+                href={`/${loc.slug}`}
+                className={`px-5 py-2.5 rounded-full text-sm transition-colors font-medium border ${
+                  isAtlanta
+                    ? 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-400'
+                    : 'border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600'
+                }`}
+              >
+                {loc.fullName}{isAtlanta && <span className="ml-1 text-xs font-normal opacity-75">(historical)</span>}
+              </Link>
+            )
+          })}
         </div>
       </section>
 
