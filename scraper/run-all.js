@@ -7,6 +7,12 @@ const { fetchNewPermits } = require('./forsyth-fetch-permits');
 const { fetchNewPermits: fetchSavannahPermits } = require('./savannah-fetch-permits');
 const { fetchNewPermits: fetchAlpharettaPermits } = require('./alpharetta-fetch-permits');
 const { fetchNewPermits: fetchBryanPermits } = require('./bryan-fetch-permits');
+const { fetchNewPermits: fetchDeKalbPermits } = require('./dekalb-fetch-permits');
+const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-permits');
+const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permits');
+const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
+const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
+const { fetchNewPermits: fetchCherokeePermits } = require('./cherokee-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -15,6 +21,12 @@ const {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getDeKalbLastTimestamp, setDeKalbLastTimestamp,
+  getAugustaLastTimestamp, setAugustaLastTimestamp,
+  getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
+  getAtlantaLastTimestamp, setAtlantaLastTimestamp,
+  getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
+  getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -200,6 +212,146 @@ async function main() {
       totalErrors++;
     }
 
+    // --- DeKalb County ---
+    const dekalbLastTs = await getDeKalbLastTimestamp();
+    console.log(`\n[DeKalb County] Last processed timestamp: ${dekalbLastTs ? new Date(dekalbLastTs).toISOString() : 'none'}`);
+
+    let dekalbCount = 0;
+    try {
+      const { permits: dekalbPermits, maxTimestamp: dekalbMax } = await fetchDeKalbPermits(dekalbLastTs);
+      dekalbCount = dekalbPermits.length;
+
+      if (dekalbPermits.length === 0) {
+        console.log('[DeKalb County] No new permits found.');
+      } else {
+        const result = await savePermits(dekalbPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setDeKalbLastTimestamp(dekalbMax);
+        console.log(`\n[DeKalb County] State advanced to ${new Date(dekalbMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [DeKalb County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- Augusta ---
+    const augustaLastTs = await getAugustaLastTimestamp();
+    console.log(`\n[Augusta] Last processed timestamp: ${augustaLastTs ? new Date(augustaLastTs).toISOString() : 'none'}`);
+
+    let augustaCount = 0;
+    try {
+      const { permits: augustaPermits, maxTimestamp: augustaMax } = await fetchAugustaPermits(augustaLastTs);
+      augustaCount = augustaPermits.length;
+
+      if (augustaPermits.length === 0) {
+        console.log('[Augusta] No new permits found.');
+      } else {
+        const result = await savePermits(augustaPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setAugustaLastTimestamp(augustaMax);
+        console.log(`\n[Augusta] State advanced to ${new Date(augustaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Augusta] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- Johns Creek ---
+    const johnsCreekLastTs = await getJohnsCreekLastTimestamp();
+    console.log(`\n[Johns Creek] Last processed timestamp: ${johnsCreekLastTs ? new Date(johnsCreekLastTs).toISOString() : 'none'}`);
+
+    let johnsCreekCount = 0;
+    try {
+      const { permits: johnsCreekPermits, maxTimestamp: johnsCreekMax } = await fetchJohnsCreekPermits(johnsCreekLastTs);
+      johnsCreekCount = johnsCreekPermits.length;
+
+      if (johnsCreekPermits.length === 0) {
+        console.log('[Johns Creek] No new permits found.');
+      } else {
+        const result = await savePermits(johnsCreekPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setJohnsCreekLastTimestamp(johnsCreekMax);
+        console.log(`\n[Johns Creek] State advanced to ${new Date(johnsCreekMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Johns Creek] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- City of Atlanta ---
+    const atlantaLastTs = await getAtlantaLastTimestamp();
+    console.log(`\n[City of Atlanta] Last processed timestamp: ${atlantaLastTs ? new Date(atlantaLastTs).toISOString() : 'none'}`);
+
+    let atlantaCount = 0;
+    try {
+      const { permits: atlantaPermits, maxTimestamp: atlantaMax } = await fetchAtlantaPermits(atlantaLastTs);
+      atlantaCount = atlantaPermits.length;
+
+      if (atlantaPermits.length === 0) {
+        console.log('[City of Atlanta] No new permits found.');
+      } else {
+        const result = await savePermits(atlantaPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setAtlantaLastTimestamp(atlantaMax);
+        console.log(`\n[City of Atlanta] State advanced to ${new Date(atlantaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [City of Atlanta] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- Sandy Springs ---
+    const sandySpringsLastTs = await getSandySpringsLastTimestamp();
+    console.log(`\n[Sandy Springs] Last processed timestamp: ${sandySpringsLastTs ? new Date(sandySpringsLastTs).toISOString() : 'none'}`);
+
+    let sandySpringsCount = 0;
+    try {
+      const { permits: sandySpringsPermits, maxTimestamp: sandySpringsMax } = await fetchSandySpringsPermits(sandySpringsLastTs);
+      sandySpringsCount = sandySpringsPermits.length;
+
+      if (sandySpringsPermits.length === 0) {
+        console.log('[Sandy Springs] No new permits found.');
+      } else {
+        const result = await savePermits(sandySpringsPermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setSandySpringsLastTimestamp(sandySpringsMax);
+        console.log(`\n[Sandy Springs] State advanced to ${new Date(sandySpringsMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Sandy Springs] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
+    // --- Cherokee County ---
+    const cherokeeLastPermitNum = await getCherokeeLastPermitNum();
+    console.log(`\n[Cherokee County] Last processed permit: ${cherokeeLastPermitNum}`);
+
+    let cherokeeCount = 0;
+    try {
+      const { permits: cherokeePermits, maxPermitNum: cherokeeMax } = await fetchCherokeePermits(cherokeeLastPermitNum);
+      cherokeeCount = cherokeePermits.length;
+
+      if (cherokeePermits.length === 0) {
+        console.log('[Cherokee County] No new permits found.');
+      } else {
+        const result = await savePermits(cherokeePermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        if (cherokeeMax && cherokeeMax !== cherokeeLastPermitNum) {
+          await setCherokeeLastPermitNum(cherokeeMax);
+          console.log(`\n[Cherokee County] State advanced to ${cherokeeMax}`);
+        }
+      }
+    } catch (err) {
+      console.error(`  ❌ [Cherokee County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -208,6 +360,12 @@ async function main() {
     console.log(`  Savannah permits fetched: ${savannahCount}`);
     console.log(`  Alpharetta permits fetched: ${alpharettaCount}`);
     console.log(`  Bryan County permits fetched: ${bryanCount}`);
+    console.log(`  DeKalb County permits fetched: ${dekalbCount}`);
+    console.log(`  Augusta permits fetched: ${augustaCount}`);
+    console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
+    console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
+    console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
+    console.log(`  Cherokee County permits fetched: ${cherokeeCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

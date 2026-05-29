@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Logo } from '@/components/Logo'
+import { ContactModal } from '@/components/ContactModal'
 import { LOCATIONS, getLocation } from '@/lib/locations'
 import { COUNTY_META, getAllMonths, buildSlug, formatMonthYear } from '@/lib/reports'
 
@@ -226,7 +227,7 @@ export default async function LocationPage(
       </section>
 
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
+        © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
   )

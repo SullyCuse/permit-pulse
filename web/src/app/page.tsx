@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Logo } from '@/components/Logo'
+import { ContactModal } from '@/components/ContactModal'
 import { LOCATIONS } from '@/lib/locations'
 
 export default function HomePage() {
@@ -21,13 +22,13 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
-          Hall · Gwinnett · Forsyth · Bryan · Savannah · Alpharetta, GA · Updated Mon, Wed &amp; Fri
+          Hall · Gwinnett · Forsyth · DeKalb · Bryan · Savannah · Alpharetta · Johns Creek · Augusta · Atlanta · Sandy Springs · Cherokee County, GA · Updated Mon, Wed &amp; Fri
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
           Be first on every permit<br />filed in your market.
         </h1>
         <p className="mt-6 text-xl text-gray-500 max-w-2xl mx-auto">
-          Permit Pulse monitors every building permit filed across Hall, Gwinnett, Forsyth &amp; Bryan County — plus Savannah and Alpharetta — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes.
+          Permit Pulse monitors every building permit filed across Hall, Gwinnett, Forsyth, DeKalb &amp; Bryan County — plus Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, and Cherokee County — and sends Pro subscribers a permit digest every Monday, Wednesday, and Friday when new filings match their zip codes.
         </p>
         <div className="mt-10 flex gap-4 justify-center">
           <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
@@ -45,7 +46,7 @@ export default function HomePage() {
           {[
             { value: '10,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: '6 Areas', label: 'GA counties & cities covered' },
+            { value: '11 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -93,7 +94,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
-              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta — for new filings automatically each week.' },
+              { step: '2', title: 'We monitor for you', desc: 'Our system checks Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs — for new filings automatically each week.' },
               { step: '3', title: 'Get your permit digest', desc: 'Pro subscribers receive an email digest every Monday, Wednesday, and Friday with every new permit matching their zip codes — address, type, and value included.' },
             ].map(item => (
               <div key={item.step}>
@@ -108,6 +109,147 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Dashboard Preview */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Here's what you'll see inside</h2>
+            <p className="text-gray-500 text-sm max-w-xl mx-auto">Real-time permit data, filterable by county and type. Here's a preview of the dashboard you get after signing up.</p>
+          </div>
+
+          {/* Mock dashboard chrome */}
+          <div className="rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
+            {/* Mock header bar */}
+            <div className="bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between">
+              <Logo />
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400">you@example.com</span>
+                <span className="text-xs text-gray-300 border border-gray-200 rounded px-2 py-0.5">Sign out</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-5">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Permit feed */}
+                <div className="lg:col-span-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Recent Permits</h3>
+                    <span className="text-xs text-gray-400">10,240 total</span>
+                  </div>
+
+                  {/* Search bar */}
+                  <div className="relative mb-3">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <div className="w-full pl-9 pr-4 py-2 text-xs border border-gray-200 rounded-lg bg-white shadow-sm text-gray-400">
+                      Search by address or permit number…
+                    </div>
+                  </div>
+
+                  {/* County tabs */}
+                  <div className="flex gap-1 overflow-x-hidden mb-3 bg-gray-100 p-1 rounded-lg">
+                    {['All', 'Hall', 'Gwinnett', 'Forsyth', 'DeKalb', 'Atlanta'].map((county, i) => (
+                      <div key={county} className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap flex-shrink-0 ${i === 0 ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+                        {county}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Permit cards */}
+                  <div className="relative">
+                    <div className="space-y-2.5">
+                      <MockPermitCard
+                        type="Residential - New Construction"
+                        status="Issued"
+                        statusStyle="bg-blue-50 text-blue-700"
+                        number="BP-2025-04821"
+                        county="Hall"
+                        address="412 Ridgecrest Dr, Gainesville, 30501"
+                        description="New single-family residence, 2,850 sq ft, 3 bed/2 bath with attached garage"
+                        contractor="Lakeside Home Builders LLC"
+                        date="May 21, 2025"
+                        value="$385,000"
+                      />
+                      <MockPermitCard
+                        type="Electrical"
+                        status="Approved"
+                        statusStyle="bg-blue-50 text-blue-700"
+                        number="EP-2025-01193"
+                        county="Gwinnett"
+                        address="887 Peachtree Industrial Blvd, Suwanee, 30024"
+                        description="200A service upgrade, panel replacement, EV charger installation"
+                        contractor="PowerUp Electric Co"
+                        date="May 20, 2025"
+                        value="$8,400"
+                      />
+                      <MockPermitCard
+                        type="Commercial - Renovation"
+                        status="In Review"
+                        statusStyle="bg-yellow-50 text-yellow-700"
+                        number="CP-2025-00762"
+                        county="Forsyth"
+                        address="1540 Market Place Blvd, Cumming, 30041"
+                        description="Interior build-out for new retail tenant, 3,200 sq ft, includes new MEP"
+                        contractor="Cornerstone Commercial Group"
+                        date="May 19, 2025"
+                        value="$142,000"
+                      />
+                      <MockPermitCard
+                        type="HVAC"
+                        status="Finaled"
+                        statusStyle="bg-green-50 text-green-700"
+                        number="HP-2025-03340"
+                        county="DeKalb County"
+                        address="2209 Briarcliff Rd NE, Atlanta, 30329"
+                        description="Replace existing 4-ton split system, gas furnace and AC unit"
+                        contractor="Cool Comfort HVAC Services"
+                        date="May 17, 2025"
+                        value="$12,500"
+                      />
+                    </div>
+
+                    {/* Fade + CTA overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent flex items-end justify-center pb-4">
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-gray-900 mb-1">10,000+ permits tracked across Georgia</p>
+                        <p className="text-xs text-gray-500 mb-3">Subscribe to unlock the full feed and email alerts.</p>
+                        <Link href="#pricing" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
+                          See plans →
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sidebar */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">My Watchlist</h3>
+                  <div className="bg-white rounded-xl border border-gray-200 p-4">
+                    <ul className="space-y-2 mb-3">
+                      {['30501', '30024', '30041', '30329'].map(zip => (
+                        <li key={zip} className="text-xs text-gray-600 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                          {zip}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="border-t border-gray-100 pt-3 space-y-2">
+                      <div className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 text-gray-300 bg-gray-50">
+                        Add zip code (e.g. 30501)
+                      </div>
+                      <div className="w-full text-xs bg-blue-600 text-white py-2 rounded-lg font-medium text-center opacity-60">
+                        Add to watchlist
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 max-w-4xl mx-auto px-6">
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">One subscription. Every permit in your market.</h2>
@@ -117,14 +259,14 @@ export default function HomePage() {
             name="Basic"
             price={29}
             description="Perfect for contractors focused on one area."
-            features={['Hall, Gwinnett, Forsyth & Bryan County + Savannah & Alpharetta', 'Permit feed dashboard', 'Up to 3 zip codes']}
+            features={['Hall, Gwinnett, Forsyth, DeKalb & Bryan County + Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs & Cherokee County', 'Permit feed dashboard', 'Up to 3 zip codes']}
             highlight={false}
           />
           <PricingCard
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={['Hall, Gwinnett, Forsyth & Bryan County + Savannah & Alpharetta', 'Permit digest emails (Mon, Wed & Fri)', 'Unlimited zip codes']}
+            features={['Hall, Gwinnett, Forsyth, DeKalb & Bryan County + Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs & Cherokee County', 'Permit digest emails (Mon, Wed & Fri)', 'Unlimited zip codes']}
             highlight={true}
           />
         </div>
@@ -138,7 +280,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -150,7 +292,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more areas?',
-                a: 'Yes — we recently added Bryan County and are actively expanding. Pro subscribers get early access to new areas.',
+                a: 'Yes — we recently added Sandy Springs and Cherokee County and are actively expanding. Pro subscribers get early access to new areas.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-gray-200 pb-6">
@@ -165,7 +307,7 @@ export default function HomePage() {
       {/* Browse by area */}
       <section className="py-16 max-w-4xl mx-auto px-6 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Browse permits by area</h2>
-        <p className="text-gray-500 mb-8 text-sm">We cover 6 Georgia counties and cities. Click an area to see what's being built.</p>
+        <p className="text-gray-500 mb-8 text-sm">We cover 12 Georgia counties and cities. Click an area to see what's being built.</p>
         <div className="flex flex-wrap justify-center gap-3">
           {LOCATIONS.map(loc => (
             <Link
@@ -208,14 +350,14 @@ export default function HomePage() {
       {/* Bottom CTA */}
       <section className="py-20 text-center px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to stay ahead?</h2>
-        <p className="text-gray-500 mb-8">Join contractors and investors already tracking permits across Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta.</p>
+        <p className="text-gray-500 mb-8">Join contractors and investors already tracking permits across Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.</p>
         <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-medium text-sm">
           Get started today
         </Link>
       </section>
 
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
+        © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
   )
@@ -265,6 +407,34 @@ function CountyRequestFormInner() {
         Request this county
       </button>
     </form>
+  )
+}
+
+function MockPermitCard({ type, status, statusStyle, number, county, address, description, contractor, date, value }: {
+  type: string; status: string; statusStyle: string; number: string; county: string
+  address: string; description: string; contractor: string; date: string; value: string
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+            <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{type}</span>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusStyle}`}>{status}</span>
+            <span className="text-xs text-gray-400">{number}</span>
+            <span className="text-xs text-gray-300">·</span>
+            <span className="text-xs text-gray-400">{county}</span>
+          </div>
+          <p className="text-xs font-medium text-gray-900">{address}</p>
+          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{description}</p>
+          <p className="text-xs text-gray-400 mt-1"><span className="font-medium text-gray-500">Contractor:</span> {contractor}</p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-xs text-gray-400">{date}</p>
+          <p className="text-xs font-medium text-gray-700 mt-0.5">{value}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 

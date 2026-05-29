@@ -87,6 +87,54 @@ async function setBryanLastTimestamp(ms) {
   return setStateValue('bryan_last_timestamp', ms);
 }
 
+// DeKalb County — last processed issuedDateTime as Unix ms timestamp
+async function getDeKalbLastTimestamp() {
+  return getStateValue('dekalb_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setDeKalbLastTimestamp(ms) {
+  return setStateValue('dekalb_last_timestamp', ms);
+}
+
+// Augusta — last processed DATE_ISSUE as Unix ms timestamp
+async function getAugustaLastTimestamp() {
+  return getStateValue('augusta_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setAugustaLastTimestamp(ms) {
+  return setStateValue('augusta_last_timestamp', ms);
+}
+
+// Johns Creek — last processed ISSUE_DATE as Unix ms timestamp
+async function getJohnsCreekLastTimestamp() {
+  return getStateValue('johnscreek_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setJohnsCreekLastTimestamp(ms) {
+  return setStateValue('johnscreek_last_timestamp', ms);
+}
+
+// City of Atlanta — last processed OrigOpened as Unix ms timestamp
+async function getAtlantaLastTimestamp() {
+  return getStateValue('atlanta_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setAtlantaLastTimestamp(ms) {
+  return setStateValue('atlanta_last_timestamp', ms);
+}
+
+// Sandy Springs — last processed dateSubmitted as Unix ms timestamp
+async function getSandySpringsLastTimestamp() {
+  return getStateValue('sandysprings_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setSandySpringsLastTimestamp(ms) {
+  return setStateValue('sandysprings_last_timestamp', ms);
+}
+
+// Cherokee County — last processed permit number string (e.g. "PR20260000900")
+async function getCherokeeLastPermitNum() {
+  return getStateValue('cherokee_last_permit_num', 'PR20250000000'); // default: before any 2025 permits
+}
+async function setCherokeeLastPermitNum(s) {
+  return setStateValue('cherokee_last_permit_num', s);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -102,5 +150,11 @@ module.exports = {
   getSavannahLastTimestamp, setSavannahLastTimestamp,
   getAlpharettaLastTimestamp, setAlpharettaLastTimestamp,
   getBryanLastTimestamp, setBryanLastTimestamp,
+  getDeKalbLastTimestamp, setDeKalbLastTimestamp,
+  getAugustaLastTimestamp, setAugustaLastTimestamp,
+  getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
+  getAtlantaLastTimestamp, setAtlantaLastTimestamp,
+  getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
+  getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getLastDigestSentMs, setLastDigestSentMs,
 };

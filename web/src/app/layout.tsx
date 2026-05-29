@@ -6,7 +6,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
   title: "Permit Pulse | GA Building Permit Alerts",
-  description: "Get instant alerts when new building permits are filed in Hall, Gwinnett, Forsyth, and Bryan County — and the cities of Savannah and Alpharetta — GA.",
+  description: "Get instant alerts when new building permits are filed in Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Sandy Springs, and Augusta — GA.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

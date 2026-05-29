@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { ContactModal } from '@/components/ContactModal'
 import {
   COUNTY_META, COUNTIES, buildSlug, formatMonthYear, getAllReportSummaries,
 } from '@/lib/reports'
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
-  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, Bryan County, Savannah, and Alpharetta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
+  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
 }
 
 export default async function ReportsIndexPage() {
@@ -39,7 +40,7 @@ export default async function ReportsIndexPage() {
         </div>
         <h1 className="text-4xl font-bold text-gray-900">Building Permit Activity Reports</h1>
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-          Monthly permit data across Hall, Gwinnett, Forsyth, Bryan County, Savannah, and Alpharetta — pulled directly from official county sources.
+          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, and Cherokee County — pulled directly from official county sources.
         </p>
         {totalPermits > 0 && (
           <p className="mt-3 text-sm text-gray-400">{totalPermits.toLocaleString()} permits tracked across all areas</p>
@@ -118,7 +119,7 @@ export default async function ReportsIndexPage() {
       </section>
 
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        © {new Date().getFullYear()} Permit Pulse · <a href="mailto:kevin@kpsullivan.com" className="hover:text-gray-600">Contact</a>
+        © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
   )

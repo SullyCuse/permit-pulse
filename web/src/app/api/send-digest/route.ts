@@ -16,8 +16,13 @@ function emailToToken(email: string) {
   return Buffer.from(email).toString('base64url')
 }
 
-function digestHtml(permits: Permit[], sinceDate: string, unsubscribeUrl: string) {
-  const rows = permits.map(p => {
+const DIGEST_PREVIEW_LIMIT = 50
+
+function digestHtml(permits: Permit[], totalCount: number, sinceDate: string, unsubscribeUrl: string) {
+  const preview = permits.slice(0, DIGEST_PREVIEW_LIMIT)
+  const truncated = totalCount > DIGEST_PREVIEW_LIMIT
+
+  const rows = preview.map(p => {
     const estValue = p.raw_data?.estimated_value
     return `
     <tr>
@@ -31,12 +36,16 @@ function digestHtml(permits: Permit[], sinceDate: string, unsubscribeUrl: string
     </tr>`
   }).join('')
 
+  const moreNote = truncated
+    ? `<p style="margin:12px 0 0;font-size:13px;color:#374151">Showing <strong>${DIGEST_PREVIEW_LIMIT} of ${totalCount} permits</strong> added since ${sinceDate}. <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color:#2563eb">View all ${totalCount} on your dashboard →</a></p>`
+    : `<p style="margin:12px 0 0;font-size:13px;color:#374151"><strong>${totalCount} permit${totalCount === 1 ? '' : 's'}</strong> added since ${sinceDate}.</p>`
+
   return `
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
   <h2 style="color:#2563eb">Permit Pulse — Permit Digest</h2>
-  <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${permits.length} permits</strong> found.</p>
+  <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${totalCount} permit${totalCount === 1 ? '' : 's'}</strong> added to your feed.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
       <tr style="background:#f9fafb">
@@ -51,6 +60,7 @@ function digestHtml(permits: Permit[], sinceDate: string, unsubscribeUrl: string
     </thead>
     <tbody>${rows}</tbody>
   </table>
+  ${moreNote}
   <hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb">
   <p style="font-size:12px;color:#9ca3af">View your full dashboard at <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Permit Pulse</a>. · <a href="${unsubscribeUrl}" style="color:#9ca3af">Unsubscribe</a></p>
 </body>
@@ -119,13 +129,15 @@ export async function POST(req: NextRequest) {
 
     if (!permits.length) continue
 
+    const totalCount = permits.length
+
     try {
       const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?token=${emailToToken(user.email)}`
       await getResend().emails.send({
         from: FROM,
         to: user.email,
-        subject: `Permit Pulse — ${permits.length} new permit${permits.length === 1 ? '' : 's'} in your area`,
-        html: digestHtml(permits, sinceStr, unsubscribeUrl),
+        subject: `Permit Pulse — ${totalCount} new permit${totalCount === 1 ? '' : 's'} in your area`,
+        html: digestHtml(permits, totalCount, sinceStr, unsubscribeUrl),
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
