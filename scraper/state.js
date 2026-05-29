@@ -3,7 +3,7 @@ const path = require('path');
 
 const STATE_FILE = path.join(__dirname, '..', 'state.json');
 
-// Named store so state persists across Apify runs (default store is per-run)
+// ── Apify (production on Apify platform) ──────────────────────────────────────
 let _apifyStore = null;
 async function getApifyStore() {
   if (!_apifyStore) {
@@ -13,12 +13,32 @@ async function getApifyStore() {
   return _apifyStore;
 }
 
+// ── Supabase (GitHub Actions / any non-Apify environment with SUPABASE_URL) ───
+let _supabase = null;
+function getSupabaseClient() {
+  if (!_supabase) {
+    const { createClient } = require('@supabase/supabase-js');
+    _supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SECRET_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+  }
+  return _supabase;
+}
+
 async function getStateValue(key, defaultValue) {
   if (process.env.APIFY_IS_AT_HOME) {
     const store = await getApifyStore();
     const val = await store.getValue(key);
     return val !== null ? val : defaultValue;
   }
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+    const sb = getSupabaseClient();
+    const { data } = await sb.from('scraper_state').select('value').eq('key', key).maybeSingle();
+    return data !== null ? data.value : defaultValue;
+  }
+  // Local file fallback (dev only)
   try {
     const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
     return data[key] !== undefined ? data[key] : defaultValue;
@@ -33,6 +53,12 @@ async function setStateValue(key, value) {
     await store.setValue(key, value);
     return;
   }
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+    const sb = getSupabaseClient();
+    await sb.from('scraper_state').upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    return;
+  }
+  // Local file fallback (dev only)
   let data = {};
   try { data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } catch {}
   data[key] = value;
