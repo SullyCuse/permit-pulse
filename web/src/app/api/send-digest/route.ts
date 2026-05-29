@@ -18,7 +18,17 @@ function emailToToken(email: string) {
 
 const DIGEST_PREVIEW_LIMIT = 50
 
-function digestHtml(permits: Permit[], totalCount: number, sinceDate: string, unsubscribeUrl: string) {
+function newCountiesSection(newCounties: string[]) {
+  if (!newCounties.length) return ''
+  const list = newCounties.map(c => `<li style="margin:4px 0">${c}</li>`).join('')
+  return `
+  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin-bottom:20px">
+    <p style="margin:0 0 6px;font-weight:600;color:#1d4ed8">🆕 New area${newCounties.length > 1 ? 's' : ''} added to Permit Pulse</p>
+    <ul style="margin:0;padding-left:20px;color:#1e40af;font-size:14px">${list}</ul>
+  </div>`
+}
+
+function digestHtml(permits: Permit[], totalCount: number, sinceDate: string, unsubscribeUrl: string, newCounties: string[]) {
   const preview = permits.slice(0, DIGEST_PREVIEW_LIMIT)
   const truncated = totalCount > DIGEST_PREVIEW_LIMIT
 
@@ -45,6 +55,7 @@ function digestHtml(permits: Permit[], totalCount: number, sinceDate: string, un
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
   <h2 style="color:#2563eb">Permit Pulse — Permit Digest</h2>
+  ${newCountiesSection(newCounties)}
   <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${totalCount} permit${totalCount === 1 ? '' : 's'}</strong> added to your feed.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead>
@@ -94,6 +105,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: 0, message: `No permits since ${sinceStr}` })
   }
 
+  // Detect new counties not yet announced
+  const { data: allCountiesData } = await supabase
+    .from('permits')
+    .select('county')
+
+  const presentCounties = new Set(
+    (allCountiesData ?? []).map((r: { county: string | null }) => r.county).filter(Boolean) as string[]
+  )
+
+  const { data: announcedData } = await supabase
+    .from('announced_counties')
+    .select('county')
+
+  const announcedCounties = new Set((announcedData ?? []).map((r: { county: string }) => r.county))
+  const newCounties = [...presentCounties].filter(c => !announcedCounties.has(c)).sort()
+
   const { data: users, error: usersError } = await supabase
     .from('users')
     .select('id, email')
@@ -127,17 +154,20 @@ export async function POST(req: NextRequest) {
       ? allPermits.filter((p: Permit) => p.zip_code && watchedZips.has(p.zip_code))
       : allPermits
 
-    if (!permits.length) continue
+    if (!permits.length && !newCounties.length) continue
 
     const totalCount = permits.length
 
     try {
       const unsubscribeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/unsubscribe?token=${emailToToken(user.email)}`
+      const subject = newCounties.length
+        ? `Permit Pulse — ${newCounties.length} new area${newCounties.length > 1 ? 's' : ''} added + ${totalCount} new permit${totalCount === 1 ? '' : 's'}`
+        : `Permit Pulse — ${totalCount} new permit${totalCount === 1 ? '' : 's'} in your area`
       await getResend().emails.send({
         from: FROM,
         to: user.email,
-        subject: `Permit Pulse — ${totalCount} new permit${totalCount === 1 ? '' : 's'} in your area`,
-        html: digestHtml(permits, totalCount, sinceStr, unsubscribeUrl),
+        subject,
+        html: digestHtml(permits, totalCount, sinceStr, unsubscribeUrl, newCounties),
         headers: {
           'List-Unsubscribe': `<${unsubscribeUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
@@ -149,5 +179,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ sent, permits_found: allPermits.length })
+  // Mark new counties as announced after successful send
+  if (newCounties.length && sent > 0) {
+    await supabase
+      .from('announced_counties')
+      .insert(newCounties.map(county => ({ county })))
+  }
+
+  return NextResponse.json({ sent, permits_found: allPermits.length, new_counties: newCounties })
 }
