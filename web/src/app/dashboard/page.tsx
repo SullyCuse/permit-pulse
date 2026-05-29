@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import SubscribeButton from './SubscribeButton'
 import { Logo } from '@/components/Logo'
+import CountyTabs from './CountyTabs'
 
 const PAGE_SIZE = 50
 const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County'] as const
@@ -153,21 +154,10 @@ export default async function DashboardPage({
 
           {/* County filter tabs — subscribers only, scrollable */}
           {isActive && (
-            <div className="flex gap-1 overflow-x-auto mb-3 bg-gray-100 p-1 rounded-lg" style={{ scrollbarWidth: 'none' }}>
-              {COUNTIES.map(county => (
-                <Link
-                  key={county}
-                  href={buildHref({ county, type: 'All', page: 1 })}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-                    activeCounty === county
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {county}
-                </Link>
-              ))}
-            </div>
+            <CountyTabs
+              tabs={COUNTIES.map(county => ({ label: county, href: buildHref({ county, type: 'All', page: 1 }) }))}
+              activeCounty={activeCounty}
+            />
           )}
 
           {/* Type filter + sort toggle — subscribers only */}
