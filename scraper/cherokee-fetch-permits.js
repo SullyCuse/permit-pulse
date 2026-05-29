@@ -48,9 +48,9 @@ function nextPermitNum(current) {
   return formatPermitNum(parsed.year, parsed.seq + 1);
 }
 
-// Use the autocomplete endpoint (works without browser) to check if a permit exists.
-// Returns true/false. This is a lightweight pre-filter before loading via Puppeteer.
-async function permitExists(axios, formToken, cookieStr, permitNum) {
+// Use the autocomplete endpoint to check if a permit exists.
+// Returns { exists: bool, rawStrings: string[] } — raw strings may contain address/type info.
+async function permitSearch(axios, formToken, cookieStr, permitNum) {
   try {
     const { data } = await axios.post(
       PERMIT_SEARCH_URL,
@@ -73,71 +73,95 @@ async function permitExists(axios, formToken, cookieStr, permitNum) {
         timeout: 10000,
       }
     );
-    // Response is an array of strings. If it contains the permit number, it exists.
-    if (Array.isArray(data)) {
-      return data.some(item => typeof item === 'string' && item.includes(permitNum));
-    }
-    if (typeof data === 'string') {
-      return data.includes(permitNum) && !data.includes('[There are no matches]');
-    }
-    return false;
+    const strings = Array.isArray(data) ? data.filter(s => typeof s === 'string') :
+                    typeof data === 'string' ? [data] : [];
+    const exists = strings.some(s => s.includes(permitNum) && !s.includes('[There are no matches]'));
+    return { exists, rawStrings: strings };
   } catch {
-    return false;
+    return { exists: false, rawStrings: [] };
   }
 }
 
-// Get permit details via page.evaluate() — runs jQuery AJAX from inside the browser.
-// Returns the LocatorResults response: {View: "<html>...", LocationMarkers: [...]}
-// Returns null if no results.
+// Try to parse permit details from autocomplete strings.
+// CityView autocomplete strings vary by install — log the first result so we can tune parsing.
+function parseAutocompleteStrings(strings, permitNum) {
+  // Log the raw strings once so we can see the format (only for first permit in a run)
+  if (parseAutocompleteStrings._logged < 2) {
+    console.log(`  [Cherokee] Autocomplete raw strings for ${permitNum}:`, JSON.stringify(strings));
+    parseAutocompleteStrings._logged = (parseAutocompleteStrings._logged || 0) + 1;
+  }
+
+  // Common CityView format: "PR20250000001 - 123 Main St, Canton GA - Building Permit - New Construction"
+  // or: "PR20250000001 - 123 Main St - Commercial Building"
+  const match = strings.find(s => s.includes(permitNum));
+  if (!match) return {};
+
+  const parts = match.split(' - ').map(s => s.trim()).filter(Boolean);
+  // parts[0] = permit number, parts[1] = address (maybe), parts[2+] = type info
+  const result = {};
+  if (parts.length >= 2 && /\d/.test(parts[1])) {
+    result.address = parts[1];
+  }
+  if (parts.length >= 3) {
+    result.permit_type = parts.slice(2).join(' - ');
+  } else if (parts.length === 2 && !/\d/.test(parts[1])) {
+    result.permit_type = parts[1];
+  }
+  return result;
+}
+parseAutocompleteStrings._logged = 0;
+
+// Dump page structure once so we can identify the right selectors.
+let _pageDumped = false;
+async function dumpPageStructure(page) {
+  if (_pageDumped) return;
+  _pageDumped = true;
+  try {
+    const structure = await page.evaluate(() => ({
+      inputs: Array.from(document.querySelectorAll('input')).map(el => ({
+        id: el.id, name: el.name, type: el.type, placeholder: el.placeholder, class: el.className
+      })),
+      buttons: Array.from(document.querySelectorAll('button,input[type=submit]')).map(el => ({
+        id: el.id, text: el.textContent?.trim().slice(0, 50), class: el.className
+      })),
+      divIds: Array.from(document.querySelectorAll('[id]')).map(el => el.id).slice(0, 40),
+    }));
+    console.log('[Cherokee] Page structure:', JSON.stringify(structure));
+  } catch (e) {
+    console.log('[Cherokee] Could not dump page structure:', e.message);
+  }
+}
+
+// Get permit details by typing the permit number into the InspectionLocator search form
+// and reading the resulting HTML — simulates real user interaction, works for all statuses.
 async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
-    const result = await page.evaluate(async (pNum, locatorUrl) => {
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => resolve(null), 12000);
+    await dumpPageStructure(page);
 
-        // Temporarily capture the showLocatorResults callback
-        const orig = window.showLocatorResults;
-        window.showLocatorResults = function(data) {
-          clearTimeout(timeout);
-          window.showLocatorResults = orig;
-          resolve(data || null);
-        };
+    // The form POSTs to /Permit/Locator and causes a page navigation.
+    // Set values and submit the form, then parse the resulting page.
+    await page.$eval('#searchValue', (el, val) => { el.value = val; }, permitNum);
+    await page.$eval('#isInspectionSearch', (el) => { el.value = 'false'; });
 
-        // Call the portal's own runLocatorSearch function
-        try {
-          // Directly call $.ajax to match the portal's own behavior
-          window.jQuery.ajax({
-            type: 'GET',
-            url: locatorUrl,
-            data: {
-              searchValue: pNum,
-              category: '',
-              appealPeriodStatusesOnly: 'False',
-              isInspectionSearch: 'True',
-              pageNumber: '0',
-              jurisdictionFilter: '',
-            },
-          }).done(function(data) {
-            clearTimeout(timeout);
-            window.showLocatorResults = orig;
-            // showLocatorResults would have been called internally, but we intercept here
-            resolve(data || null);
-          }).fail(function() {
-            clearTimeout(timeout);
-            window.showLocatorResults = orig;
-            resolve(null);
-          });
-        } catch (e) {
-          clearTimeout(timeout);
-          window.showLocatorResults = orig;
-          resolve(null);
-        }
-      });
-    }, permitNum, LOCATOR_RESULTS_URL);
+    // Submit form + wait for navigation
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }),
+      page.$eval('#permitLocatorForm', form => form.submit()),
+    ]);
 
-    return result;
+    // Capture the results page HTML
+    const resultsHtml = await page.content();
+
+    // Navigate back to InspectionLocator to restore the session for next permit
+    await page.goto(LOCATOR_PAGE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForFunction(() => typeof window.jQuery !== 'undefined', { timeout: 10000 }).catch(() => {});
+
+    if (resultsHtml && resultsHtml.length > 500) {
+      return { View: resultsHtml };
+    }
+    return null;
   } catch (err) {
-    console.warn(`  [Cherokee] page.evaluate error for ${permitNum}: ${err.message}`);
+    console.warn(`  [Cherokee] getPermitDetailsFromBrowser error for ${permitNum}: ${err.message}`);
     return null;
   }
 }
@@ -236,12 +260,35 @@ async function fetchNewPermits(lastPermitNum) {
     return { permits: [], maxPermitNum: lastPermitNum };
   }
 
+  // Find Chrome: check env var, then common system paths in the Apify container.
+  function findChrome() {
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+    const fs = require('fs');
+    const candidates = [
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/snap/bin/chromium',
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) return p;
+    }
+    try {
+      const { execSync } = require('child_process');
+      const found = execSync('which google-chrome-stable google-chrome chromium 2>/dev/null | head -1', { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+      if (found) return found;
+    } catch {}
+    return undefined; // let puppeteer try its own bundled version
+  }
+
+  const chromeExecutable = findChrome();
+  console.log(`  [Cherokee] Chrome executable: ${chromeExecutable ?? 'puppeteer default'}`);
+
   try {
     browser = await puppeteer.launch({
       headless: true,
-      // Use the Chrome provided by the Apify base image if available,
-      // otherwise fall back to puppeteer's own bundled Chrome.
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      executablePath: chromeExecutable,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -282,8 +329,8 @@ async function fetchNewPermits(lastPermitNum) {
     while (currentNum && checked < MAX_PERMITS_PER_RUN) {
       checked++;
 
-      // Lightweight check via autocomplete first (saves Puppeteer time for non-existent permits)
-      const exists = await permitExists(axios, formToken, cookieStr, currentNum);
+      // Lightweight check via autocomplete — also grab whatever strings it returns
+      const { exists, rawStrings } = await permitSearch(axios, formToken, cookieStr, currentNum);
 
       if (!exists) {
         consecutiveMisses++;
@@ -299,7 +346,10 @@ async function fetchNewPermits(lastPermitNum) {
       consecutiveMisses = 0;
       console.log(`  [Cherokee] Found permit: ${currentNum}`);
 
-      // Get full details via Puppeteer
+      // Parse whatever the autocomplete returned — may include address/type
+      const autocompleteData = parseAutocompleteStrings(rawStrings, currentNum);
+
+      // Get full details via Puppeteer (tries detail page, then LocatorResults)
       const details = await getPermitDetailsFromBrowser(page, currentNum);
 
       if (details && details.View) {
@@ -308,9 +358,9 @@ async function fetchNewPermits(lastPermitNum) {
           const p = parsed[0];
           allPermits.push({
             permit_number: currentNum,
-            address:       p.address ?? null,
-            zip_code:      null, // will geocode later if needed
-            permit_type:   p.permitType ?? null,
+            address:       p.address ?? autocompleteData.address ?? null,
+            zip_code:      null,
+            permit_type:   p.permitType ?? autocompleteData.permit_type ?? null,
             description:   p.description ?? null,
             date_filed:    p.dateFiled ?? null,
             county:        'Cherokee County',
@@ -345,17 +395,22 @@ async function fetchNewPermits(lastPermitNum) {
           raw_data:      { html_preview: details.substring(0, 500) },
         });
       } else {
-        // Permit exists per autocomplete but LocatorResults returned nothing useful
-        console.log(`  [Cherokee] Permit ${currentNum} confirmed via autocomplete but LocatorResults returned empty. Recording stub.`);
+        // No HTML details available — use whatever autocomplete returned
+        const hasData = autocompleteData.address || autocompleteData.permit_type;
+        if (hasData) {
+          console.log(`  [Cherokee] Permit ${currentNum} — partial data from autocomplete.`);
+        } else {
+          console.log(`  [Cherokee] Permit ${currentNum} — no detail data, recording stub.`);
+        }
         allPermits.push({
           permit_number: currentNum,
-          address:       null,
+          address:       autocompleteData.address ?? null,
           zip_code:      null,
-          permit_type:   null,
+          permit_type:   autocompleteData.permit_type ?? null,
           description:   null,
           date_filed:    null,
           county:        'Cherokee County',
-          raw_data:      {},
+          raw_data:      { autocomplete: rawStrings },
         });
       }
 
