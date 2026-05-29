@@ -12,6 +12,7 @@ const { fetchNewPermits: fetchJohnsCreekPermits } = require('./johnscreek-fetch-
 const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permits');
 const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
 const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
+const { fetchNewPermits: fetchCherokeePermits } = require('./cherokee-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -25,6 +26,7 @@ const {
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
+  getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -325,6 +327,31 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Cherokee County ---
+    const cherokeeLastPermitNum = await getCherokeeLastPermitNum();
+    console.log(`\n[Cherokee County] Last processed permit: ${cherokeeLastPermitNum}`);
+
+    let cherokeeCount = 0;
+    try {
+      const { permits: cherokeePermits, maxPermitNum: cherokeeMax } = await fetchCherokeePermits(cherokeeLastPermitNum);
+      cherokeeCount = cherokeePermits.length;
+
+      if (cherokeePermits.length === 0) {
+        console.log('[Cherokee County] No new permits found.');
+      } else {
+        const result = await savePermits(cherokeePermits);
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        if (cherokeeMax && cherokeeMax !== cherokeeLastPermitNum) {
+          await setCherokeeLastPermitNum(cherokeeMax);
+          console.log(`\n[Cherokee County] State advanced to ${cherokeeMax}`);
+        }
+      }
+    } catch (err) {
+      console.error(`  ❌ [Cherokee County] Failed: ${err.message}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -338,6 +365,7 @@ async function main() {
     console.log(`  Johns Creek permits fetched: ${johnsCreekCount}`);
     console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
     console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
+    console.log(`  Cherokee County permits fetched: ${cherokeeCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

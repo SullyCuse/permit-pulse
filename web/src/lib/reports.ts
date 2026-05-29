@@ -11,7 +11,8 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Augusta':       { slug: 'augusta',        display: 'Augusta',         fullName: 'Augusta, GA' },
   'Johns Creek':   { slug: 'johns-creek',   display: 'Johns Creek',     fullName: 'Johns Creek, GA' },
   'Atlanta':       { slug: 'atlanta',        display: 'Atlanta',         fullName: 'Atlanta, GA' },
-  'Sandy Springs': { slug: 'sandy-springs',  display: 'Sandy Springs',   fullName: 'Sandy Springs, GA' },
+  'Sandy Springs':    { slug: 'sandy-springs',    display: 'Sandy Springs',     fullName: 'Sandy Springs, GA' },
+  'Cherokee County':  { slug: 'cherokee-county',  display: 'Cherokee County',   fullName: 'Cherokee County, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

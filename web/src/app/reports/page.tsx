@@ -40,7 +40,7 @@ export default async function ReportsIndexPage() {
         </div>
         <h1 className="text-4xl font-bold text-gray-900">Building Permit Activity Reports</h1>
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta — pulled directly from official county sources.
+          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, and Cherokee County — pulled directly from official county sources.
         </p>
         {totalPermits > 0 && (
           <p className="mt-3 text-sm text-gray-400">{totalPermits.toLocaleString()} permits tracked across all areas</p>
