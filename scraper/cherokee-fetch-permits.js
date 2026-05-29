@@ -138,52 +138,37 @@ async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
     await dumpPageStructure(page);
 
-    // Find the search input
-    const inputSel = '#searchInput, input[type="search"], input[name*="search" i], input[placeholder*="search" i], input[placeholder*="permit" i], input[placeholder*="address" i]';
-    const inputHandle = await page.$(inputSel);
-    if (!inputHandle) {
-      console.log(`  [Cherokee] No search input matched selector — check page structure log above.`);
-      return null;
-    }
+    // Set the search value and flip isInspectionSearch to false (shows ALL permits, not just active inspections)
+    await page.$eval('#searchValue', (el, val) => { el.value = val; }, permitNum);
+    await page.$eval('#isInspectionSearch', (el) => { el.value = 'false'; });
 
-    // Clear, type permit number, submit
-    await inputHandle.click({ clickCount: 3 });
-    await inputHandle.type(permitNum, { delay: 20 });
-    await inputHandle.press('Enter');
+    // Click the search button (type="button" — Enter key won't trigger it)
+    await page.click('#bsearch');
 
-    // Wait briefly for any network activity to start
-    await sleep(500);
-
-    // Wait for the page to show results — try a broad selector first then narrow
+    // Wait for the results container to populate
+    // divIds showed "permitLocator..." — try common completions
     try {
       await page.waitForFunction(() => {
-        // Look for any element that appeared/changed after the search
-        const candidates = [
-          document.querySelector('#locatorResults'),
-          document.querySelector('#searchResults'),
-          document.querySelector('.locator-results'),
-          document.querySelector('[data-results]'),
-          document.querySelector('.cv-locator-result'),
-          document.querySelector('.results'),
-          // Fall back: look for any div that has a table or permit-like content
-          ...Array.from(document.querySelectorAll('table')),
-        ].filter(Boolean);
-        return candidates.some(el => el.innerHTML.trim().length > 100);
+        const el = document.querySelector('[id^="permitLocator"], #locatorResults, #permitResults, #resultsDiv');
+        return el && el.innerHTML.trim().length > 100;
       }, { timeout: 8000 });
 
-      // Capture whatever results appeared
       const html = await page.evaluate(() => {
-        const sels = ['#locatorResults', '#searchResults', '.locator-results', '.cv-locator-result', '.results', 'table'];
-        for (const s of sels) {
-          const el = document.querySelector(s);
-          if (el && el.innerHTML.trim().length > 100) return el.outerHTML;
-        }
-        return null;
+        const el = document.querySelector('[id^="permitLocator"], #locatorResults, #permitResults, #resultsDiv');
+        return el ? el.outerHTML : null;
       });
-      return html ? { View: html } : null;
+      if (html) return { View: html };
     } catch {
-      return null;
+      // Timeout — log the full divIds so we can identify the results container
+      if (!getPermitDetailsFromBrowser._divsDumped) {
+        getPermitDetailsFromBrowser._divsDumped = true;
+        const allDivIds = await page.evaluate(() =>
+          Array.from(document.querySelectorAll('[id]')).map(el => `${el.tagName}#${el.id}`)
+        );
+        console.log('[Cherokee] All element IDs after search:', JSON.stringify(allDivIds));
+      }
     }
+    return null;
   } catch (err) {
     console.warn(`  [Cherokee] getPermitDetailsFromBrowser error for ${permitNum}: ${err.message}`);
     return null;
