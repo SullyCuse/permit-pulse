@@ -236,12 +236,35 @@ async function fetchNewPermits(lastPermitNum) {
     return { permits: [], maxPermitNum: lastPermitNum };
   }
 
+  // Find Chrome: check env var, then common system paths in the Apify container.
+  function findChrome() {
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+    const fs = require('fs');
+    const candidates = [
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/snap/bin/chromium',
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) return p;
+    }
+    try {
+      const { execSync } = require('child_process');
+      const found = execSync('which google-chrome-stable google-chrome chromium 2>/dev/null | head -1', { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+      if (found) return found;
+    } catch {}
+    return undefined; // let puppeteer try its own bundled version
+  }
+
+  const chromeExecutable = findChrome();
+  console.log(`  [Cherokee] Chrome executable: ${chromeExecutable ?? 'puppeteer default'}`);
+
   try {
     browser = await puppeteer.launch({
       headless: true,
-      // Use the Chrome provided by the Apify base image if available,
-      // otherwise fall back to puppeteer's own bundled Chrome.
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      executablePath: chromeExecutable,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
