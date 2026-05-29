@@ -46,7 +46,7 @@ export default function HomePage() {
           {[
             { value: '10,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: '11 Areas', label: 'GA counties & cities covered' },
+            { value: '12 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
