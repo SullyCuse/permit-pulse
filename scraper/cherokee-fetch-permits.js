@@ -111,23 +111,17 @@ function parseAutocompleteStrings(strings, permitNum) {
 }
 parseAutocompleteStrings._logged = 0;
 
-// Get permit details by navigating Puppeteer to the portal's permit search/detail page.
-// Falls back to LocatorResults (works if permit has active inspections).
+// Get permit details via LocatorResults AJAX (runs from the InspectionLocator browser session).
+// Tries isInspectionSearch=False first (all statuses), then True (active inspections only).
 async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
-    // Strategy 1: Navigate directly to a permit detail/status page via search
-    try {
-      await page.goto(`${BASE_URL}/Permit/PermitWorkflowDetail?permitNum=${encodeURIComponent(permitNum)}`, {
-        waitUntil: 'domcontentloaded', timeout: 15000,
-      });
-      const detailHtml = await page.content();
-      if (detailHtml && detailHtml.length > 1000 && !detailHtml.includes('Page Not Found') && !detailHtml.includes('404')) {
-        return { View: detailHtml };
-      }
-    } catch {}
+    // Check jQuery is still available (page must still be on InspectionLocator)
+    const jqueryAvailable = await page.evaluate(() => typeof window.jQuery !== 'undefined').catch(() => false);
+    if (!jqueryAvailable) return null;
 
-    // Strategy 2: LocatorResults with isInspectionSearch=False (works for all permit statuses)
+    // Strategy 1: LocatorResults with isInspectionSearch=False (all permit statuses)
     const result = await page.evaluate(async (pNum, locatorUrl) => {
+      if (typeof window.jQuery === 'undefined') return null;
       return new Promise((resolve) => {
         const timeout = setTimeout(() => resolve(null), 12000);
         window.jQuery.ajax({
@@ -153,8 +147,9 @@ async function getPermitDetailsFromBrowser(page, permitNum) {
 
     if (result && (result.View || typeof result === 'string')) return result;
 
-    // Strategy 3: LocatorResults with isInspectionSearch=True (original — only for active inspections)
+    // Strategy 2: LocatorResults with isInspectionSearch=True (active inspections only)
     const inspResult = await page.evaluate(async (pNum, locatorUrl) => {
+      if (typeof window.jQuery === 'undefined') return null;
       return new Promise((resolve) => {
         const timeout = setTimeout(() => resolve(null), 12000);
         window.jQuery.ajax({
