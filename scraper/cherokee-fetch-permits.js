@@ -111,56 +111,49 @@ function parseAutocompleteStrings(strings, permitNum) {
 }
 parseAutocompleteStrings._logged = 0;
 
-// Get permit details via LocatorResults AJAX (runs from the InspectionLocator browser session).
-// Tries isInspectionSearch=False first (all statuses), then True (active inspections only).
+// Get permit details by typing the permit number into the InspectionLocator search form
+// and reading the resulting HTML — simulates real user interaction, works for all statuses.
 async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
-    // Check jQuery is still available (page must still be on InspectionLocator)
-    const jqueryAvailable = await page.evaluate(() => typeof window.jQuery !== 'undefined').catch(() => false);
-    if (!jqueryAvailable) return null;
+    // Find the search input and type the permit number
+    const inputSel = '#searchInput, input[type="search"], input[name*="search" i], input[placeholder*="search" i], input[placeholder*="permit" i]';
+    const inputHandle = await page.$(inputSel);
+    if (!inputHandle) {
+      // Log the available inputs for debugging
+      const inputs = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('input')).map(i => ({ id: i.id, name: i.name, type: i.type, placeholder: i.placeholder }))
+      );
+      console.log(`  [Cherokee] No search input found. Available inputs:`, JSON.stringify(inputs));
+      return null;
+    }
 
-    // Strategy 1: LocatorResults with isInspectionSearch=False (all permit statuses)
-    const result = await page.evaluate(async (pNum, locatorUrl) => {
-      if (typeof window.jQuery === 'undefined') return null;
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => resolve(null), 12000);
-        window.jQuery.ajax({
-          type: 'GET',
-          url: locatorUrl,
-          data: {
-            searchValue: pNum,
-            category: '',
-            appealPeriodStatusesOnly: 'False',
-            isInspectionSearch: 'False',
-            pageNumber: '0',
-            jurisdictionFilter: '',
-          },
-        }).done(function(data) {
-          clearTimeout(timeout);
-          resolve(data || null);
-        }).fail(function() {
-          clearTimeout(timeout);
-          resolve(null);
-        });
-      });
-    }, permitNum, LOCATOR_RESULTS_URL);
+    // Clear the input, type the permit number, and submit
+    await inputHandle.click({ clickCount: 3 });
+    await inputHandle.type(permitNum, { delay: 30 });
 
-    if (result && (result.View || typeof result === 'string')) return result;
+    // Submit — try pressing Enter, or find a search/submit button
+    await Promise.race([
+      inputHandle.press('Enter'),
+      page.$('button[type="submit"], input[type="submit"], button:contains("Search"), .btn-search').then(btn => btn?.click()),
+    ]).catch(() => inputHandle.press('Enter'));
 
-    // Strategy 2: LocatorResults with isInspectionSearch=True (active inspections only)
-    const inspResult = await page.evaluate(async (pNum, locatorUrl) => {
-      if (typeof window.jQuery === 'undefined') return null;
-      return new Promise((resolve) => {
-        const timeout = setTimeout(() => resolve(null), 12000);
-        window.jQuery.ajax({
-          type: 'GET', url: locatorUrl,
-          data: { searchValue: pNum, category: '', appealPeriodStatusesOnly: 'False', isInspectionSearch: 'True', pageNumber: '0', jurisdictionFilter: '' },
-        }).done(d => { clearTimeout(timeout); resolve(d || null); })
-          .fail(() => { clearTimeout(timeout); resolve(null); });
-      });
-    }, permitNum, LOCATOR_RESULTS_URL);
-
-    return inspResult;
+    // Wait for results to appear (look for a results container that becomes non-empty)
+    const resultsSel = '#locatorResults, #searchResults, .results-container, [id*="result" i], [class*="result" i]';
+    try {
+      await page.waitForFunction(
+        (sel) => {
+          const el = document.querySelector(sel);
+          return el && el.innerHTML.trim().length > 100;
+        },
+        { timeout: 10000 },
+        resultsSel
+      );
+      const html = await page.$eval(resultsSel, el => el.innerHTML);
+      return html ? { View: html } : null;
+    } catch {
+      // Timeout waiting for results — capture full page for debugging on first permit
+      return null;
+    }
   } catch (err) {
     console.warn(`  [Cherokee] page.evaluate error for ${permitNum}: ${err.message}`);
     return null;
