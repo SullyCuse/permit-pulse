@@ -138,35 +138,26 @@ async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
     await dumpPageStructure(page);
 
-    // Set the search value and flip isInspectionSearch to false (shows ALL permits, not just active inspections)
+    // The form POSTs to /Permit/Locator and causes a page navigation.
+    // Set values and submit the form, then parse the resulting page.
     await page.$eval('#searchValue', (el, val) => { el.value = val; }, permitNum);
     await page.$eval('#isInspectionSearch', (el) => { el.value = 'false'; });
 
-    // Click the search button (type="button" — Enter key won't trigger it)
-    await page.click('#bsearch');
+    // Submit form + wait for navigation
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }),
+      page.$eval('#permitLocatorForm', form => form.submit()),
+    ]);
 
-    // Wait for the results container to populate
-    // divIds showed "permitLocator..." — try common completions
-    try {
-      await page.waitForFunction(() => {
-        const el = document.querySelector('[id^="permitLocator"], #locatorResults, #permitResults, #resultsDiv');
-        return el && el.innerHTML.trim().length > 100;
-      }, { timeout: 8000 });
+    // Capture the results page HTML
+    const resultsHtml = await page.content();
 
-      const html = await page.evaluate(() => {
-        const el = document.querySelector('[id^="permitLocator"], #locatorResults, #permitResults, #resultsDiv');
-        return el ? el.outerHTML : null;
-      });
-      if (html) return { View: html };
-    } catch {
-      // Timeout — log the full divIds so we can identify the results container
-      if (!getPermitDetailsFromBrowser._divsDumped) {
-        getPermitDetailsFromBrowser._divsDumped = true;
-        const allDivIds = await page.evaluate(() =>
-          Array.from(document.querySelectorAll('[id]')).map(el => `${el.tagName}#${el.id}`)
-        );
-        console.log('[Cherokee] All element IDs after search:', JSON.stringify(allDivIds));
-      }
+    // Navigate back to InspectionLocator to restore the session for next permit
+    await page.goto(LOCATOR_PAGE, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForFunction(() => typeof window.jQuery !== 'undefined', { timeout: 10000 }).catch(() => {});
+
+    if (resultsHtml && resultsHtml.length > 500) {
+      return { View: resultsHtml };
     }
     return null;
   } catch (err) {
