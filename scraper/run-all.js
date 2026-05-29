@@ -328,29 +328,11 @@ async function main() {
     }
 
     // --- Cherokee County ---
-    const cherokeeLastPermitNum = await getCherokeeLastPermitNum();
-    console.log(`\n[Cherokee County] Last processed permit: ${cherokeeLastPermitNum}`);
-
-    let cherokeeCount = 0;
-    try {
-      const { permits: cherokeePermits, maxPermitNum: cherokeeMax } = await fetchCherokeePermits(cherokeeLastPermitNum);
-      cherokeeCount = cherokeePermits.length;
-
-      if (cherokeePermits.length === 0) {
-        console.log('[Cherokee County] No new permits found.');
-      } else {
-        const result = await savePermits(cherokeePermits);
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        if (cherokeeMax && cherokeeMax !== cherokeeLastPermitNum) {
-          await setCherokeeLastPermitNum(cherokeeMax);
-          console.log(`\n[Cherokee County] State advanced to ${cherokeeMax}`);
-        }
-      }
-    } catch (err) {
-      console.error(`  ❌ [Cherokee County] Failed: ${err.message}`);
-      totalErrors++;
-    }
+    // Disabled: CityView portal returns empty responses for LocatorResults even
+    // in a real browser — permit details are not publicly accessible. Re-enable
+    // once a viable public data source is found and the scraper is reworked.
+    const cherokeeCount = 0;
+    console.log('\n[Cherokee County] Skipped — data source unavailable.');
 
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
