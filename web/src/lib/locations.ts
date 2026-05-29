@@ -297,27 +297,27 @@ export const LOCATIONS: Location[] = [
     name: 'Atlanta',
     region: 'GA',
     fullName: 'Atlanta, GA',
-    headline: 'Every Atlanta building permit.\nDelivered before your competition sees it.',
+    headline: 'Atlanta building permits — historical archive through January 2026.',
     subheadline:
-      'Permit Pulse monitors every building permit filed in the City of Atlanta and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
+      'Permit Pulse has archived 7,500+ City of Atlanta building permits through January 2026. Note: the City of Atlanta\'s public ArcGIS feed stopped updating in January 2026 — we\'re monitoring for a new data source and will resume live tracking when one becomes available.',
     personas: [
       {
         icon: '🔨',
         title: 'Contractors & Builders',
-        desc: 'Atlanta is Georgia\'s largest and most active construction market. Get a digest of every new residential and commercial permit filed in your service area three times a week — and show up to quote before anyone else does.',
+        desc: 'Browse Atlanta\'s permit history through January 2026 — over 7,500 residential and commercial permits across all zip codes. We\'re actively working to restore live coverage.',
       },
       {
         icon: '🏠',
         title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Atlanta zip codes — from Buckhead to East Atlanta. Spot the neighborhoods gaining momentum before they hit the MLS.',
+        desc: 'Explore historical construction and renovation activity across Atlanta zip codes — from Buckhead to East Atlanta. Historical data through January 2026 available now.',
       },
       {
         icon: '📋',
         title: 'Agents & Realtors',
-        desc: 'Know which Atlanta streets are seeing new investment before your clients do. Use permit data to prospect smarter, win more listings, and have real answers about neighborhood development activity.',
+        desc: 'Browse Atlanta permit history by zip code and permit type. Our Atlanta data is currently historical (through January 2026) while we work to restore live coverage.',
       },
     ],
-    faqWhere: 'We pull directly from the City of Atlanta\'s official building permit records via ArcGIS, updated Monday, Wednesday, and Friday.',
+    faqWhere: 'Our Atlanta data is sourced from the City of Atlanta\'s ArcGIS permit records. Note: the city\'s public data feed stopped updating in January 2026. We\'re monitoring for a replacement source and will resume live tracking when one is available.',
     faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.',
     metaTitle: 'Atlanta GA Building Permits | Permit Pulse',
     metaDescription:
