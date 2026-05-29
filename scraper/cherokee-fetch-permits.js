@@ -132,36 +132,35 @@ async function dumpPageStructure(page) {
   }
 }
 
-// Get permit details by typing the permit number into the InspectionLocator search form
-// and reading the resulting HTML — simulates real user interaction, works for all statuses.
+// Get permit details by clicking the search button and waiting for the
+// #locatorSearchResults div to populate via AJAX (no page navigation occurs).
 async function getPermitDetailsFromBrowser(page, permitNum) {
   try {
     await dumpPageStructure(page);
 
-    // The form POSTs to /Permit/Locator and causes a page navigation.
-    // Set values and submit the form, then parse the resulting page.
+    // Clear previous results so we can detect when new ones load
+    await page.$eval('#locatorSearchResults', el => { el.innerHTML = ''; }).catch(() => {});
+
+    // Set search value and flip isInspectionSearch to false (returns all permits, not just active inspections)
     await page.$eval('#searchValue', (el, val) => { el.value = val; }, permitNum);
-    await page.$eval('#isInspectionSearch', (el) => { el.value = 'false'; });
+    await page.$eval('#isInspectionSearch', el => { el.value = 'false'; }).catch(() => {});
 
-    // Submit form + wait for navigation
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }),
-      page.$eval('#permitLocatorForm', form => form.submit()),
-    ]);
+    // Click the search button — triggers AJAX that populates #locatorSearchResults
+    await page.click('#bsearch');
 
-    // Capture the results page HTML
-    const resultsHtml = await page.content();
+    // Wait for #locatorSearchResults to be populated with actual content
+    await page.waitForFunction(
+      () => {
+        const el = document.getElementById('locatorSearchResults');
+        return el && el.innerHTML.trim().length > 50;
+      },
+      { timeout: 10000 }
+    );
 
-    // Navigate back to InspectionLocator to restore the session for next permit
-    await page.goto(LOCATOR_PAGE, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await page.waitForFunction(() => typeof window.jQuery !== 'undefined', { timeout: 10000 }).catch(() => {});
-
-    if (resultsHtml && resultsHtml.length > 500) {
-      return { View: resultsHtml };
-    }
-    return null;
+    const html = await page.$eval('#locatorSearchResults', el => el.innerHTML);
+    return html ? { View: html } : null;
   } catch (err) {
-    console.warn(`  [Cherokee] getPermitDetailsFromBrowser error for ${permitNum}: ${err.message}`);
+    // Timeout or missing element — return null (stub will be recorded)
     return null;
   }
 }
