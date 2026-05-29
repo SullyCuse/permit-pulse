@@ -176,26 +176,13 @@ export async function getAllReportSummaries(): Promise<
 > {
   const admin = createAdminClient()
 
-  const rows = await fetchAllRows<{ county: string; date_filed: string }>(
-    admin,
-    'permits',
-    'county, date_filed',
-    q => q.not('date_filed', 'is', null)
-  )
+  const { data, error } = await admin.rpc('get_permit_summaries')
+  if (error) throw new Error(`get_permit_summaries: ${error.message}`)
 
-  const countMap: Record<string, number> = {}
-  for (const row of rows) {
-    if (!row.date_filed) continue
-    // Parse date string directly to avoid timezone shifting
-    const [yearStr, monthStr] = row.date_filed.split('-')
-    const key = `${row.county}|${yearStr}|${parseInt(monthStr, 10) - 1}`
-    countMap[key] = (countMap[key] ?? 0) + 1
-  }
-
-  return Object.entries(countMap)
-    .map(([key, count]) => {
-      const [county, yearStr, monthStr] = key.split('|')
-      return { county, year: parseInt(yearStr), month: parseInt(monthStr), count }
-    })
-    .sort((a, b) => b.year - a.year || b.month - a.month || a.county.localeCompare(b.county))
+  return (data ?? []).map((row: { county: string; year: number; month: number; count: number }) => ({
+    county: row.county,
+    year: row.year,
+    month: row.month,
+    count: Number(row.count),
+  }))
 }

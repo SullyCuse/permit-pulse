@@ -89,12 +89,13 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   }
   console.log(`  Geocoding: ${geocoded}/${permits.length} resolved`);
 
+  const now = Date.now();
   const maxTimestamp = features.reduce(
     (max, f) => Math.max(max, f.attributes.IssuedDate_DATE || 0),
     lastTimestampMs
   );
 
-  return { permits, maxTimestamp };
+  return { permits, maxTimestamp: Math.min(maxTimestamp, now) };
 }
 
 module.exports = { fetchNewPermits };

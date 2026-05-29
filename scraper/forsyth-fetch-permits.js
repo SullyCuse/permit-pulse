@@ -141,7 +141,10 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     }
   }
 
-  const maxTimestamp = features.reduce((max, f) => Math.max(max, f.attributes.IssueDate || 0), lastTimestampMs);
+  const maxTimestamp = Math.min(
+    features.reduce((max, f) => Math.max(max, f.attributes.IssueDate || 0), lastTimestampMs),
+    Date.now()
+  );
 
   return { permits, maxTimestamp };
 }
