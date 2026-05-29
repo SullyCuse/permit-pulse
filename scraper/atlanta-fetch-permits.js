@@ -102,9 +102,9 @@ async function fetchNewPermits(lastTimestampMs = 0) {
 
   const permits = allFeatures.map(normalizeFeature);
 
-  const maxTimestamp = allFeatures.reduce(
-    (max, f) => Math.max(max, f.attributes.OrigOpened || 0),
-    lastTimestampMs
+  const maxTimestamp = Math.min(
+    allFeatures.reduce((max, f) => Math.max(max, f.attributes.OrigOpened || 0), lastTimestampMs),
+    Date.now()
   );
 
   return { permits, maxTimestamp };

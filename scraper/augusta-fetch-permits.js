@@ -82,9 +82,9 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     };
   });
 
-  const maxTimestamp = allFeatures.reduce(
-    (max, f) => Math.max(max, f.attributes.DATE_ISSUE || 0),
-    lastTimestampMs
+  const maxTimestamp = Math.min(
+    allFeatures.reduce((max, f) => Math.max(max, f.attributes.DATE_ISSUE || 0), lastTimestampMs),
+    Date.now()
   );
 
   return { permits, maxTimestamp };

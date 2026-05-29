@@ -99,9 +99,10 @@ async function fetchNewPermits(lastTimestampMs = 0) {
     };
   });
 
-  const maxTimestamp = newRecords.reduce((max, r) => {
-    return Math.max(max, parseVpcDate(r.attributes?.dateSubmitted));
-  }, lastTimestampMs);
+  const maxTimestamp = Math.min(
+    newRecords.reduce((max, r) => Math.max(max, parseVpcDate(r.attributes?.dateSubmitted)), lastTimestampMs),
+    Date.now()
+  );
 
   return { permits, maxTimestamp };
 }

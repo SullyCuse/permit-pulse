@@ -153,9 +153,9 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   if (geocoded > 0) console.log(`  Geocoding: ${geocoded} zips resolved`);
   if (noGeometry > 0) console.log(`  No geometry: ${noGeometry} permits skipped`);
 
-  const maxTimestamp = allFeatures.reduce(
-    (max, f) => Math.max(max, f.attributes.issuedDateTime || 0),
-    lastTimestampMs
+  const maxTimestamp = Math.min(
+    allFeatures.reduce((max, f) => Math.max(max, f.attributes.issuedDateTime || 0), lastTimestampMs),
+    Date.now()
   );
 
   return { permits, maxTimestamp };
