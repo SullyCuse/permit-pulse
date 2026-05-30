@@ -158,9 +158,12 @@ async function getPermitDetailsFromBrowser(page, permitNum) {
     );
 
     const html = await page.$eval('#locatorSearchResults', el => el.innerHTML);
-    return html ? { View: html } : null;
+    // If the portal returned the search form instead of results, treat as no data
+    if (!html || html.includes('id="permitLocatorForm"') || html.includes("id='permitLocatorForm'")) {
+      return null;
+    }
+    return { View: html };
   } catch (err) {
-    // Timeout or missing element — return null (stub will be recorded)
     return null;
   }
 }
@@ -367,50 +370,41 @@ async function fetchNewPermits(lastPermitNum) {
             raw_data:      { html_preview: details.View.substring(0, 500), ...p },
           });
         } else {
-          // No parse — still record the permit with what we have
-          console.log(`  [Cherokee] Could not parse HTML for ${currentNum}, recording with minimal data`);
-          allPermits.push({
-            permit_number: currentNum,
-            address:       null,
-            zip_code:      null,
-            permit_type:   null,
-            description:   null,
-            date_filed:    null,
-            county:        'Cherokee County',
-            raw_data:      { html_preview: (details.View || '').substring(0, 500) },
-          });
+          console.log(`  [Cherokee] Could not parse HTML for ${currentNum}, skipping.`);
         }
       } else if (details && typeof details === 'string' && details.length > 50) {
         // Fallback: details might be raw HTML string
         const parsed = parsePermitsFromHtml(details, currentNum);
-        allPermits.push({
-          permit_number: currentNum,
-          address:       parsed[0]?.address ?? null,
-          zip_code:      null,
-          permit_type:   parsed[0]?.permitType ?? null,
-          description:   parsed[0]?.description ?? null,
-          date_filed:    parsed[0]?.dateFiled ?? null,
-          county:        'Cherokee County',
-          raw_data:      { html_preview: details.substring(0, 500) },
-        });
+        if (parsed[0]?.address || parsed[0]?.permitType) {
+          allPermits.push({
+            permit_number: currentNum,
+            address:       parsed[0]?.address ?? null,
+            zip_code:      null,
+            permit_type:   parsed[0]?.permitType ?? null,
+            description:   parsed[0]?.description ?? null,
+            date_filed:    parsed[0]?.dateFiled ?? null,
+            county:        'Cherokee County',
+            raw_data:      { html_preview: details.substring(0, 500) },
+          });
+        }
       } else {
         // No HTML details available — use whatever autocomplete returned
         const hasData = autocompleteData.address || autocompleteData.permit_type;
         if (hasData) {
           console.log(`  [Cherokee] Permit ${currentNum} — partial data from autocomplete.`);
+          allPermits.push({
+            permit_number: currentNum,
+            address:       autocompleteData.address ?? null,
+            zip_code:      null,
+            permit_type:   autocompleteData.permit_type ?? null,
+            description:   null,
+            date_filed:    null,
+            county:        'Cherokee County',
+            raw_data:      { autocomplete: rawStrings },
+          });
         } else {
-          console.log(`  [Cherokee] Permit ${currentNum} — no detail data, recording stub.`);
+          console.log(`  [Cherokee] Permit ${currentNum} — no detail data, skipping.`);
         }
-        allPermits.push({
-          permit_number: currentNum,
-          address:       autocompleteData.address ?? null,
-          zip_code:      null,
-          permit_type:   autocompleteData.permit_type ?? null,
-          description:   null,
-          date_filed:    null,
-          county:        'Cherokee County',
-          raw_data:      { autocomplete: rawStrings },
-        });
       }
 
       maxPermitNum = currentNum;
