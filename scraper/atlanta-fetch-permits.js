@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 
-const BASE_URL = 'https://services5.arcgis.com/5RxyIIJ9boPdptdo/arcgis/rest/services/Building_Permit_latest/FeatureServer';
+const BASE_URL = 'https://services5.arcgis.com/5RxyIIJ9boPdptdo/arcgis/rest/services/building_permit_featureLayer/FeatureServer';
 const PAGE_SIZE = 2000;
 
 function msToIsoDate(ms) {
