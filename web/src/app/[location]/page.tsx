@@ -75,7 +75,7 @@ export default async function LocationPage(
       <section className="border-y border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-4 text-center">
           {[
-            { value: '10,000+', label: 'Permits tracked' },
+            { value: '40,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
             { value: '5 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (

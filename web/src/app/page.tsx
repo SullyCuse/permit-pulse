@@ -44,7 +44,7 @@ export default function HomePage() {
       <section className="border-y border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-4 text-center">
           {[
-            { value: '10,000+', label: 'Permits tracked' },
+            { value: '40,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
             { value: '12 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
@@ -212,7 +212,7 @@ export default function HomePage() {
                     {/* Fade + CTA overlay */}
                     <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent flex items-end justify-center pb-4">
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-900 mb-1">10,000+ permits tracked across Georgia</p>
+                        <p className="text-sm font-semibold text-gray-900 mb-1">40,000+ permits tracked across Georgia</p>
                         <p className="text-xs text-gray-500 mb-3">Subscribe to unlock the full feed and email alerts.</p>
                         <Link href="#pricing" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium">
                           See plans →
