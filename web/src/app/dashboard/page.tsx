@@ -333,9 +333,9 @@ const STATUS_STYLES: Record<string, string> = {
 
 // Normalize raw status strings from various county sources to a small set of display values.
 // Each county uses different field names and value strings — this maps them all consistently.
-function normalizeStatus(raw: string | null | undefined): string | undefined {
-  if (!raw) return undefined
-  const s = raw.trim()
+function normalizeStatus(raw: string | number | null | undefined): string | undefined {
+  if (raw === null || raw === undefined) return undefined
+  const s = String(raw).trim()
   if (!s || s === '-1') return undefined
   const lower = s.toLowerCase()
   // Terminal — work done
@@ -366,7 +366,7 @@ function PermitCard({ permit }: { permit: any }) {
   const applicant = permit.applicant_name
   const estimatedValue = permit.raw_data?.estimated_value ?? permit.raw_data?.Permit_Value ?? permit.raw_data?.WORKCOST
   const inner = permit.raw_data?.raw_data
-  const rawStatus: string | null =
+  const rawStatus: string | number | null =
     inner?.PermitStatus ??   // Forsyth, Savannah
     inner?.PERMIT_STATUS ??  // Augusta
     inner?.JobStatus ??      // Johns Creek
