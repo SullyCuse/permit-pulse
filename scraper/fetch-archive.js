@@ -1,55 +1,86 @@
 require('dotenv').config();
 const axios = require('axios');
 
+// Hall County publishes permit PDFs to their ArchiveCenter under category AMID=39.
+// The archive rotates — only the most recent batch of PDFs is live at any time, and
+// item numbers may not be strictly sequential across CMS migrations. We scrape the
+// listing page directly to find current item IDs rather than scanning forward blindly.
+
+const ARCHIVE_LISTING_URL = 'https://www.hallcounty.org/Archive.aspx?AMID=39';
 const BASE_PDF_URL = 'https://www.hallcounty.org/ArchiveCenter/ViewFile/Item';
 
-// Last known item number from our research (state.js overrides this at runtime)
-const LAST_KNOWN_ITEM = 1416;
-const CHECK_AHEAD = 10; // Check 10 item numbers ahead
+/**
+ * Scrape the Archive listing page and return all current ADID values as integers.
+ */
+async function fetchListingAdids() {
+  const response = await axios.get(ARCHIVE_LISTING_URL, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    },
+    timeout: 15000,
+  });
 
-async function checkPdfExists(itemNumber) {
-  const url = `${BASE_PDF_URL}/${itemNumber}`;
-  try {
-    const response = await axios.head(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      timeout: 5000,
-      maxRedirects: 5
-    });
-    return { 
-      exists: response.status === 200, 
-      url, 
-      itemNumber,
-      contentType: response.headers['content-type'] || ''
-    };
-  } catch (err) {
-    return { exists: false, url, itemNumber };
-  }
+  const html = response.data;
+  const matches = [...html.matchAll(/Archive\.aspx\?ADID=(\d+)/g)];
+  const adids = [...new Set(matches.map(m => parseInt(m[1], 10)))].sort((a, b) => a - b);
+  return adids;
 }
 
-async function fetchLatestPdfUrls(lastKnownItem = LAST_KNOWN_ITEM) {
-  console.log(`Checking for new permit PDFs after item #${lastKnownItem}...`);
-  const newPdfs = [];
+/**
+ * Return PDFs from the listing page that haven't been processed yet.
+ * "New" means item number > lastKnownItem, OR any item on the listing page
+ * if the listing's max item < lastKnownItem (catches CMS resets/re-indexing).
+ */
+async function fetchLatestPdfUrls(lastKnownItem = 0) {
+  console.log(`[Hall County] Scraping archive listing page for current PDFs...`);
 
-  for (let i = lastKnownItem + 1; i <= lastKnownItem + CHECK_AHEAD; i++) {
-    process.stdout.write(`  Checking item ${i}... `);
-    const result = await checkPdfExists(i);
-    if (result.exists) {
-      console.log(`✅ Found!`);
-      newPdfs.push(result);
-    } else {
-      console.log(`✗ Not found`);
-    }
+  let adids;
+  try {
+    adids = await fetchListingAdids();
+  } catch (err) {
+    console.error(`  ❌ [Hall County] Failed to fetch archive listing: ${err.message}`);
+    return [];
   }
 
-  console.log(`\nFound ${newPdfs.length} accessible permit PDFs`);
-  newPdfs.forEach(p => console.log(`  → ${p.url}`));
-  return newPdfs;
+  if (adids.length === 0) {
+    console.log(`  No items found on listing page.`);
+    return [];
+  }
+
+  const maxListed = Math.max(...adids);
+  console.log(`  Found ${adids.length} items on listing page: [${adids.join(', ')}] (max: ${maxListed})`);
+
+  // If the archive has been re-indexed (max listed < our cursor), process everything listed.
+  // Otherwise, only process items we haven't seen yet.
+  const isReindex = maxListed < lastKnownItem;
+  if (isReindex) {
+    console.log(`  ⚠️  Archive re-index detected (max listed ${maxListed} < cursor ${lastKnownItem}) — processing all listed items.`);
+  }
+
+  const toProcess = isReindex
+    ? adids
+    : adids.filter(id => id > lastKnownItem);
+
+  if (toProcess.length === 0) {
+    console.log(`  No new items since cursor ${lastKnownItem}.`);
+    return [];
+  }
+
+  console.log(`  Processing ${toProcess.length} item(s): [${toProcess.join(', ')}]`);
+  return toProcess.map(id => ({
+    exists: true,
+    url: `${BASE_PDF_URL}/${id}`,
+    itemNumber: id,
+  }));
 }
 
 module.exports = { fetchLatestPdfUrls };
 
 if (require.main === module) {
-  fetchLatestPdfUrls().catch(console.error);
+  fetchLatestPdfUrls(0)
+    .then(pdfs => {
+      console.log('\nFound PDFs:');
+      pdfs.forEach(p => console.log(`  Item ${p.itemNumber}: ${p.url}`));
+    })
+    .catch(console.error);
 }
