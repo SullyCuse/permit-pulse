@@ -154,12 +154,20 @@ async function setSandySpringsLastTimestamp(ms) {
   return setStateValue('sandysprings_last_timestamp', ms);
 }
 
-// Cherokee County — last processed permit number string (e.g. "PR20260000900")
+// Cherokee County — last processed permit number string (legacy CityView cursor, no longer used)
 async function getCherokeeLastPermitNum() {
-  return getStateValue('cherokee_last_permit_num', 'PR20250000000'); // default: before any 2025 permits
+  return getStateValue('cherokee_last_permit_num', 'PR20250000000');
 }
 async function setCherokeeLastPermitNum(s) {
   return setStateValue('cherokee_last_permit_num', s);
+}
+
+// Cherokee County — last processed dateentered as ISO date string (YYYY-MM-DD)
+async function getCherokeeLastDate() {
+  return getStateValue('cherokee_last_date', '2025-07-01'); // default: 2025-07-01
+}
+async function setCherokeeLastDate(dateStr) {
+  return setStateValue('cherokee_last_date', dateStr);
 }
 
 // Digest cooldown — last time digest email was sent (Unix ms)
@@ -183,5 +191,6 @@ module.exports = {
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastPermitNum, setCherokeeLastPermitNum,
+  getCherokeeLastDate, setCherokeeLastDate,
   getLastDigestSentMs, setLastDigestSentMs,
 };

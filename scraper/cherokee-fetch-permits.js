@@ -1,442 +1,234 @@
 require('dotenv').config();
 
-// Cherokee County, GA — CityView portal scraper.
+// Cherokee County, GA — CherokeeStatus portal scraper.
 //
-// The CityView portal's LocatorResults AJAX endpoint returns empty responses for
-// plain HTTP requests (Content-Length: 0) regardless of session/CSRF setup.
-// It only works when called from a real browser that passes TLS fingerprint and
-// has the page's JavaScript execution context. We use Puppeteer to open the
-// InspectionLocator page and call LocatorResults via page.evaluate() so jQuery
-// makes the request from inside the real browser session.
+// The portal at cherokeega.com/cherokeestatus exposes a CSV export endpoint
+// (permit-applications-export.php) that accepts a SQL WHERE clause via the
+// `thequery` POST parameter. Returns CSV with all permit fields.
 //
-// Permit number format: PR{YEAR}{7-digit-zero-padded}  e.g. PR20260000001
-// Cursor: last processed permit number string, incremented each run.
+// Cloudflare blocks plain Node.js HTTP clients (TLS fingerprinting). We use
+// Puppeteer to load the portal page (getting real CF cookies + Chrome TLS),
+// then call the export endpoint via fetch() from within the browser context.
+//
+// Cursor: ISO date string (YYYY-MM-DD), e.g. "2025-07-01".
 
-const BASE_URL = 'https://cityview.cherokeega.com/CVProdPortal';
-const LOCATOR_PAGE = `${BASE_URL}/Permit/InspectionLocator`;
-const PERMIT_SEARCH_URL = `${BASE_URL}/Permit/PermitSearch`;
-const LOCATOR_RESULTS_URL = `${BASE_URL}/Permit/LocatorResults`;
+const PORTAL_URL = 'https://cherokeega.com/cherokeestatus/permit-applications.php';
+const EXPORT_URL = 'https://cherokeega.com/cherokeestatus/permit-applications-export.php';
 
-// How many consecutive "not found" permit numbers before we stop scanning
-const MAX_CONSECUTIVE_MISSES = 30;
+function buildQuery(sinceDate) {
+  return `SELECT dateentered,permitnumber,status,[description],gncommonid,recordid,type FROM prpermit WHERE 1=1 AND dateentered >= '${sinceDate}' ORDER BY dateentered asc`;
+}
 
-// Permit numbers per batch (we open one browser page and process all)
-const MAX_PERMITS_PER_RUN = 300;
-
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-function parsePermitNum(s) {
-  if (!s || typeof s !== 'string') return null;
-  const m = s.match(/^PR(\d{4})(\d{7})$/);
+// Parse "MM-DD-YYYY" or "MM-D-YYYY" → "YYYY-MM-DD"
+function parseCsvDate(s) {
+  if (!s) return null;
+  const m = s.trim().match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (!m) return null;
-  return { year: parseInt(m[1], 10), seq: parseInt(m[2], 10) };
+  const [, mm, dd, yyyy] = m;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 }
 
-function formatPermitNum(year, seq) {
-  return `PR${year}${String(seq).padStart(7, '0')}`;
+// Extract zip from location block — "...Canton, GA30115\n..." or "GA 30115"
+function extractZip(locationBlock) {
+  if (!locationBlock) return null;
+  const m = locationBlock.match(/GA\s?(\d{5})/);
+  return m ? m[1] : null;
 }
 
-function nextPermitNum(current) {
-  const parsed = parsePermitNum(current);
-  if (!parsed) return null;
-  const now = new Date();
-  const currentYear = now.getUTCFullYear();
-  if (parsed.seq + 1 > 9999999) {
-    // Roll over to next year
-    return formatPermitNum(parsed.year + 1, 1);
-  }
-  return formatPermitNum(parsed.year, parsed.seq + 1);
+// First line of location block is the street address
+function extractAddress(locationBlock) {
+  if (!locationBlock) return null;
+  const firstLine = locationBlock.split('\n')[0].trim();
+  return firstLine.replace(/\s{2,}/g, ' ').trim() || null;
 }
 
-// Use the autocomplete endpoint to check if a permit exists.
-// Returns { exists: bool, rawStrings: string[] } — raw strings may contain address/type info.
-async function permitSearch(axios, formToken, cookieStr, permitNum) {
-  try {
-    const { data } = await axios.post(
-      PERMIT_SEARCH_URL,
-      new URLSearchParams({
-        term: permitNum,
-        returnInactiveAddresses: 'false',
-        module: '',
-        appealPeriodStatusesOnly: 'false',
-        isIntermentSearch: 'false',
-      }).toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'X-Requested-With': 'XMLHttpRequest',
-          '__RequestVerificationToken': formToken,
-          'Cookie': cookieStr,
-          'Referer': LOCATOR_PAGE,
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        },
-        timeout: 10000,
-      }
-    );
-    const strings = Array.isArray(data) ? data.filter(s => typeof s === 'string') :
-                    typeof data === 'string' ? [data] : [];
-    const exists = strings.some(s => s.includes(permitNum) && !s.includes('[There are no matches]'));
-    return { exists, rawStrings: strings };
-  } catch {
-    return { exists: false, rawStrings: [] };
+// Find "(Contractor)" role in contacts block
+function extractContractor(contactsBlock) {
+  if (!contactsBlock) return null;
+  for (const line of contactsBlock.split('\n')) {
+    const m = line.match(/^(.+?)\s*\(Contractor\)/i);
+    if (m) return m[1].trim();
   }
+  return null;
 }
 
-// Try to parse permit details from autocomplete strings.
-// CityView autocomplete strings vary by install — log the first result so we can tune parsing.
-function parseAutocompleteStrings(strings, permitNum) {
-  // Log the raw strings once so we can see the format (only for first permit in a run)
-  if (parseAutocompleteStrings._logged < 2) {
-    console.log(`  [Cherokee] Autocomplete raw strings for ${permitNum}:`, JSON.stringify(strings));
-    parseAutocompleteStrings._logged = (parseAutocompleteStrings._logged || 0) + 1;
+// Find "(Applicant)" role in contacts block
+function extractApplicant(contactsBlock) {
+  if (!contactsBlock) return null;
+  for (const line of contactsBlock.split('\n')) {
+    const m = line.match(/^(.+?)\s*\(Applicant\)/i);
+    if (m) return m[1].trim();
   }
-
-  // Common CityView format: "PR20250000001 - 123 Main St, Canton GA - Building Permit - New Construction"
-  // or: "PR20250000001 - 123 Main St - Commercial Building"
-  const match = strings.find(s => s.includes(permitNum));
-  if (!match) return {};
-
-  const parts = match.split(' - ').map(s => s.trim()).filter(Boolean);
-  // parts[0] = permit number, parts[1] = address (maybe), parts[2+] = type info
-  const result = {};
-  if (parts.length >= 2 && /\d/.test(parts[1])) {
-    result.address = parts[1];
-  }
-  if (parts.length >= 3) {
-    result.permit_type = parts.slice(2).join(' - ');
-  } else if (parts.length === 2 && !/\d/.test(parts[1])) {
-    result.permit_type = parts[1];
-  }
-  return result;
-}
-parseAutocompleteStrings._logged = 0;
-
-// Dump page structure once so we can identify the right selectors.
-let _pageDumped = false;
-async function dumpPageStructure(page) {
-  if (_pageDumped) return;
-  _pageDumped = true;
-  try {
-    const structure = await page.evaluate(() => ({
-      inputs: Array.from(document.querySelectorAll('input')).map(el => ({
-        id: el.id, name: el.name, type: el.type, placeholder: el.placeholder, class: el.className
-      })),
-      buttons: Array.from(document.querySelectorAll('button,input[type=submit]')).map(el => ({
-        id: el.id, text: el.textContent?.trim().slice(0, 50), class: el.className
-      })),
-      divIds: Array.from(document.querySelectorAll('[id]')).map(el => el.id).slice(0, 40),
-    }));
-    console.log('[Cherokee] Page structure:', JSON.stringify(structure));
-  } catch (e) {
-    console.log('[Cherokee] Could not dump page structure:', e.message);
-  }
+  return null;
 }
 
-// Get permit details by clicking the search button and waiting for the
-// #locatorSearchResults div to populate via AJAX (no page navigation occurs).
-async function getPermitDetailsFromBrowser(page, permitNum) {
-  try {
-    await dumpPageStructure(page);
+// Parse CSV with quoted multiline fields (RFC 4180 compliant).
+function parseCsv(text) {
+  const rows = [];
+  let pos = 0;
 
-    // Clear previous results so we can detect when new ones load
-    await page.$eval('#locatorSearchResults', el => { el.innerHTML = ''; }).catch(() => {});
-
-    // Set search value and flip isInspectionSearch to false (returns all permits, not just active inspections)
-    await page.$eval('#searchValue', (el, val) => { el.value = val; }, permitNum);
-    await page.$eval('#isInspectionSearch', el => { el.value = 'false'; }).catch(() => {});
-
-    // Click the search button — triggers AJAX that populates #locatorSearchResults
-    await page.click('#bsearch');
-
-    // Wait for #locatorSearchResults to be populated with actual content
-    await page.waitForFunction(
-      () => {
-        const el = document.getElementById('locatorSearchResults');
-        return el && el.innerHTML.trim().length > 50;
-      },
-      { timeout: 10000 }
-    );
-
-    const html = await page.$eval('#locatorSearchResults', el => el.innerHTML);
-    // If the portal returned the search form instead of results, treat as no data
-    if (!html || html.includes('id="permitLocatorForm"') || html.includes("id='permitLocatorForm'")) {
-      return null;
-    }
-    return { View: html };
-  } catch (err) {
-    return null;
-  }
-}
-
-function parsePermitsFromHtml(html, permitNum) {
-  if (!html || typeof html !== 'string' || html.trim().length === 0) return [];
-
-  // Use cheerio for HTML parsing
-  const cheerio = require('cheerio');
-  const $ = cheerio.load(html);
-
-  const permits = [];
-
-  // CityView LocatorResults HTML typically shows a table or list of permits.
-  // We try multiple common patterns.
-
-  // Pattern 1: Table rows with permit info
-  $('table tbody tr, .cv-locator-result, .cv-result-row, [data-cy*="result"]').each((i, el) => {
-    const row = $(el);
-    const text = row.text().trim();
-    if (!text) return;
-
-    // Try to extract fields from cells
-    const cells = row.find('td, .cv-result-cell');
-    let address = null, permitType = null, dateFiled = null, status = null;
-
-    cells.each((j, cell) => {
-      const cellText = $(cell).text().trim();
-      // Look for date pattern MM/DD/YYYY or YYYY-MM-DD
-      if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(cellText) && !dateFiled) {
-        dateFiled = cellText.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)?.[0];
-        if (dateFiled) {
-          const parts = dateFiled.match(/(\d+)\/(\d+)\/(\d+)/);
-          if (parts) dateFiled = `${parts[3]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+  function parseField() {
+    if (pos >= text.length) return '';
+    if (text[pos] === '"') {
+      pos++;
+      let val = '';
+      while (pos < text.length) {
+        if (text[pos] === '"') {
+          if (text[pos + 1] === '"') { val += '"'; pos += 2; }
+          else { pos++; break; }
+        } else {
+          val += text[pos++];
         }
-      } else if (!address && cellText.match(/\d+\s+\w+/)) {
-        address = cellText;
-      } else if (!permitType && cellText && cellText.length > 3 && cellText.length < 80 && !cellText.includes('PR2025') && !cellText.includes('PR2026')) {
-        permitType = cellText;
       }
-    });
-
-    if (address || permitType) {
-      permits.push({ address, permitType, dateFiled, status });
-    }
-  });
-
-  // Pattern 2: Definition lists or key-value pairs
-  if (permits.length === 0) {
-    const fields = {};
-    $('dt, .cv-label, .label, th').each((i, el) => {
-      const label = $(el).text().trim().toLowerCase();
-      const value = $(el).next('dd, .cv-value, .value, td').text().trim();
-      if (label.includes('address')) fields.address = value;
-      if (label.includes('type') || label.includes('permit')) fields.permitType = value;
-      if (label.includes('date') || label.includes('filed') || label.includes('issued')) {
-        const m = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-        if (m) fields.dateFiled = `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
-        else if (/\d{4}-\d{2}-\d{2}/.test(value)) fields.dateFiled = value.match(/\d{4}-\d{2}-\d{2}/)[0];
+      return val;
+    } else {
+      let val = '';
+      while (pos < text.length && text[pos] !== ',' && text[pos] !== '\n' && text[pos] !== '\r') {
+        val += text[pos++];
       }
-      if (label.includes('status')) fields.status = value;
-      if (label.includes('contractor')) fields.contractorName = value;
-      if (label.includes('description')) fields.description = value;
-    });
-
-    if (fields.address || fields.permitType || fields.dateFiled) {
-      permits.push(fields);
+      return val;
     }
   }
 
-  // Pattern 3: Flat text extraction if all else fails
-  if (permits.length === 0 && html.length > 100) {
-    // Log raw HTML for diagnostics (first permit only)
-    console.log(`  [Cherokee] Raw HTML for ${permitNum} (first 500 chars):`);
-    console.log('  ' + html.replace(/\s+/g, ' ').substring(0, 500));
+  function parseRow() {
+    const fields = [];
+    while (pos < text.length) {
+      fields.push(parseField());
+      if (pos < text.length && text[pos] === ',') { pos++; }
+      else { if (text[pos] === '\r') pos++; if (text[pos] === '\n') pos++; break; }
+    }
+    return fields;
   }
 
-  return permits;
+  const headers = parseRow();
+  if (!headers.length) return rows;
+
+  while (pos < text.length) {
+    const fields = parseRow();
+    if (!fields.length || (fields.length === 1 && fields[0] === '')) continue;
+    const row = {};
+    headers.forEach((h, i) => { row[h.trim()] = fields[i] ?? ''; });
+    rows.push(row);
+  }
+  return rows;
 }
 
-async function fetchNewPermits(lastPermitNum) {
-  const defaultStart = 'PR20250000000';
-  const startFrom = lastPermitNum || defaultStart;
-  console.log(`[Cherokee County] Starting from permit ${startFrom}...`);
+function findChrome() {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+  const fs = require('fs');
+  const candidates = [
+    '/usr/bin/google-chrome-stable', '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser', '/usr/bin/chromium', '/snap/bin/chromium',
+  ];
+  for (const p of candidates) { if (fs.existsSync(p)) return p; }
+  try {
+    const { execSync } = require('child_process');
+    const found = execSync('which google-chrome-stable google-chrome chromium 2>/dev/null | head -1',
+      { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
+    if (found) return found;
+  } catch {}
+  return undefined;
+}
+
+async function fetchNewPermits(lastDateStr = '2025-07-01') {
+  console.log(`[Cherokee County] Fetching permits since ${lastDateStr}...`);
 
   let puppeteer;
-  let browser;
-  let axios;
+  try { puppeteer = require('puppeteer'); }
+  catch { console.error('  [Cherokee] puppeteer not installed — skipping.'); return { permits: [], maxDateStr: lastDateStr }; }
 
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: findChrome(),
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+  });
+
+  let csvText;
   try {
-    puppeteer = require('puppeteer');
-    axios = require('axios');
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+
+    // Load portal page first so Cloudflare sets its cookies
+    console.log('  [Cherokee] Loading portal page...');
+    await page.goto(PORTAL_URL, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // POST to export endpoint from within Chrome's context (real TLS + CF cookies)
+    console.log('  [Cherokee] Requesting CSV export...');
+    const query = buildQuery(lastDateStr);
+    csvText = await page.evaluate(async (exportUrl, thequery) => {
+      const resp = await fetch(exportUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ thequery }).toString(),
+      });
+      return resp.text();
+    }, EXPORT_URL, query);
   } catch (err) {
-    console.error(`  [Cherokee] Missing required packages: ${err.message}`);
-    console.error(`  [Cherokee] Skipping — install puppeteer to enable this scraper`);
-    return { permits: [], maxPermitNum: lastPermitNum };
+    console.error(`  ❌ [Cherokee County] Browser request failed: ${err.message}`);
+    await browser.close();
+    return { permits: [], maxDateStr: lastDateStr };
+  } finally {
+    await browser.close();
   }
 
-  // Find Chrome: check env var, then common system paths in the Apify container.
-  function findChrome() {
-    if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
-    const fs = require('fs');
-    const candidates = [
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/google-chrome',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/chromium',
-      '/snap/bin/chromium',
-    ];
-    for (const p of candidates) {
-      if (fs.existsSync(p)) return p;
-    }
-    try {
-      const { execSync } = require('child_process');
-      const found = execSync('which google-chrome-stable google-chrome chromium 2>/dev/null | head -1', { stdio: ['pipe', 'pipe', 'pipe'] }).toString().trim();
-      if (found) return found;
-    } catch {}
-    return undefined; // let puppeteer try its own bundled version
+  if (!csvText || !csvText.includes('Application Number')) {
+    console.log('  [Cherokee County] No CSV data in response.');
+    return { permits: [], maxDateStr: lastDateStr };
   }
 
-  const chromeExecutable = findChrome();
-  console.log(`  [Cherokee] Chrome executable: ${chromeExecutable ?? 'puppeteer default'}`);
+  const rows = parseCsv(csvText);
+  console.log(`  [Cherokee County] Parsed ${rows.length} rows from CSV`);
+  if (!rows.length) return { permits: [], maxDateStr: lastDateStr };
 
-  try {
-    browser = await puppeteer.launch({
-      headless: true,
-      executablePath: chromeExecutable,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-web-security',
-      ],
+  const permits = [];
+  let maxDate = lastDateStr;
+
+  for (const row of rows) {
+    const permitNumber = (row['Application Number'] || '').trim();
+    if (!permitNumber) continue;
+
+    const dateFiled   = parseCsvDate(row['Date Entered']);
+    const address     = extractAddress(row['Locations']);
+    const zip         = extractZip(row['Locations']);
+    const contractor  = extractContractor(row['Contacts']);
+    const applicant   = extractApplicant(row['Contacts']);
+
+    permits.push({
+      permit_number:   permitNumber,
+      address,
+      zip_code:        zip,
+      permit_type:     (row['Type'] || '').trim() || null,
+      description:     (row['Description'] || '').trim() || null,
+      date_filed:      dateFiled,
+      county:          'Cherokee County',
+      contractor_name: contractor,
+      applicant_name:  applicant,
+      raw_data: {
+        status:   (row['Status'] || '').trim(),
+        contacts: (row['Contacts'] || '').trim(),
+        location: (row['Locations'] || '').trim(),
+      },
     });
 
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-    );
-
-    // Load the InspectionLocator page to establish session
-    console.log(`  [Cherokee] Loading InspectionLocator page...`);
-    await page.goto(LOCATOR_PAGE, { waitUntil: 'networkidle2', timeout: 30000 });
-
-    // Wait for jQuery to be available
-    await page.waitForFunction(() => typeof window.jQuery !== 'undefined', { timeout: 15000 });
-
-    // Extract cookies and CSRF token for the lightweight autocomplete checks
-    const cookies = await page.cookies();
-    const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-    const formToken = await page.$eval(
-      'input[name="__RequestVerificationToken"]',
-      el => el.value
-    ).catch(() => '');
-
-    console.log(`  [Cherokee] Page loaded, session established.`);
-
-    const allPermits = [];
-    let currentNum = nextPermitNum(startFrom);
-    let consecutiveMisses = 0;
-    let checked = 0;
-    let maxPermitNum = lastPermitNum || defaultStart;
-
-    while (currentNum && checked < MAX_PERMITS_PER_RUN) {
-      checked++;
-
-      // Lightweight check via autocomplete — also grab whatever strings it returns
-      const { exists, rawStrings } = await permitSearch(axios, formToken, cookieStr, currentNum);
-
-      if (!exists) {
-        consecutiveMisses++;
-        if (consecutiveMisses >= MAX_CONSECUTIVE_MISSES) {
-          console.log(`  [Cherokee] ${MAX_CONSECUTIVE_MISSES} consecutive misses at ${currentNum}, stopping scan.`);
-          break;
-        }
-        currentNum = nextPermitNum(currentNum);
-        await sleep(50);
-        continue;
-      }
-
-      consecutiveMisses = 0;
-      console.log(`  [Cherokee] Found permit: ${currentNum}`);
-
-      // Parse whatever the autocomplete returned — may include address/type
-      const autocompleteData = parseAutocompleteStrings(rawStrings, currentNum);
-
-      // Get full details via Puppeteer (tries detail page, then LocatorResults)
-      const details = await getPermitDetailsFromBrowser(page, currentNum);
-
-      if (details && details.View) {
-        const parsed = parsePermitsFromHtml(details.View, currentNum);
-        if (parsed.length > 0) {
-          const p = parsed[0];
-          allPermits.push({
-            permit_number: currentNum,
-            address:       p.address ?? autocompleteData.address ?? null,
-            zip_code:      null,
-            permit_type:   p.permitType ?? autocompleteData.permit_type ?? null,
-            description:   p.description ?? null,
-            date_filed:    p.dateFiled ?? null,
-            county:        'Cherokee County',
-            contractor_name: p.contractorName ?? null,
-            raw_data:      { html_preview: details.View.substring(0, 500), ...p },
-          });
-        } else {
-          console.log(`  [Cherokee] Could not parse HTML for ${currentNum}, skipping.`);
-        }
-      } else if (details && typeof details === 'string' && details.length > 50) {
-        // Fallback: details might be raw HTML string
-        const parsed = parsePermitsFromHtml(details, currentNum);
-        if (parsed[0]?.address || parsed[0]?.permitType) {
-          allPermits.push({
-            permit_number: currentNum,
-            address:       parsed[0]?.address ?? null,
-            zip_code:      null,
-            permit_type:   parsed[0]?.permitType ?? null,
-            description:   parsed[0]?.description ?? null,
-            date_filed:    parsed[0]?.dateFiled ?? null,
-            county:        'Cherokee County',
-            raw_data:      { html_preview: details.substring(0, 500) },
-          });
-        }
-      } else {
-        // No HTML details available — use whatever autocomplete returned
-        const hasData = autocompleteData.address || autocompleteData.permit_type;
-        if (hasData) {
-          console.log(`  [Cherokee] Permit ${currentNum} — partial data from autocomplete.`);
-          allPermits.push({
-            permit_number: currentNum,
-            address:       autocompleteData.address ?? null,
-            zip_code:      null,
-            permit_type:   autocompleteData.permit_type ?? null,
-            description:   null,
-            date_filed:    null,
-            county:        'Cherokee County',
-            raw_data:      { autocomplete: rawStrings },
-          });
-        } else {
-          console.log(`  [Cherokee] Permit ${currentNum} — no detail data, skipping.`);
-        }
-      }
-
-      maxPermitNum = currentNum;
-      currentNum = nextPermitNum(currentNum);
-      await sleep(300); // be polite
-    }
-
-    console.log(`[Cherokee County] Found ${allPermits.length} new permits (checked ${checked} numbers).`);
-    return { permits: allPermits, maxPermitNum };
-
-  } catch (err) {
-    console.error(`  ❌ [Cherokee County] Error: ${err.message}`);
-    return { permits: [], maxPermitNum: lastPermitNum };
-  } finally {
-    if (browser) {
-      try { await browser.close(); } catch {}
-    }
+    if (dateFiled && dateFiled > maxDate) maxDate = dateFiled;
   }
+
+  console.log(`[Cherokee County] Found ${permits.length} permits. Max date: ${maxDate}`);
+  return { permits, maxDateStr: maxDate };
 }
 
 module.exports = { fetchNewPermits };
 
 if (require.main === module) {
-  // Test: scan from PR20260000900 (near-recent permits)
-  fetchNewPermits('PR20260000880')
-    .then(({ permits, maxPermitNum }) => {
+  fetchNewPermits('2026-05-28')
+    .then(({ permits, maxDateStr }) => {
       console.log('\n--- RESULTS ---');
-      console.log(`Total permits: ${permits.length}`);
-      console.log(`New max permit num: ${maxPermitNum}`);
+      console.log(`Total: ${permits.length}, max date: ${maxDateStr}`);
       if (permits.length > 0) {
         console.log('\n--- SAMPLE PERMIT ---');
         console.log(JSON.stringify(permits[0], null, 2));
+        console.log('\n--- SECOND SAMPLE ---');
+        console.log(JSON.stringify(permits[1], null, 2));
       }
     })
     .catch(console.error);

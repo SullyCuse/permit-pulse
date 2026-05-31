@@ -354,6 +354,37 @@ export const LOCATIONS: Location[] = [
     metaDescription:
       'Get a digest of every new building permit filed in Sandy Springs, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
+  {
+    slug: 'cherokee-county-ga-building-permits',
+    name: 'Cherokee County',
+    region: 'GA',
+    fullName: 'Cherokee County, GA',
+    headline: 'Every Cherokee County building permit — live tracking updated Monday, Wednesday & Friday.',
+    subheadline:
+      'Permit Pulse monitors every permit filed in Cherokee County, GA and delivers a digest to Pro subscribers three times a week. From Canton to Woodstock — never miss a new build or renovation in your market.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Cherokee County is one of Metro Atlanta\'s fastest-growing markets. Get every new residential and commercial permit — building, electrical, plumbing, mechanical, pools, and more — delivered three times a week before your competition.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Canton, Woodstock, Ball Ground, and Waleska. Spot emerging neighborhoods and development trends before they hit the headlines.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Cherokee County streets are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this high-growth market.',
+      },
+    ],
+    faqWhere: 'Our Cherokee County data is sourced from the Cherokee County Government\'s official public permit records at cherokeega.com, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.',
+    metaTitle: 'Cherokee County GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Cherokee County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
+  },
 ]
 
 export function getLocation(slug: string): Location | undefined {
