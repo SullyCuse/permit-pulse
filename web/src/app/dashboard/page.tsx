@@ -361,6 +361,16 @@ function normalizeStatus(raw: string | number | null | undefined): string | unde
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+const COUNTY_PORTAL: Record<string, string> = {
+  'Savannah':       'https://etrac.savannahga.gov',
+  'Alpharetta':     'https://permits.alpharetta.ga.us',
+  'Bryan County':   'https://evolvepublic.infovisionsoftware.com/BryanCounty/',
+  'DeKalb County':  'https://epermits.dekalbcountyga.gov/lookup-record',
+  'Augusta':        'https://cityview.augustaga.gov/cityviewportal',
+  'Johns Creek':    'https://selfservice.johnscreekga.gov/EnerGov_Prod/SelfService#/home',
+  'Cherokee County':'https://cityview.cherokeega.com/cvprodportal/Permit/InspectionLocator',
+}
+
 function PermitCard({ permit }: { permit: any }) {
   const contractor = permit.contractor_name
   const applicant = permit.applicant_name
@@ -421,14 +431,14 @@ function PermitCard({ permit }: { permit: any }) {
               ${Number(estimatedValue).toLocaleString()}
             </p>
           )}
-          {permit.source_url && (
+          {(permit.source_url || COUNTY_PORTAL[permit.county]) && (
             <a
-              href={permit.source_url}
+              href={permit.source_url ?? COUNTY_PORTAL[permit.county]}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-blue-500 hover:text-blue-700 mt-1 block"
             >
-              View source →
+              {permit.source_url ? 'View source →' : 'View portal →'}
             </a>
           )}
         </div>
