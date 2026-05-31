@@ -364,7 +364,6 @@ function normalizeStatus(raw: string | number | null | undefined): string | unde
 const COUNTY_PORTAL: Record<string, string> = {
   'Alpharetta':     'https://permits.alpharetta.ga.us',
   'Bryan County':   'https://evolvepublic.infovisionsoftware.com/BryanCounty/',
-  'DeKalb County':  'https://epermits.dekalbcountyga.gov/lookup-record',
   'Augusta':        'https://cityview.augustaga.gov/cityviewportal',
   'Johns Creek':    'https://selfservice.johnscreekga.gov/EnerGov_Prod/SelfService#/home',
   'Cherokee County':'https://cityview.cherokeega.com/cvprodportal/Permit/InspectionLocator',
@@ -388,9 +387,15 @@ function PermitCard({ permit }: { permit: any }) {
     ?? (permit.county === 'Savannah' && permit.permit_number
         ? `https://etrac.savannahga.gov/EnerGov_Prod/SelfService#/search?m=1&fm=1&ps=10&pn=1&em=true&st=${encodeURIComponent(permit.permit_number)}`
         : null)
+    ?? (permit.county === 'DeKalb County' && permit.permit_number
+        ? `https://epermits.dekalbcountyga.gov/record-details/#intdetails/building/intid/${permit.permit_number}`
+        : null)
     ?? COUNTY_PORTAL[permit.county]
     ?? null
-  const sourceLinkLabel = permit.source_url ? 'View source →' : permit.county === 'Savannah' ? 'View permit →' : 'View portal →'
+  const sourceLinkLabel = permit.source_url
+    ? 'View source →'
+    : (permit.county === 'Savannah' || permit.county === 'DeKalb County') ? 'View permit →'
+    : 'View portal →'
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—'
