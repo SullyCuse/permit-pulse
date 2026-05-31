@@ -26,7 +26,7 @@ const {
   getJohnsCreekLastTimestamp, setJohnsCreekLastTimestamp,
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
-  getCherokeeLastPermitNum, setCherokeeLastPermitNum,
+  getCherokeeLastDate, setCherokeeLastDate,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -326,11 +326,25 @@ async function main() {
     }
 
     // --- Cherokee County ---
-    // Disabled: CityView portal returns empty responses for LocatorResults even
-    // in a real browser — permit details are not publicly accessible. Re-enable
-    // once a viable public data source is found and the scraper is reworked.
-    const cherokeeCount = 0;
-    console.log('\n[Cherokee County] Skipped — data source unavailable.');
+    let cherokeeCount = 0;
+    try {
+      const cherokeeLastDate = await getCherokeeLastDate();
+      console.log(`\n[Cherokee County] Last processed date: ${cherokeeLastDate}`);
+      const { permits: cherokeePermits, maxDateStr } = await fetchCherokeePermits(cherokeeLastDate);
+      if (cherokeePermits.length === 0) {
+        console.log('[Cherokee County] No new permits found.');
+      } else {
+        const result = await savePermits(cherokeePermits);
+        cherokeeCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setCherokeeLastDate(maxDateStr);
+        console.log(`\n[Cherokee County] State advanced to ${maxDateStr}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Cherokee County] Failed: ${err.message}`);
+      totalErrors++;
+    }
 
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
