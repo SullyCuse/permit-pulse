@@ -45,7 +45,6 @@ async function callApi(path, body = {}) {
   return data;
 }
 
-const CHECK_AHEAD = 10;
 
 async function main() {
   const isApify = !!process.env.APIFY_IS_AT_HOME;
@@ -64,13 +63,13 @@ async function main() {
     // --- Hall County ---
     const lastItem = await getLastItemNumber();
     console.log(`\n[Hall County] Last processed item: #${lastItem}`);
-    console.log(`Checking items #${lastItem + 1} – #${lastItem + CHECK_AHEAD}`);
 
     const hallFound = await fetchLatestPdfUrls(lastItem);
 
     if (hallFound.length === 0) {
       console.log('[Hall County] No new permit PDFs found.');
     } else {
+      let maxItemSeen = lastItem;
       for (const pdf of hallFound) {
         try {
           console.log(`\n[Hall County] Processing item #${pdf.itemNumber}...`);
@@ -78,16 +77,15 @@ async function main() {
           const result = await savePermits(permits);
           totalInserted += result.inserted;
           totalErrors += result.errors;
+          if (pdf.itemNumber > maxItemSeen) maxItemSeen = pdf.itemNumber;
         } catch (err) {
           console.error(`  ❌ [Hall County] Failed on item #${pdf.itemNumber}: ${err.message}`);
           totalErrors++;
         }
       }
+      await setLastItemNumber(maxItemSeen);
+      console.log(`\n[Hall County] State advanced to item #${maxItemSeen}`);
     }
-
-    const newLast = lastItem + CHECK_AHEAD;
-    await setLastItemNumber(newLast);
-    console.log(`\n[Hall County] State advanced to item #${newLast}`);
 
     // --- Gwinnett County ---
     const gwinnettLastDate = await getGwinnettLastDate();
