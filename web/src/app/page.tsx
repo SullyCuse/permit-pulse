@@ -284,7 +284,7 @@ export default function HomePage() {
               },
               {
                 q: 'How quickly will I get alerted?',
-                a: 'Within minutes of our Monday scrape completing. You\'ll have the data before most people check their email.',
+                a: 'Within minutes of our Monday, Wednesday, and Friday scrapes completing. You\'ll have the data before most people check their email.',
               },
               {
                 q: 'Can I cancel anytime?',
