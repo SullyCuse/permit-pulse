@@ -362,7 +362,6 @@ function normalizeStatus(raw: string | number | null | undefined): string | unde
 }
 
 const COUNTY_PORTAL: Record<string, string> = {
-  'Savannah':       'https://etrac.savannahga.gov',
   'Alpharetta':     'https://permits.alpharetta.ga.us',
   'Bryan County':   'https://evolvepublic.infovisionsoftware.com/BryanCounty/',
   'DeKalb County':  'https://epermits.dekalbcountyga.gov/lookup-record',
@@ -385,6 +384,13 @@ function PermitCard({ permit }: { permit: any }) {
     inner?.status ??         // Cherokee County, DeKalb County (Sandy Springs '-1' filtered in normalizeStatus)
     null
   const permitStatus = normalizeStatus(rawStatus)
+  const sourceUrl = permit.source_url
+    ?? (permit.county === 'Savannah' && permit.permit_number
+        ? `https://etrac.savannahga.gov/EnerGov_Prod/SelfService#/search?m=1&fm=1&ps=10&pn=1&em=true&st=${encodeURIComponent(permit.permit_number)}`
+        : null)
+    ?? COUNTY_PORTAL[permit.county]
+    ?? null
+  const sourceLinkLabel = permit.source_url ? 'View source →' : permit.county === 'Savannah' ? 'View permit →' : 'View portal →'
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—'
@@ -431,14 +437,14 @@ function PermitCard({ permit }: { permit: any }) {
               ${Number(estimatedValue).toLocaleString()}
             </p>
           )}
-          {(permit.source_url || COUNTY_PORTAL[permit.county]) && (
+          {sourceUrl && (
             <a
-              href={permit.source_url ?? COUNTY_PORTAL[permit.county]}
+              href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-blue-500 hover:text-blue-700 mt-1 block"
             >
-              {permit.source_url ? 'View source →' : 'View portal →'}
+              {sourceLinkLabel}
             </a>
           )}
         </div>
