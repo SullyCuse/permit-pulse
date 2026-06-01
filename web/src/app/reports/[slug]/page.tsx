@@ -10,6 +10,9 @@ import {
 
 export const revalidate = 86400
 
+const FOREST = '#2d5a27'
+const PLAYFAIR = 'var(--font-playfair), Georgia, serif'
+
 export async function generateStaticParams() {
   return getPastMonthSlugs().map(slug => ({ slug }))
 }
@@ -56,9 +59,11 @@ export default async function ReportPage(
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <Link href="/"><Logo /></Link>
-        <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <Logo color={FOREST} />
+          <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Sign in</Link>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -70,11 +75,19 @@ export default async function ReportPage(
           >
             ← All reports
           </Link>
-          <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide">
+          <span
+            className="inline-block text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide"
+            style={{ backgroundColor: '#f0f7ee', color: FOREST }}
+          >
             {meta.fullName} · Monthly Report
           </span>
         </div>
-        <h1 className="text-4xl font-bold text-gray-900">{monthYear} Building Permits</h1>
+        <h1
+          className="text-4xl font-black text-gray-900"
+          style={{ fontFamily: PLAYFAIR }}
+        >
+          {monthYear} Building Permits
+        </h1>
         <p className="mt-4 text-gray-500">
           Official permit data from {meta.display} — updated Mon, Wed &amp; Fri from the county permitting office.
         </p>
@@ -113,7 +126,7 @@ export default async function ReportPage(
 
       {/* Zip code breakdown */}
       {report.byZip.length > 0 && (
-        <section className="bg-gray-50 py-14">
+        <section className="hero-pattern py-14">
           <div className="max-w-3xl mx-auto px-6">
             <h2 className="text-xl font-bold text-gray-900 mb-1">Permit activity by zip code</h2>
             <p className="text-sm text-gray-500 mb-8">Top 10 zip codes by permit volume — {monthYear}</p>
@@ -123,8 +136,11 @@ export default async function ReportPage(
                   <span className="w-16 text-sm font-mono text-gray-700 flex-shrink-0">{row.zip}</span>
                   <div className="flex-1 bg-gray-200 rounded-full h-2.5">
                     <div
-                      className="bg-blue-500 h-2.5 rounded-full transition-all"
-                      style={{ width: `${Math.max(3, (row.count / maxZipCount) * 100)}%` }}
+                      className="h-2.5 rounded-full transition-all"
+                      style={{
+                        width: `${Math.max(3, (row.count / maxZipCount) * 100)}%`,
+                        backgroundColor: FOREST,
+                      }}
                     />
                   </div>
                   <span className="w-10 text-sm font-semibold text-gray-900 text-right flex-shrink-0">
@@ -151,8 +167,12 @@ export default async function ReportPage(
                     <span className="w-44 text-sm text-gray-700 truncate flex-shrink-0">{row.type}</span>
                     <div className="flex-1 bg-gray-100 rounded-full h-2.5">
                       <div
-                        className="bg-blue-400 h-2.5 rounded-full"
-                        style={{ width: `${Math.max(3, pct)}%` }}
+                        className="h-2.5 rounded-full"
+                        style={{
+                          width: `${Math.max(3, pct)}%`,
+                          backgroundColor: FOREST,
+                          opacity: 0.7,
+                        }}
                       />
                     </div>
                     <span className="w-20 text-sm text-gray-500 text-right flex-shrink-0">
@@ -167,7 +187,7 @@ export default async function ReportPage(
       )}
 
       {/* Other months for this county */}
-      <section className="bg-gray-50 py-12 border-t border-gray-100">
+      <section className="hero-pattern py-12 border-t border-stone-200">
         <div className="max-w-3xl mx-auto px-6">
           <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
             Other months — {meta.display}
@@ -177,7 +197,7 @@ export default async function ReportPage(
               <Link
                 key={buildSlug(county, y, m)}
                 href={`/reports/${buildSlug(county, y, m)}`}
-                className="border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-4 py-2 rounded-full text-sm text-gray-600 transition-colors"
+                className="border border-stone-200 px-4 py-2 rounded-full text-sm text-gray-600 transition-colors hover:border-[#2d5a27] hover:text-[#2d5a27]"
               >
                 {formatMonthYear(y, m)}
               </Link>
@@ -193,7 +213,10 @@ export default async function ReportPage(
 
       {/* CTA */}
       <section className="py-20 text-center px-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <h2
+          className="text-2xl font-black text-gray-900 mb-3"
+          style={{ fontFamily: PLAYFAIR }}
+        >
           Get alerted when new permits are filed in {meta.display}
         </h2>
         <p className="text-gray-500 mb-8 max-w-lg mx-auto">
@@ -201,13 +224,14 @@ export default async function ReportPage(
         </p>
         <Link
           href="/login"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-medium text-sm"
+          className="text-white px-10 py-3 rounded-lg font-semibold text-sm inline-block transition-opacity hover:opacity-90"
+          style={{ backgroundColor: FOREST }}
         >
           Start free
         </Link>
       </section>
 
-      <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
+      <footer className="border-t border-stone-200 py-8 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>
@@ -226,7 +250,7 @@ function MetricCard({
   sub?: string
 }) {
   return (
-    <div className="bg-gray-50 rounded-2xl p-5">
+    <div className="rounded-2xl p-5" style={{ backgroundColor: '#f0f7ee' }}>
       <div className="text-xs text-gray-500 mb-2">{label}</div>
       <div className={`text-2xl font-bold ${valueClass}`}>{value}</div>
       {sub && <div className="text-xs text-gray-400 mt-1">{sub}</div>}

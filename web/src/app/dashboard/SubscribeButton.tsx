@@ -36,11 +36,12 @@ export default function SubscribeButton({ plan, label, highlight }: {
     <button
       onClick={handleClick}
       disabled={loading}
-      className={`w-full py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 ${
+      className={`w-full py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-opacity ${
         highlight
-          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-          : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+          ? 'text-white hover:opacity-90'
+          : 'border border-stone-300 hover:bg-stone-50 text-gray-700'
       }`}
+      style={highlight ? { backgroundColor: '#2d5a27' } : undefined}
     >
       {loading ? 'Loading…' : label}
     </button>
