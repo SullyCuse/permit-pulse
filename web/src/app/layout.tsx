@@ -15,6 +15,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="https://analytics.ahrefs.com/analytics.js" data-key="eDaU8I4k8YTPmKRwx/mQqg" async={true}></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-970099736"></script>
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-970099736');
+        `}} />
       </head>
       <body className="min-h-full bg-white text-gray-900">{children}</body>
     </html>
