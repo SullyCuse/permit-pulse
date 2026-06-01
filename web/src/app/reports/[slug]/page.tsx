@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { unstable_cache } from 'next/cache'
 import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
@@ -8,7 +9,13 @@ import {
   getAllMonths, buildSlug,
 } from '@/lib/reports'
 
-export const revalidate = 21600 // revalidate every 6 hours
+export const dynamic = 'force-dynamic'
+
+const getCachedReportData = unstable_cache(
+  getReportData,
+  ['report-data'],
+  { revalidate: 21600 },
+)
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
@@ -33,7 +40,7 @@ export default async function ReportPage(
   if (!parsed || !COUNTY_META[parsed.county]) notFound()
 
   const { county, year, month } = parsed
-  const report = await getReportData(county, year, month)
+  const report = await getCachedReportData(county, year, month)
   const meta = COUNTY_META[county]
   const monthYear = formatMonthYear(year, month)
 

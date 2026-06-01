@@ -1,12 +1,21 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
   COUNTY_META, COUNTIES, buildSlug, formatMonthYear, getAllReportSummaries,
 } from '@/lib/reports'
 
-export const revalidate = 21600 // revalidate every 6 hours
+// force-dynamic prevents build-time pre-render (Supabase env vars only available at runtime).
+// unstable_cache caches the DB result for 6 hours so repeated requests are fast.
+export const dynamic = 'force-dynamic'
+
+const getCachedSummaries = unstable_cache(
+  getAllReportSummaries,
+  ['report-summaries'],
+  { revalidate: 21600 },
+)
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
@@ -14,7 +23,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ReportsIndexPage() {
-  const summaries = await getAllReportSummaries()
+  const summaries = await getCachedSummaries()
 
   // Group summaries by county, most recent month first — show ALL months so
   // no report page is an internal-link orphan
