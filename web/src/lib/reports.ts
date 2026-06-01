@@ -45,7 +45,7 @@ export function parseSlug(slug: string): { county: string; year: number; month: 
     const yearStr = rest.slice(lastDash + 1)
     const month = MONTH_NAMES.indexOf(monthName)
     const year = parseInt(yearStr, 10)
-    if (month === -1 || isNaN(year) || year < 2025) continue
+    if (month === -1 || isNaN(year) || year < 2020) continue
     return { county, year, month }
   }
   return null
