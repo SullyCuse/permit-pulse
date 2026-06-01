@@ -1,4 +1,4 @@
-export function LogoIcon({ size = 40, color = '#2563eb' }: { size?: number; color?: string }) {
+export function LogoIcon({ size = 40, color = '#2d5a27' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Document body */}
@@ -26,7 +26,7 @@ export function LogoIcon({ size = 40, color = '#2563eb' }: { size?: number; colo
 
 import Link from 'next/link'
 
-export function Logo({ color = '#2563eb' }: { color?: string }) {
+export function Logo({ color = '#2d5a27' }: { color?: string }) {
   return (
     <Link href="/" className="flex items-center gap-2">
       <LogoIcon size={36} color={color} />
