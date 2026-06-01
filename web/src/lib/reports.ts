@@ -170,6 +170,14 @@ async function fetchAllRows<T>(
   return all
 }
 
+// Months with actual permit data for a single county — used for "other months" nav
+export async function getCountyMonths(county: string): Promise<{ year: number; month: number }[]> {
+  const summaries = await getAllReportSummaries()
+  return summaries
+    .filter(s => s.county === county && s.count > 0)
+    .map(s => ({ year: s.year, month: s.month }))
+}
+
 // Aggregate permit counts per county per month — used on index page
 export async function getAllReportSummaries(): Promise<
   { county: string; year: number; month: number; count: number }[]

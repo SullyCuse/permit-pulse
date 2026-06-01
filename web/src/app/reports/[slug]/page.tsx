@@ -5,7 +5,7 @@ import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
   parseSlug, getReportData, formatMonthYear, COUNTY_META,
-  getAllMonths, buildSlug, getPastMonthSlugs,
+  getCountyMonths, buildSlug, getPastMonthSlugs,
 } from '@/lib/reports'
 
 export const revalidate = 86400
@@ -51,9 +51,8 @@ export default async function ReportPage(
   const topType = report.byType[0]
   const totalTyped = report.byType.reduce((s, t) => s + t.count, 0)
 
-  // Show ALL other months for this county so no report page is an orphan
-  const allMonths = getAllMonths()
-  const otherMonths = allMonths.filter(m => !(m.year === year && m.month === month))
+  const allCountyMonths = await getCountyMonths(county)
+  const otherMonths = allCountyMonths.filter(m => !(m.year === year && m.month === month))
 
   return (
     <div className="min-h-screen bg-white">
