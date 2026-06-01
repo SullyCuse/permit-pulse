@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import SubscribeButton from './SubscribeButton'
 import { Logo } from '@/components/Logo'
 import CountyTabs from './CountyTabs'
+import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
 const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County'] as const
@@ -11,7 +12,7 @@ const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta'
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ county?: string; page?: string; type?: string; error?: string; search?: string; sort?: string }>
+  searchParams: Promise<{ county?: string; page?: string; type?: string; error?: string; search?: string; sort?: string; checkout?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -20,6 +21,7 @@ export default async function DashboardPage({
   const params = await searchParams
   const activeCounty = COUNTIES.includes(params.county as any) ? params.county! : 'All'
   const zipLimitReached = params.error === 'zip_limit'
+  const checkoutSuccess = params.checkout === 'success'
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const offset = (page - 1) * PAGE_SIZE
   const activeSearch = params.search?.trim() ?? ''
@@ -84,6 +86,7 @@ export default async function DashboardPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {checkoutSuccess && <CheckoutConversion />}
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
