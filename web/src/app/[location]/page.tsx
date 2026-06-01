@@ -57,7 +57,7 @@ export default async function LocationPage(
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
+        <div className="inline-block bg-green-50 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
           {loc.fullName} · Updated Mon, Wed &amp; Fri
         </div>
         <h1 className="text-5xl font-bold text-gray-900 leading-tight">
@@ -67,7 +67,7 @@ export default async function LocationPage(
           {loc.subheadline}
         </p>
         <div className="mt-10 flex gap-4 justify-center">
-          <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium text-sm">
+          <Link href="/login" className="text-white px-8 py-3 rounded-lg font-medium text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: '#2d5a27' }}>
             Browse free permits
           </Link>
           <a href="#pricing" className="border border-gray-300 hover:bg-gray-50 px-8 py-3 rounded-lg font-medium text-sm text-gray-700">
@@ -120,7 +120,7 @@ export default async function LocationPage(
               { step: '3', title: 'Get your permit digest', desc: `Pro subscribers receive an email digest every Monday, Wednesday, and Friday with every new ${loc.name} permit matching their zip codes — address, type, and value included.` },
             ].map(item => (
               <div key={item.step}>
-                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mx-auto mb-4">
+                <div className="w-10 h-10 bg-green-100 text-[#2d5a27] rounded-full flex items-center justify-center font-bold mx-auto mb-4">
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
@@ -190,7 +190,7 @@ export default async function LocationPage(
         <section className="bg-gray-50 border-y border-gray-100 py-10">
           <div className="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">Free · No account needed</div>
+              <div className="text-xs font-semibold text-green-800 uppercase tracking-wide mb-1">Free · No account needed</div>
               <p className="text-gray-900 font-semibold">
                 {latestReportLabel} permit report — {loc.name}
               </p>
@@ -198,7 +198,7 @@ export default async function LocationPage(
             </div>
             <Link
               href={`/reports/${latestReportSlug}`}
-              className="flex-shrink-0 border border-blue-600 text-blue-600 hover:bg-blue-50 px-5 py-2 rounded-lg font-medium text-sm transition-colors"
+              className="flex-shrink-0 border border-[#2d5a27] text-[#2d5a27] hover:bg-green-50 px-5 py-2 rounded-lg font-medium text-sm transition-colors"
             >
               View report →
             </Link>
@@ -214,7 +214,7 @@ export default async function LocationPage(
             <Link
               key={l.slug}
               href={`/${l.slug}`}
-              className="border border-gray-200 hover:border-blue-400 hover:text-blue-600 px-4 py-2 rounded-full text-sm text-gray-600 transition-colors"
+              className="border border-gray-200 hover:border-[#2d5a27] hover:text-[#2d5a27] px-4 py-2 rounded-full text-sm text-gray-600 transition-colors"
             >
               {l.fullName}
             </Link>
@@ -226,7 +226,7 @@ export default async function LocationPage(
       <section className="py-20 text-center px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to move first in {loc.name}?</h2>
         <p className="text-gray-500 mb-8">Join contractors, investors, and agents already tracking permits across Georgia.</p>
-        <Link href="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-lg font-medium text-sm">
+        <Link href="/login" className="text-white px-10 py-3 rounded-lg font-medium text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: '#2d5a27' }}>
           Browse free permits
         </Link>
       </section>
@@ -246,9 +246,9 @@ function PricingCard({ name, price, description, features, highlight }: {
   highlight: boolean
 }) {
   return (
-    <div className={`rounded-2xl border-2 p-8 transition-shadow hover:shadow-lg ${highlight ? 'border-blue-600' : 'border-gray-200 hover:border-gray-300'}`}>
+    <div className={`rounded-2xl border-2 p-8 transition-shadow hover:shadow-lg ${highlight ? 'border-[#2d5a27]' : 'border-gray-200 hover:border-gray-300'}`}>
       {highlight && (
-        <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Most popular</span>
+        <span className="text-xs font-semibold text-[#2d5a27] uppercase tracking-wide">Most popular</span>
       )}
       <h3 className="text-xl font-bold mt-2 text-gray-900">{name}</h3>
       <p className="text-gray-500 text-sm mt-1 mb-4">{description}</p>
@@ -270,9 +270,10 @@ function PricingCard({ name, price, description, features, highlight }: {
         href="/login"
         className={`block w-full text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
           highlight
-            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+            ? 'text-white transition-opacity hover:opacity-90'
             : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
         }`}
+        style={highlight ? { backgroundColor: '#2d5a27' } : undefined}
       >
         Get started
       </Link>
