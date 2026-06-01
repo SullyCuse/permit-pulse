@@ -40,7 +40,9 @@ export default async function ReportPage(
 
   const { county, year, month } = parsed
   const report = await getReportData(county, year, month)
-  if (report.total === 0) notFound()
+  // Don't 404 on zero permits — show the empty-state section instead.
+  // A valid county/month with no data yet (e.g. scraper hasn't run)
+  // should return 200 so internal links from landing pages don't break.
   const meta = COUNTY_META[county]
   const monthYear = formatMonthYear(year, month)
 
