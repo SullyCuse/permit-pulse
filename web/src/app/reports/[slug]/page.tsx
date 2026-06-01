@@ -5,17 +5,16 @@ import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
   parseSlug, getReportData, formatMonthYear, COUNTY_META,
-  getCountyMonths, buildSlug, getPastMonthSlugs,
+  getCountyMonths, buildSlug,
 } from '@/lib/reports'
 
+// revalidate without generateStaticParams = ISR on-demand:
+// pages render on first request and are cached for 24 hours.
+// No build-time Supabase calls (env vars not available in preview builds).
 export const revalidate = 86400
 
 const FOREST = '#2d5a27'
 const PLAYFAIR = 'var(--font-playfair), Georgia, serif'
-
-export async function generateStaticParams() {
-  return getPastMonthSlugs().map(slug => ({ slug }))
-}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
