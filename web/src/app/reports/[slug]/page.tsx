@@ -5,10 +5,14 @@ import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
   parseSlug, getReportData, formatMonthYear, COUNTY_META,
-  getAllMonths, buildSlug,
+  getAllMonths, buildSlug, getPastMonthSlugs,
 } from '@/lib/reports'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 86400
+
+export async function generateStaticParams() {
+  return getPastMonthSlugs().map(slug => ({ slug }))
+}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
@@ -34,6 +38,7 @@ export default async function ReportPage(
 
   const { county, year, month } = parsed
   const report = await getReportData(county, year, month)
+  if (report.total === 0) notFound()
   const meta = COUNTY_META[county]
   const monthYear = formatMonthYear(year, month)
 
@@ -106,16 +111,6 @@ export default async function ReportPage(
           />
         </div>
       </section>
-
-      {/* No data state */}
-      {report.total === 0 && (
-        <section className="py-20 text-center px-6">
-          <p className="text-gray-400 text-lg">No permit data available for {monthYear} in {meta.display}.</p>
-          <Link href="/reports" className="mt-4 inline-block text-sm text-blue-600 hover:underline">
-            ← Back to all reports
-          </Link>
-        </section>
-      )}
 
       {/* Zip code breakdown */}
       {report.byZip.length > 0 && (
