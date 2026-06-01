@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next'
 import { LOCATIONS } from '@/lib/locations'
 import { COUNTY_META, buildSlug, getAllReportSummaries } from '@/lib/reports'
 
+// Sitemap calls Supabase — must be dynamic so it isn't pre-rendered at build time
+// (Supabase env vars are only available at runtime, not in preview builds)
+export const dynamic = 'force-dynamic'
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://permitpulse.io'
 
