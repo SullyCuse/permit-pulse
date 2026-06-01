@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
 }
 
+const FOREST = '#2d5a27'
+const PLAYFAIR = 'var(--font-playfair), Georgia, serif'
+
 export default async function ReportsIndexPage() {
   const summaries = await getAllReportSummaries()
 
@@ -29,16 +32,26 @@ export default async function ReportsIndexPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <Link href="/"><Logo /></Link>
-        <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+      <nav className="bg-white/95 backdrop-blur-sm border-b border-stone-200 sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <Logo color={FOREST} />
+          <Link href="/login" className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Sign in</Link>
+        </div>
       </nav>
 
       <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
-        <div className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide">
+        <div
+          className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-6 uppercase tracking-wide"
+          style={{ backgroundColor: '#f0f7ee', color: FOREST }}
+        >
           Georgia · Monthly Reports
         </div>
-        <h1 className="text-4xl font-bold text-gray-900">Building Permit Activity Reports</h1>
+        <h1
+          className="text-4xl font-black text-gray-900"
+          style={{ fontFamily: PLAYFAIR }}
+        >
+          Building Permit Activity Reports
+        </h1>
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
           Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, and Cherokee County — pulled directly from official county sources.
         </p>
@@ -53,7 +66,7 @@ export default async function ReportsIndexPage() {
           const countyMonths = byCounty[county] ?? []
           return (
             <div key={county} className="mb-12">
-              <h2 className="text-base font-semibold text-gray-900 mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
+              <h2 className="text-base font-semibold text-gray-900 mb-4 border-b border-stone-200 pb-3 flex items-center gap-2">
                 {meta.fullName}
                 {meta.historicalThrough && (
                   <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
@@ -73,12 +86,12 @@ export default async function ReportsIndexPage() {
                         <Link
                           key={slug}
                           href={`/reports/${slug}`}
-                          className="bg-gray-50 hover:bg-blue-50 hover:border-blue-200 border border-gray-200 rounded-xl p-4 text-center transition-colors group"
+                          className="bg-gray-50 hover:bg-[#f0f7ee] border border-gray-200 hover:border-[#2d5a27] rounded-xl p-4 text-center transition-colors group"
                         >
                           <div className="text-xs text-gray-500 mb-2 leading-tight">
                             {formatMonthYear(year, month)}
                           </div>
-                          <div className="text-2xl font-bold text-gray-900 group-hover:text-blue-700">
+                          <div className="text-2xl font-bold text-gray-900 group-hover:text-[#2d5a27]">
                             {count.toLocaleString()}
                           </div>
                           <div className="text-xs text-gray-400 mt-1">permits</div>
@@ -95,7 +108,7 @@ export default async function ReportsIndexPage() {
                           <Link
                             key={slug}
                             href={`/reports/${slug}`}
-                            className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
+                            className="text-sm text-gray-500 transition-colors hover:text-[#2d5a27]"
                           >
                             {formatMonthYear(year, month)} ({count.toLocaleString()})
                           </Link>
@@ -110,20 +123,26 @@ export default async function ReportsIndexPage() {
         })}
       </section>
 
-      <section className="bg-blue-600 py-14 text-center px-6">
-        <h2 className="text-2xl font-bold text-white mb-3">Get alerted when new permits are filed</h2>
-        <p className="text-blue-100 mb-6 max-w-lg mx-auto">
+      <section className="py-14 text-center px-6" style={{ backgroundColor: FOREST }}>
+        <h2
+          className="text-2xl font-black text-white mb-3"
+          style={{ fontFamily: PLAYFAIR }}
+        >
+          Get alerted when new permits are filed
+        </h2>
+        <p className="text-green-100 mb-6 max-w-lg mx-auto">
           Pick your zip codes and permit types. We'll email you every Monday, Wednesday, and Friday.
         </p>
         <Link
           href="/login"
-          className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-medium text-sm"
+          className="bg-white hover:bg-stone-50 px-8 py-3 rounded-lg font-semibold text-sm transition-colors inline-block"
+          style={{ color: FOREST }}
         >
           Start free
         </Link>
       </section>
 
-      <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
+      <footer className="border-t border-stone-200 py-8 text-center text-sm text-gray-400">
         © {new Date().getFullYear()} Permit Pulse · <ContactModal />
       </footer>
     </div>

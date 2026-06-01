@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { Logo } from '@/components/Logo'
+
+const FOREST = '#2d5a27'
 
 function getSupabase() {
   return createBrowserClient(
@@ -35,13 +38,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-gray-900 hover:text-blue-600">
-            Permit Pulse
-          </Link>
-          <p className="text-gray-500 mt-1 text-sm">Sign in to your account</p>
+    <div className="min-h-screen flex items-center justify-center px-4 hero-pattern">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
+        <div className="flex flex-col items-center mb-8">
+          <Logo color={FOREST} />
+          <p className="text-gray-500 mt-3 text-sm">Sign in to your account</p>
         </div>
 
         {sent ? (
@@ -58,26 +59,27 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-stone-300 rounded-lg text-sm focus:outline-none focus:ring-2"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
+                className="w-full text-white py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-opacity hover:opacity-90"
+                style={{ backgroundColor: FOREST }}
               >
                 {loading ? 'Sending…' : 'Send magic link'}
               </button>
             </form>
 
             <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-stone-200" />
               <span className="px-3 text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-200" />
+              <div className="flex-1 h-px bg-stone-200" />
             </div>
 
             <button
               onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 py-2.5 rounded-lg text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 border border-stone-300 hover:bg-stone-50 py-2.5 rounded-lg text-sm font-medium transition-colors"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

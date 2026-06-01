@@ -88,9 +88,9 @@ export default async function DashboardPage({
     <div className="min-h-screen bg-gray-50">
       {checkoutSuccess && <CheckoutConversion />}
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white/95 backdrop-blur-sm border-b border-stone-200 px-6 py-4 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Logo />
+          <Logo color="#2d5a27" />
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">{user.email}</span>
             <form action="/auth/signout" method="POST">
@@ -101,11 +101,11 @@ export default async function DashboardPage({
       </header>
 
       {!isActive && (
-        <div className="bg-blue-50 border-b border-blue-100 px-6 py-4">
+        <div className="border-b border-stone-200 px-6 py-4" style={{ backgroundColor: '#f0f7ee' }}>
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <p className="font-medium text-blue-900">Start your subscription to get permit alerts</p>
-              <p className="text-sm text-blue-700 mt-0.5">Choose a plan to unlock email alerts and full access.</p>
+              <p className="font-medium" style={{ color: '#1e4a1c' }}>Start your subscription to get permit alerts</p>
+              <p className="text-sm mt-0.5" style={{ color: '#2d5a27' }}>Choose a plan to unlock email alerts and full access.</p>
             </div>
             <div className="flex gap-3 flex-shrink-0">
               <div className="w-32">
@@ -143,7 +143,8 @@ export default async function DashboardPage({
               type="text"
               defaultValue={activeSearch}
               placeholder="Search by address or permit number…"
-              className="w-full pl-9 pr-10 py-2 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-10 py-2 text-sm border border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2"
+              style={{ ['--tw-ring-color' as string]: '#2d5a27' } as React.CSSProperties}
             />
             {activeSearch && (
               <Link
@@ -173,7 +174,7 @@ export default async function DashboardPage({
                 <select
                   name="type"
                   defaultValue={activeType}
-                  className="text-sm border border-gray-200 rounded-l-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:z-10 max-w-[220px] truncate"
+                  className="text-sm border border-gray-200 rounded-l-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:z-10 max-w-[220px] truncate"
                 >
                   {permitTypes.map(type => (
                     <option key={type} value={type}>{type === 'All' ? 'All Types' : type}</option>
@@ -188,7 +189,8 @@ export default async function DashboardPage({
                 {activeType !== 'All' && (
                   <Link
                     href={buildHref({ type: 'All', page: 1 })}
-                    className="ml-2 text-xs text-blue-600 hover:text-blue-800"
+                    className="ml-2 text-xs hover:underline"
+                    style={{ color: '#2d5a27' }}
                   >
                     Clear
                   </Link>
@@ -235,11 +237,11 @@ export default async function DashboardPage({
 
               {/* Free user upsell */}
               {!isActive && (
-                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-6 text-center">
-                  <p className="text-sm font-medium text-blue-900">
+                <div className="mt-4 rounded-xl p-6 text-center" style={{ backgroundColor: '#f0f7ee', border: '1px solid #c6dfc2' }}>
+                  <p className="text-sm font-medium" style={{ color: '#1e4a1c' }}>
                     Showing {permits?.length} of {totalCount?.toLocaleString()} permits
                   </p>
-                  <p className="text-sm text-blue-700 mt-1 mb-4">Subscribe to unlock the full feed and email alerts.</p>
+                  <p className="text-sm mt-1 mb-4" style={{ color: '#2d5a27' }}>Subscribe to unlock the full feed and email alerts.</p>
                   <div className="flex justify-center gap-3">
                     <div className="w-32">
                       <SubscribeButton plan="basic" label="Basic — $29/mo" highlight={false} />
@@ -296,7 +298,7 @@ export default async function DashboardPage({
                   {(watchlist as any[]).flatMap((w: any) => w.zip_codes ?? []).map((zip: string) => (
                     <li key={zip} className="text-sm text-gray-600 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#2d5a27' }} />
                         {zip}
                       </div>
                       <form action="/api/watchlist" method="POST">
@@ -408,7 +410,7 @@ function PermitCard({ permit }: { permit: any }) {
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: '#f0f7ee', color: '#2d5a27' }}>
               {permit.permit_type ?? 'Unknown type'}
             </span>
             {permitStatus && (
@@ -450,7 +452,8 @@ function PermitCard({ permit }: { permit: any }) {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-500 hover:text-blue-700 mt-1 block"
+              className="text-xs mt-1 block hover:underline"
+              style={{ color: '#2d5a27' }}
             >
               {sourceLinkLabel}
             </a>
@@ -469,11 +472,12 @@ function WatchlistForm({ userId }: { userId: string }) {
         name="zip_code"
         placeholder="Add zip code (e.g. 30501)"
         maxLength={5}
-        className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
       />
       <button
         type="submit"
-        className="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+        className="w-full text-sm text-white py-2 rounded-lg font-medium transition-opacity hover:opacity-90"
+        style={{ backgroundColor: '#2d5a27' }}
       >
         Add to watchlist
       </button>
