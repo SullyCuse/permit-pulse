@@ -35,7 +35,12 @@ export default async function LocationPage(
   const countyKey = Object.keys(COUNTY_META).find(k =>
     COUNTY_META[k].display.toLowerCase() === loc.name.toLowerCase()
   )
-  const latestMonth = getAllMonths()[0]
+  // Use the latest *completed* month — skip the current in-progress month
+  // so the landing page never links to a report page with 0 permits yet.
+  const now = new Date()
+  const latestMonth = getAllMonths().find(
+    ({ year, month }) => year < now.getFullYear() || month < now.getMonth()
+  ) ?? getAllMonths()[0]
   const latestReportSlug = countyKey ? buildSlug(countyKey, latestMonth.year, latestMonth.month) : null
   const latestReportLabel = formatMonthYear(latestMonth.year, latestMonth.month)
 
