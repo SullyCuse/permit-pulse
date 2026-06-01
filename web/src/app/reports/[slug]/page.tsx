@@ -10,11 +10,6 @@ import {
 
 export const revalidate = 21600 // revalidate every 6 hours
 
-export async function generateStaticParams() {
-  const { getPastMonthSlugs } = await import('@/lib/reports')
-  return getPastMonthSlugs().map(slug => ({ slug }))
-}
-
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
