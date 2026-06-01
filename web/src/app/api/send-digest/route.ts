@@ -28,13 +28,13 @@ function coveredAreasSection() {
   }
   const colWidth = Math.floor(100 / COLS)
   const tableRows = rows.map(row => {
-    const cells = row.map(a => `<td style="padding:3px 8px 3px 0;font-size:13px;color:#1e40af;width:${colWidth}%">${a}</td>`).join('')
+    const cells = row.map(a => `<td style="padding:3px 8px 3px 0;font-size:13px;color:#2d5a27;width:${colWidth}%">${a}</td>`).join('')
     const empty = Array(COLS - row.length).fill(`<td style="width:${colWidth}%"></td>`).join('')
     return `<tr>${cells}${empty}</tr>`
   }).join('')
   return `
-  <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:14px 16px;margin-bottom:20px">
-    <p style="margin:0 0 10px;font-weight:600;color:#1d4ed8">Areas covered by Permit Pulse</p>
+  <div style="background:#f0f7ee;border:1px solid #c6dfc2;border-radius:8px;padding:14px 16px;margin-bottom:20px">
+    <p style="margin:0 0 10px;font-weight:600;color:#1e4a1c">Areas covered by Permit Pulse</p>
     <table style="width:100%;border-collapse:collapse">${tableRows}</table>
   </div>`
 }
@@ -58,14 +58,14 @@ function digestHtml(permits: Permit[], totalCount: number, sinceDate: string, un
   }).join('')
 
   const moreNote = truncated
-    ? `<p style="margin:12px 0 0;font-size:13px;color:#374151">Showing <strong>${DIGEST_PREVIEW_LIMIT} of ${totalCount} permits</strong> added since ${sinceDate}. <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color:#2563eb">View all ${totalCount} on your dashboard →</a></p>`
+    ? `<p style="margin:12px 0 0;font-size:13px;color:#374151">Showing <strong>${DIGEST_PREVIEW_LIMIT} of ${totalCount} permits</strong> added since ${sinceDate}. <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color:#2d5a27">View all ${totalCount} on your dashboard →</a></p>`
     : `<p style="margin:12px 0 0;font-size:13px;color:#374151"><strong>${totalCount} permit${totalCount === 1 ? '' : 's'}</strong> added since ${sinceDate}.</p>`
 
   return `
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:700px;margin:0 auto;padding:20px;color:#111">
-  <h2 style="color:#2563eb">Permit Pulse — Permit Digest</h2>
+  <h2 style="color:#2d5a27">Permit Pulse — Permit Digest</h2>
   ${coveredAreasSection()}
   <p style="color:#6b7280">New permits filed since ${sinceDate}. <strong>${totalCount} permit${totalCount === 1 ? '' : 's'}</strong> added to your feed.</p>
   <table style="width:100%;border-collapse:collapse;font-size:13px">
