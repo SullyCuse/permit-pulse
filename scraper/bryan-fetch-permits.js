@@ -127,10 +127,11 @@ function parseListingRows(html) {
     const line2 = html.match(new RegExp(`LBT_ResultsLine2_${idx}"[^>]*>([^<]*)<`))?.[1]?.trim() ?? '';
     const line3 = html.match(new RegExp(`LBT_ResultsLine3_${idx}"[^>]*>([^<]*)<`))?.[1]?.trim() ?? '';
 
+    const statusInParens = line1.match(/\(([^)]+)\)\s*$/)?.[1]?.trim() ?? null;
     const permitNum = line1.replace(/\s*\([^)]+\)\s*$/, '').trim();
     if (!permitNum) continue;
 
-    rows.push({ idx, permitNum, address: line2 || null, contractor: line3 || null });
+    rows.push({ idx, permitNum, address: line2 || null, contractor: line3 || null, listingStatus: statusInParens });
   }
   return rows;
 }
@@ -158,7 +159,12 @@ function parseDetails(html) {
     dateFiled = `${yr}-${mo.padStart(2, '0')}-${dy.padStart(2, '0')}`;
   }
 
-  return { permitType, dateFiled, applicantName };
+  // Status field from permit summary table (two-column label/value rows)
+  let permitStatus = null;
+  const statusMatch = html.match(/<td[^>]*>\s*Status\s*<\/td>\s*<td[^>]*>([^<]+)<\/td>/i);
+  if (statusMatch) permitStatus = statusMatch[1].trim();
+
+  return { permitType, dateFiled, applicantName, permitStatus };
 }
 
 async function fetchNewPermits(lastTimestampMs = 0) {
@@ -186,7 +192,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   console.log(`[Bryan County] Parsed ${rows.length} permit rows`);
 
   const permits = [];
-  for (const { idx, permitNum, address, contractor } of rows) {
+  for (const { idx, permitNum, address, contractor, listingStatus } of rows) {
     try {
       await sleep(250);
 
@@ -201,7 +207,8 @@ async function fetchNewPermits(lastTimestampMs = 0) {
         TBWE1_ClientState: startState, TBWE2_ClientState: endState,
       });
 
-      const { permitType, dateFiled, applicantName } = parseDetails(r5.data);
+      const { permitType, dateFiled, applicantName, permitStatus } = parseDetails(r5.data);
+      const status = permitStatus ?? listingStatus ?? null;
 
       permits.push({
         permit_number:   permitNum,
@@ -213,7 +220,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
         contractor_name: contractor ?? null,
         applicant_name:  applicantName ?? null,
         county:          'Bryan County',
-        raw_data:        { source: 'evolve' },
+        raw_data:        { source: 'evolve', status },
       });
     } catch (err) {
       console.warn(`  [Bryan County] Details failed for ${permitNum}: ${err.message}`);
@@ -227,7 +234,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
         contractor_name: contractor ?? null,
         applicant_name:  null,
         county:          'Bryan County',
-        raw_data:        { source: 'evolve' },
+        raw_data:        { source: 'evolve', status: listingStatus ?? null },
       });
     }
   }
