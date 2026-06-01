@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#111">
-  <h2 style="color:#2563eb">New Contact Submission</h2>
+  <h2 style="color:#2d5a27">New Contact Submission</h2>
   <table style="width:100%;border-collapse:collapse;font-size:14px">
     <tr><td style="padding:6px 0;color:#6b7280;width:80px">Type</td><td style="padding:6px 0"><strong>${TYPE_LABELS[type]}</strong></td></tr>
     ${name?.trim() ? `<tr><td style="padding:6px 0;color:#6b7280">Name</td><td style="padding:6px 0">${name.trim()}</td></tr>` : ''}

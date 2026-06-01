@@ -21,7 +21,7 @@ function alertHtml(permit: {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#111">
-  <h2 style="color:#2563eb">New Permit Alert — ${permit.zip_code ?? 'Hall County'}</h2>
+  <h2 style="color:#2d5a27">New Permit Alert — ${permit.zip_code ?? 'Hall County'}</h2>
   <table style="width:100%;border-collapse:collapse">
     <tr><td style="padding:6px 0;color:#6b7280;width:140px">Permit #</td><td style="padding:6px 0"><strong>${permit.permit_number ?? '—'}</strong></td></tr>
     <tr><td style="padding:6px 0;color:#6b7280">Type</td><td style="padding:6px 0">${permit.permit_type ?? '—'}</td></tr>
