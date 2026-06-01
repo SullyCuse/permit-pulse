@@ -6,7 +6,7 @@ import {
   COUNTY_META, COUNTIES, buildSlug, formatMonthYear, getAllReportSummaries,
 } from '@/lib/reports'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 21600 // revalidate every 6 hours
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
