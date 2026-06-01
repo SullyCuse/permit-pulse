@@ -245,18 +245,48 @@ function PricingCard({ name, price, description, features, highlight }: {
   features: string[]
   highlight: boolean
 }) {
+  if (highlight) {
+    return (
+      <div className="rounded-2xl p-8 text-left relative shadow-xl text-white" style={{ backgroundColor: '#2d5a27' }}>
+        <span className="absolute -top-3 left-6 text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#b8860b', color: 'white' }}>
+          Most Popular
+        </span>
+        <h3 className="text-xl font-bold mt-2">{name}</h3>
+        <p className="text-green-200 text-sm mt-1 mb-5">{description}</p>
+        <div className="mb-6">
+          <span className="text-4xl font-black">${price}</span>
+          <span className="text-green-300 text-sm">/mo</span>
+        </div>
+        <ul className="space-y-2.5 mb-8">
+          {features.map(f => (
+            <li key={f} className="flex items-center gap-2 text-sm text-green-100">
+              <svg className="w-4 h-4 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              </svg>
+              {f}
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/login"
+          className="block w-full text-center py-3 rounded-xl font-semibold text-sm bg-white hover:bg-green-50 transition-colors"
+          style={{ color: '#2d5a27' }}
+        >
+          Get started
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <div className={`rounded-2xl border-2 p-8 transition-shadow hover:shadow-lg ${highlight ? 'border-[#2d5a27]' : 'border-gray-200 hover:border-gray-300'}`}>
-      {highlight && (
-        <span className="text-xs font-semibold text-[#2d5a27] uppercase tracking-wide">Most popular</span>
-      )}
+    <div className="border border-stone-200 rounded-2xl p-8 text-left bg-white hover:border-stone-300 transition-colors shadow-sm">
       <h3 className="text-xl font-bold mt-2 text-gray-900">{name}</h3>
-      <p className="text-gray-500 text-sm mt-1 mb-4">{description}</p>
+      <p className="text-gray-500 text-sm mt-1 mb-5">{description}</p>
       <div className="mb-6">
-        <span className="text-4xl font-bold">${price}</span>
+        <span className="text-4xl font-black text-gray-900">${price}</span>
         <span className="text-gray-400 text-sm">/mo</span>
       </div>
-      <ul className="space-y-3 mb-8">
+      <ul className="space-y-2.5 mb-8">
         {features.map(f => (
           <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
             <svg className="w-4 h-4 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -268,12 +298,7 @@ function PricingCard({ name, price, description, features, highlight }: {
       </ul>
       <Link
         href="/login"
-        className={`block w-full text-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
-          highlight
-            ? 'text-white transition-opacity hover:opacity-90'
-            : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
-        }`}
-        style={highlight ? { backgroundColor: '#2d5a27' } : undefined}
+        className="block w-full text-center py-3 rounded-xl text-sm font-semibold border-2 border-stone-200 hover:bg-stone-50 text-gray-700 transition-colors"
       >
         Get started
       </Link>
