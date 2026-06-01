@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { LOCATIONS } from '@/lib/locations'
-import { COUNTIES, COUNTY_META, getAllMonths, buildSlug } from '@/lib/reports'
+import { COUNTY_META, buildSlug, getAllReportSummaries } from '@/lib/reports'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://permitpulse.io'
 
   const locationPages = LOCATIONS.map(loc => ({
@@ -12,17 +12,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  const months = getAllMonths()
-  const reportPages = COUNTIES.flatMap(county =>
-    months
-      .filter(({ year, month }) => COUNTY_META[county] && buildSlug(county, year, month))
-      .map(({ year, month }) => ({
-        url: `${base}/reports/${buildSlug(county, year, month)}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-      }))
-  )
+  const summaries = await getAllReportSummaries()
+  const reportPages = summaries
+    .filter(s => s.count > 0 && COUNTY_META[s.county])
+    .map(s => ({
+      url: `${base}/reports/${buildSlug(s.county, s.year, s.month)}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    }))
 
   return [
     {
