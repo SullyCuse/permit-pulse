@@ -15,43 +15,27 @@ function CallbackHandler() {
     )
 
     async function handleCallback() {
-      const code = searchParams.get('code')
       const next = searchParams.get('next') ?? '/dashboard'
 
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-        if (!error) {
-          router.replace(next)
-          return
-        }
-        router.replace('/login?error=auth')
-        return
-      }
+      // createBrowserClient with detectSessionInUrl:true (the default) automatically
+      // handles all three flows on init:
+      //   - PKCE:       exchanges ?code= for a session
+      //   - Hash:       reads #access_token= and calls setSession
+      //   - token_hash: not auto-handled, so we do it explicitly below
+      //
+      // Give the client one tick to finish its async URL detection before we check.
+      await new Promise(resolve => setTimeout(resolve, 0))
 
-      // Hash-based flow: Supabase redirects with #access_token=...&refresh_token=...
-      const hash = window.location.hash
-      if (hash) {
-        const params = new URLSearchParams(hash.slice(1))
-        const accessToken = params.get('access_token')
-        const refreshToken = params.get('refresh_token')
-        if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-          if (!error) {
-            router.replace(next)
-            return
-          }
-        }
-      }
-
-      // token_hash flow (some Supabase email configs)
       const tokenHash = searchParams.get('token_hash')
       const type = searchParams.get('type') as 'magiclink' | 'email' | null
       if (tokenHash && type) {
-        const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
-        if (!error) {
-          router.replace(next)
-          return
-        }
+        await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+      }
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        router.replace(next)
+        return
       }
 
       router.replace('/login?error=auth')
