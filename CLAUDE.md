@@ -32,7 +32,9 @@ See `memory/adding-new-scrapers.md` for full checklist.
 - ASP.NET WebForms — scrapable via raw HTTP (no Puppeteer needed)
 - Pattern: GET home → POST BL_Menu arg=2 (Permit Search) → POST DL_SearchType=Date Range → POST BT_Search with date strings + Telerik picker ClientState JSON
 - Reuse step-4 ViewState to click any row's Details: `__EVENTTARGET=GV_SearchResults$ctl${String(i+2).padStart(2,'0')}$LBT_ResultsDetails`
-- Permit type = first non-Applicant contact role; issue date = `<td>M/D/YYYY</td><td>Permit</td>` in Documents section
+- Permit type = first non-Applicant contact role, mapped via `CONTACT_TYPE_MAP` (General Contractor→Construction, Owner→Owner-Builder, Electrical→Electrical, Pool Contractor→Pool, etc.)
+- Issue date = `<td>M/D/YYYY</td><td>Permit</td>` in Documents section
+- Forward geocode bare address + ", Bryan County, GA" for zip + city; `geocode_cache` has a `city` column. Do NOT cache `OVER_QUERY_LIMIT` — only cache ZERO_RESULTS as null
 - See `scraper/bryan-fetch-permits.js` for the full implementation
 
 ## Critical Gotchas
