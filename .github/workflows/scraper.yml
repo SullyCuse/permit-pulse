@@ -2,8 +2,10 @@ name: Permit Pulse Scraper
 
 on:
   schedule:
-    # 11:30 AM UTC = 7:30 AM ET — Mon, Wed, Fri
+    # 11:30 AM UTC = 7:30 AM ET — Mon, Wed, Fri (primary)
     - cron: '30 11 * * 1,3,5'
+    # 1:30 PM UTC = 9:30 AM ET — fallback in case GitHub misses the primary trigger
+    - cron: '30 13 * * 1,3,5'
   workflow_dispatch:  # allows manual trigger from GitHub Actions UI
 
 jobs:

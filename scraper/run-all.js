@@ -79,7 +79,7 @@ async function main() {
           totalErrors += result.errors;
           if (pdf.itemNumber > maxItemSeen) maxItemSeen = pdf.itemNumber;
         } catch (err) {
-          console.error(`  ❌ [Hall County] Failed on item #${pdf.itemNumber}: ${err.message}`);
+          console.error(`  ❌ [Hall County] Failed on item #${pdf.itemNumber}: ${err.message || err.code || String(err)}`);
           totalErrors++;
         }
       }
@@ -109,7 +109,7 @@ async function main() {
 
           if (report.startDate > latestDate) latestDate = report.startDate;
         } catch (err) {
-          console.error(`  ❌ [Gwinnett County] Failed on ${report.startDate}: ${err.message}`);
+          console.error(`  ❌ [Gwinnett County] Failed on ${report.startDate}: ${err.message || err.code || String(err)}`);
           totalErrors++;
         }
       }
@@ -137,7 +137,7 @@ async function main() {
         console.log(`\n[Forsyth County] State advanced to ${new Date(maxTimestamp).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Forsyth County] Failed: ${err.message}`);
+      console.error(`  ❌ [Forsyth County] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -160,7 +160,7 @@ async function main() {
         console.log(`\n[Savannah] State advanced to ${new Date(savannahMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Savannah] Failed: ${err.message}`);
+      console.error(`  ❌ [Savannah] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -183,7 +183,7 @@ async function main() {
         console.log(`\n[Alpharetta] State advanced to ${new Date(alpharettaMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Alpharetta] Failed: ${err.message}`);
+      console.error(`  ❌ [Alpharetta] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -206,7 +206,7 @@ async function main() {
         console.log(`\n[Bryan County] State advanced to ${new Date(bryanMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Bryan County] Failed: ${err.message}`);
+      console.error(`  ❌ [Bryan County] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -229,7 +229,7 @@ async function main() {
         console.log(`\n[DeKalb County] State advanced to ${new Date(dekalbMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [DeKalb County] Failed: ${err.message}`);
+      console.error(`  ❌ [DeKalb County] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -252,7 +252,7 @@ async function main() {
         console.log(`\n[Augusta] State advanced to ${new Date(augustaMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Augusta] Failed: ${err.message}`);
+      console.error(`  ❌ [Augusta] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -275,7 +275,7 @@ async function main() {
         console.log(`\n[Johns Creek] State advanced to ${new Date(johnsCreekMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Johns Creek] Failed: ${err.message}`);
+      console.error(`  ❌ [Johns Creek] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -298,7 +298,7 @@ async function main() {
         console.log(`\n[City of Atlanta] State advanced to ${new Date(atlantaMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [City of Atlanta] Failed: ${err.message}`);
+      console.error(`  ❌ [City of Atlanta] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -321,7 +321,7 @@ async function main() {
         console.log(`\n[Sandy Springs] State advanced to ${new Date(sandySpringsMax).toISOString()}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Sandy Springs] Failed: ${err.message}`);
+      console.error(`  ❌ [Sandy Springs] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -342,7 +342,7 @@ async function main() {
         console.log(`\n[Cherokee County] State advanced to ${maxDateStr}`);
       }
     } catch (err) {
-      console.error(`  ❌ [Cherokee County] Failed: ${err.message}`);
+      console.error(`  ❌ [Cherokee County] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -388,6 +388,6 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error('\n❌ Fatal error:', err.message);
+  console.error('\n❌ Fatal error:', err.message || err.code || String(err));
   process.exit(1);
 });
