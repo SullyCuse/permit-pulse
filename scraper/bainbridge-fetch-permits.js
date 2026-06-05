@@ -170,7 +170,7 @@ async function fetchNewPermits(lastTimestampMs) {
     }, dateRange);
 
     console.log('  [Bainbridge] Submitting search...');
-    await page.evaluate(() => { FormSupport.submitAction('Search'); });
+    await page.evaluate(() => { FormSupport.submitAction('BasicSearch'); });
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
 
     console.log('  [Bainbridge] Loading first results page...');

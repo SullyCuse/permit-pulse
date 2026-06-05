@@ -6,7 +6,7 @@ require('dotenv').config();
 // State key: camden_last_timestamp
 
 const BASE_HOST = 'https://co-camden-ga.smartgovcommunity.com';
-const SEARCH_URL = `${BASE_HOST}/PermittingPublic/PermitSearchAdvanced`;
+const SEARCH_URL = `${BASE_HOST}/Public/PermitSearchAdvanced`;
 
 function msToDateStr(ms) {
   return new Date(ms).toISOString().slice(0, 10);
@@ -57,7 +57,7 @@ function parseResultsHtml(html) {
 
   const rowRe = /<tr[^>]*class="[^"]*ils-list-row[^"]*"[^>]*>([\s\S]*?)<\/tr>/gi;
   const cellRe = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-  const linkRe = /href="(\/PermittingPublic\/[^"]+)"/i;
+  const linkRe = /href="(\/(Public\/)?PermittingPublic\/[^"]+)"/i;
   const rows = [];
 
   while ((m = rowRe.exec(html)) !== null) {
@@ -170,7 +170,7 @@ async function fetchNewPermits(lastTimestampMs) {
     }, dateRange);
 
     console.log('  [Camden County] Submitting search...');
-    await page.evaluate(() => { FormSupport.submitAction('Search'); });
+    await page.evaluate(() => { FormSupport.submitAction('BasicSearch'); });
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
 
     console.log('  [Camden County] Loading first results page...');
