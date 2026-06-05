@@ -24,7 +24,7 @@ const { fetchNewPermits: fetchBainbridgePermits } = require('./bainbridge-fetch-
 const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accela-fetch-permits');
 const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGrangePermits } = require('./sagesgov-fetch-permits');
 const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
-const { fetchCowetaPermits, fetchCobbPermits } = require('./accela-fetch-permits');
+const { fetchCowetaPermits } = require('./accela-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -53,7 +53,6 @@ const {
   getHenryLastTimestamp, setHenryLastTimestamp,
   getMariettaLastTimestamp, setMariettaLastTimestamp,
   getCowetaLastTimestamp, setCowetaLastTimestamp,
-  getCobbLastTimestamp, setCobbLastTimestamp,
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
@@ -669,27 +668,6 @@ async function main() {
       totalErrors++;
     }
 
-    // --- Cobb County ---
-    let cobbCount = 0;
-    try {
-      const cobbLastTs = await getCobbLastTimestamp();
-      console.log(`\n[Cobb County] Last processed timestamp: ${new Date(cobbLastTs).toISOString()}`);
-      const { permits: cobbPermits, maxTimestamp: cobbMax } = await fetchCobbPermits(cobbLastTs);
-      if (cobbPermits.length === 0) {
-        console.log('[Cobb County] No new permits found.');
-      } else {
-        const result = await savePermits(cobbPermits);
-        cobbCount = result.inserted;
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        await setCobbLastTimestamp(cobbMax);
-        console.log(`\n[Cobb County] State advanced to ${new Date(cobbMax).toISOString()}`);
-      }
-    } catch (err) {
-      console.error(`  ❌ [Cobb County] Failed: ${err.message || err.code || String(err)}`);
-      totalErrors++;
-    }
-
     // --- Glynn County ---
     let glynnCount = 0;
     try {
@@ -760,7 +738,6 @@ async function main() {
     console.log(`  Henry County permits fetched: ${henryCount}`);
     console.log(`  Marietta permits fetched: ${mariettaCount}`);
     console.log(`  Coweta County permits fetched: ${cowetaCount}`);
-    console.log(`  Cobb County permits fetched: ${cobbCount}`);
     console.log(`  Glynn County permits fetched: ${glynnCount}`);
     console.log(`  LaGrange permits fetched: ${laGrangeCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);

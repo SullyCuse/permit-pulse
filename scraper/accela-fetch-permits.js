@@ -1,26 +1,23 @@
 require('dotenv').config();
 
-// Accela Citizen Access scrapers — Coweta County and Cobb County.
+// Accela Citizen Access scrapers — Coweta County.
 //
-// Both portals are standard Accela ACA (AngularJS SPA) — Puppeteer required.
+// Accela ACA (AngularJS SPA) — Puppeteer required.
 // Same selector pattern as HALLCO (hallco-accela-fetch-permits.js):
 //   Date fields: #ctl00_PlaceHolderMain_generalSearchForm_txtGSStartDate / txtGSEndDate
 //   Search:      #ctl00_PlaceHolderMain_btnNewSearch
 //   Results:     .ACA_TabRow_Odd, .ACA_TabRow_Even
 //
 // Coweta County: aca-prod.accela.com/COWETA, module=Building
-// Cobb County:   cobbca.cobbcounty.gov/CitizenAccess, module=Building
+//
+// NOTE: Cobb County (cobbca.cobbcounty.gov) was attempted but requires login —
+// redirects to Login.aspx when accessing CapHome.aspx without authentication.
 
 const AGENCIES = {
   coweta: {
     baseUrl: 'https://aca-prod.accela.com/COWETA/Cap/CapHome.aspx',
     module:  'Building',
     county:  'Coweta County',
-  },
-  cobb: {
-    baseUrl: 'https://cobbca.cobbcounty.gov/CitizenAccess/Cap/CapHome.aspx',
-    module:  'Building',
-    county:  'Cobb County',
   },
 };
 
@@ -176,18 +173,12 @@ async function fetchCowetaPermits(lastTimestampMs = 0) {
   return fetchAgencyPermits('coweta', lastTimestampMs);
 }
 
-async function fetchCobbPermits(lastTimestampMs = 0) {
-  return fetchAgencyPermits('cobb', lastTimestampMs);
-}
-
-module.exports = { fetchCowetaPermits, fetchCobbPermits };
+module.exports = { fetchCowetaPermits };
 
 if (require.main === module) {
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  const target = process.argv[2] || 'coweta';
-  const fn = target === 'cobb' ? fetchCobbPermits : fetchCowetaPermits;
 
-  fn(thirtyDaysAgo)
+  fetchCowetaPermits(thirtyDaysAgo)
     .then(({ permits, maxTimestamp }) => {
       console.log('\n--- SAMPLE PERMITS ---');
       permits.slice(0, 3).forEach(p => console.log(JSON.stringify(p, null, 2)));

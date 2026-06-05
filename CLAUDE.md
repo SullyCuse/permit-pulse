@@ -35,6 +35,31 @@ See `memory/adding-new-scrapers.md` for full checklist.
 - Permit type = first non-Applicant contact role; issue date = `<td>M/D/YYYY</td><td>Permit</td>` in Documents section
 - See `scraper/bryan-fetch-permits.js` for the full implementation
 
+## Scraper Scheduling
+- **Triggered by cron-job.org** (as of 2026-06-05) — POSTs to GitHub API workflow_dispatch Mon/Wed/Fri 7:30 AM ET
+- GitHub's built-in schedule removed (was silently missing runs) — `scraper.yml` now only has `workflow_dispatch`
+- To trigger manually: `gh workflow run scraper.yml --ref main` or GitHub Actions UI → Run workflow
+- cron-job.org job uses PAT with `workflow` scope (no expiration) in Authorization header
+
+## Debugging Scraper Runs
+- Scraper logs are in **GitHub Actions**, not Vercel — `gh run list --limit 5` then `gh run view <id> --log 2>&1`
+- Vercel runtime logs will show zero traffic if `APP_URL` secret is wrong — absence of logs ≠ no errors
+- Production domain is `https://permitpulse.io` — `APP_URL` GitHub secret must match this exactly
+
+## Geocode Cache
+- Null geocode results are cached permanently and block retries on future runs
+- Clear stale nulls: `DELETE FROM geocode_cache WHERE zip_code IS NULL AND city IS NULL`
+- Gwinnett geocoder (`gwinnett-geocode.js`) only returns zip; Bryan geocoder also returns city
+
+## SagesGov Portal (Fayette County, Henry County, Marietta)
+- Tries direct HTTP POST (no CAPTCHA) before launching Puppeteer — if server enforces reCAPTCHA, falls back to Puppeteer stealth
+- Direct HTTP form fields use `ctl00$cphContent$...` dollar-notation (not the `#id` selector names seen in DevTools)
+- reCAPTCHA v2 consistently blocks headless Chrome in CI; direct HTTP bypass is the preferred path
+
+## Accela Portal (Gainesville, Oakwood — hallco-accela-fetch-permits.js)
+- Raw address format is "STREET, CITY GA ZIP" — city is always the last comma segment before " GA XXXXX"
+- `parseAddressCell()` appends city to address (e.g. `"624 GROVE ST, GAINESVILLE"`) — consistent with Bryan County pattern
+
 ## Critical Gotchas
 - **scraper_state table requires explicit grants**: `GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE scraper_state TO service_role` — missing grants cause ALL cursors to silently fall back to defaults, re-processing everything from scratch every run. Check: `SELECT grantee, privilege_type FROM information_schema.role_table_grants WHERE table_name = 'scraper_state'`
 - **PDF downloads need timeout**: `parse-permit-pdf.js` axios.get must have `timeout: 30000` — no timeout = hangs forever if server stalls
