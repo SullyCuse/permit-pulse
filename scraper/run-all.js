@@ -14,6 +14,7 @@ const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permit
 const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
 const { fetchNewPermits: fetchCherokeePermits } = require('./cherokee-fetch-permits');
 const { fetchNewPermits: fetchConyersPermits } = require('./conyers-fetch-permits');
+const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accela-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -29,6 +30,8 @@ const {
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastDate, setCherokeeLastDate,
   getConyersLastTimestamp, setConyersLastTimestamp,
+  getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
+  getOakwoodLastTimestamp, setOakwoodLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -369,6 +372,48 @@ async function main() {
       totalErrors++;
     }
 
+    // --- City of Gainesville ---
+    let gainesvilleCount = 0;
+    try {
+      const gainesvilleLastTs = await getGainesvilleLastTimestamp();
+      console.log(`\n[City of Gainesville] Last processed timestamp: ${new Date(gainesvilleLastTs).toISOString()}`);
+      const { permits: gainesvillePermits, maxTimestamp: gainesvilleMax } = await fetchGainesvillePermits(gainesvilleLastTs);
+      if (gainesvillePermits.length === 0) {
+        console.log('[City of Gainesville] No new permits found.');
+      } else {
+        const result = await savePermits(gainesvillePermits);
+        gainesvilleCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setGainesvilleLastTimestamp(gainesvilleMax);
+        console.log(`\n[City of Gainesville] State advanced to ${new Date(gainesvilleMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [City of Gainesville] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- City of Oakwood ---
+    let oakwoodCount = 0;
+    try {
+      const oakwoodLastTs = await getOakwoodLastTimestamp();
+      console.log(`\n[City of Oakwood] Last processed timestamp: ${new Date(oakwoodLastTs).toISOString()}`);
+      const { permits: oakwoodPermits, maxTimestamp: oakwoodMax } = await fetchOakwoodPermits(oakwoodLastTs);
+      if (oakwoodPermits.length === 0) {
+        console.log('[City of Oakwood] No new permits found.');
+      } else {
+        const result = await savePermits(oakwoodPermits);
+        oakwoodCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setOakwoodLastTimestamp(oakwoodMax);
+        console.log(`\n[City of Oakwood] State advanced to ${new Date(oakwoodMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [City of Oakwood] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -384,6 +429,8 @@ async function main() {
     console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
     console.log(`  Cherokee County permits fetched: ${cherokeeCount}`);
     console.log(`  City of Conyers permits fetched: ${conyersCount}`);
+    console.log(`  City of Gainesville permits fetched: ${gainesvilleCount}`);
+    console.log(`  City of Oakwood permits fetched: ${oakwoodCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

@@ -178,6 +178,22 @@ async function setConyersLastTimestamp(ms) {
   return setStateValue('conyers_last_timestamp', ms);
 }
 
+// City of Gainesville (HALLCO Accela) — last processed permit date as Unix ms timestamp
+async function getGainesvilleLastTimestamp() {
+  return getStateValue('gainesville_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setGainesvilleLastTimestamp(ms) {
+  return setStateValue('gainesville_last_timestamp', ms);
+}
+
+// City of Oakwood (HALLCO Accela) — last processed permit date as Unix ms timestamp
+async function getOakwoodLastTimestamp() {
+  return getStateValue('oakwood_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setOakwoodLastTimestamp(ms) {
+  return setStateValue('oakwood_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -201,5 +217,7 @@ module.exports = {
   getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getCherokeeLastDate, setCherokeeLastDate,
   getConyersLastTimestamp, setConyersLastTimestamp,
+  getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
+  getOakwoodLastTimestamp, setOakwoodLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
