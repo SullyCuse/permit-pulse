@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Camden County', 'Franklin County', 'Bainbridge', 'Gainesville', 'Oakwood'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Camden County', 'Franklin County', 'Bainbridge', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta'] as const
 
 export default async function DashboardPage({
   searchParams,
@@ -382,6 +382,9 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Bainbridge':       'https://ci-bainbridge-ga.smartgovcommunity.com/Public/PermitSearch',
   'Gainesville':      'https://aca-prod.accela.com/HALLCO/Cap/CapHome.aspx?module=Gainesville&TabName=Home',
   'Oakwood':          'https://aca-prod.accela.com/HALLCO/Cap/CapHome.aspx?module=Oakwood&TabName=Home',
+  'Fayette County':   'https://www.sagesgov.com/fayettecounty-ga/portal/search.aspx',
+  'Henry County':     'https://www.sagesgov.com/henrycounty-ga/portal/search.aspx',
+  'Marietta':         'https://www.sagesgov.com/marietta-ga/portal/search.aspx',
 }
 
 function PermitCard({ permit }: { permit: any }) {

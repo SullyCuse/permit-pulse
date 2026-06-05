@@ -250,6 +250,30 @@ async function setOakwoodLastTimestamp(ms) {
   return setStateValue('oakwood_last_timestamp', ms);
 }
 
+// Fayette County (SagesGov) — last processed submission date as Unix ms timestamp
+async function getFayetteLastTimestamp() {
+  return getStateValue('fayette_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setFayetteLastTimestamp(ms) {
+  return setStateValue('fayette_last_timestamp', ms);
+}
+
+// Henry County (SagesGov) — last processed submission date as Unix ms timestamp
+async function getHenryLastTimestamp() {
+  return getStateValue('henry_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setHenryLastTimestamp(ms) {
+  return setStateValue('henry_last_timestamp', ms);
+}
+
+// Marietta (SagesGov) — last processed submission date as Unix ms timestamp
+async function getMariettaLastTimestamp() {
+  return getStateValue('marietta_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setMariettaLastTimestamp(ms) {
+  return setStateValue('marietta_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -282,5 +306,8 @@ module.exports = {
   getBainbridgeLastTimestamp, setBainbridgeLastTimestamp,
   getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
   getOakwoodLastTimestamp, setOakwoodLastTimestamp,
+  getFayetteLastTimestamp, setFayetteLastTimestamp,
+  getHenryLastTimestamp, setHenryLastTimestamp,
+  getMariettaLastTimestamp, setMariettaLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };

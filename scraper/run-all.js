@@ -22,6 +22,7 @@ const { fetchNewPermits: fetchCamdenPermits } = require('./camden-fetch-permits'
 const { fetchNewPermits: fetchFranklinCountyPermits } = require('./franklincounty-fetch-permits');
 const { fetchNewPermits: fetchBainbridgePermits } = require('./bainbridge-fetch-permits');
 const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accela-fetch-permits');
+const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits } = require('./sagesgov-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -46,6 +47,9 @@ const {
   getBainbridgeLastTimestamp, setBainbridgeLastTimestamp,
   getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
   getOakwoodLastTimestamp, setOakwoodLastTimestamp,
+  getFayetteLastTimestamp, setFayetteLastTimestamp,
+  getHenryLastTimestamp, setHenryLastTimestamp,
+  getMariettaLastTimestamp, setMariettaLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -575,6 +579,69 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Fayette County (SagesGov) ---
+    let fayetteCount = 0;
+    try {
+      const fayetteLastTs = await getFayetteLastTimestamp();
+      console.log(`\n[Fayette County] Last processed timestamp: ${new Date(fayetteLastTs).toISOString()}`);
+      const { permits: fayettePermits, maxTimestamp: fayetteMax } = await fetchFayettePermits(fayetteLastTs);
+      if (fayettePermits.length === 0) {
+        console.log('[Fayette County] No new permits found.');
+      } else {
+        const result = await savePermits(fayettePermits);
+        fayetteCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setFayetteLastTimestamp(fayetteMax);
+        console.log(`\n[Fayette County] State advanced to ${new Date(fayetteMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Fayette County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- Henry County (SagesGov) ---
+    let henryCount = 0;
+    try {
+      const henryLastTs = await getHenryLastTimestamp();
+      console.log(`\n[Henry County] Last processed timestamp: ${new Date(henryLastTs).toISOString()}`);
+      const { permits: henryPermits, maxTimestamp: henryMax } = await fetchHenryPermits(henryLastTs);
+      if (henryPermits.length === 0) {
+        console.log('[Henry County] No new permits found.');
+      } else {
+        const result = await savePermits(henryPermits);
+        henryCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setHenryLastTimestamp(henryMax);
+        console.log(`\n[Henry County] State advanced to ${new Date(henryMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Henry County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- Marietta (SagesGov) ---
+    let mariettaCount = 0;
+    try {
+      const mariettaLastTs = await getMariettaLastTimestamp();
+      console.log(`\n[Marietta] Last processed timestamp: ${new Date(mariettaLastTs).toISOString()}`);
+      const { permits: mariettaPermits, maxTimestamp: mariettaMax } = await fetchMariettaPermits(mariettaLastTs);
+      if (mariettaPermits.length === 0) {
+        console.log('[Marietta] No new permits found.');
+      } else {
+        const result = await savePermits(mariettaPermits);
+        mariettaCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setMariettaLastTimestamp(mariettaMax);
+        console.log(`\n[Marietta] State advanced to ${new Date(mariettaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Marietta] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -599,6 +666,9 @@ async function main() {
     console.log(`  Bainbridge permits fetched: ${bainbridgeCount}`);
     console.log(`  City of Gainesville permits fetched: ${gainesvilleCount}`);
     console.log(`  City of Oakwood permits fetched: ${oakwoodCount}`);
+    console.log(`  Fayette County permits fetched: ${fayetteCount}`);
+    console.log(`  Henry County permits fetched: ${henryCount}`);
+    console.log(`  Marietta permits fetched: ${mariettaCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

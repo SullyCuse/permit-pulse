@@ -23,6 +23,9 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Bainbridge':       { slug: 'bainbridge',         display: 'Bainbridge',        fullName: 'Bainbridge, GA' },
   'Gainesville':      { slug: 'gainesville',        display: 'Gainesville',       fullName: 'Gainesville, GA' },
   'Oakwood':          { slug: 'oakwood',            display: 'Oakwood',           fullName: 'Oakwood, GA' },
+  'Fayette County':   { slug: 'fayette-county',     display: 'Fayette County',    fullName: 'Fayette County, GA' },
+  'Henry County':     { slug: 'henry-county',       display: 'Henry County',      fullName: 'Henry County, GA' },
+  'Marietta':         { slug: 'marietta',            display: 'Marietta',          fullName: 'Marietta, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
