@@ -198,8 +198,7 @@ async function fetchNewPermits(lastTimestampMs) {
     // Step 3: Submit the search form
     console.log('  [Conyers] Submitting search...');
     await page.evaluate(() => {
-      // FormSupport.submitAction changes form.action to /Search and calls form.submit()
-      FormSupport.submitAction('Search');
+      FormSupport.submitAction('BasicSearch');
     });
 
     // Wait for the page to reload (full form submit → navigation)

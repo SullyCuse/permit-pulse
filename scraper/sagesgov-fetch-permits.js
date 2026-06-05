@@ -177,14 +177,20 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
 
   console.log(`[${county}] Fetching permits from ${lastDateStr} to ${todayStr}...`);
 
-  let puppeteer;
-  try { puppeteer = require('puppeteer'); }
-  catch {
-    console.error(`  [${county}] puppeteer not installed — skipping.`);
-    return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+  let puppeteerExtra, StealthPlugin;
+  try {
+    puppeteerExtra = require('puppeteer-extra');
+    StealthPlugin   = require('puppeteer-extra-plugin-stealth');
+    puppeteerExtra.use(StealthPlugin());
+  } catch {
+    try { puppeteerExtra = require('puppeteer'); }
+    catch {
+      console.error(`  [${county}] puppeteer not installed — skipping.`);
+      return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+    }
   }
 
-  const browser = await puppeteer.launch({
+  const browser = await puppeteerExtra.launch({
     headless: true,
     executablePath: findChrome(),
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
@@ -221,37 +227,47 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
     await page.evaluate((id) => { const el = document.getElementById(id); if (el) { el.value = ''; el.focus(); } }, endId);
     await page.type(`#${endId}`, endFmt, { delay: 50 });
 
-    // Solve reCAPTCHA — click the checkbox and wait for token
+    // Solve reCAPTCHA — stealth mode often causes checkbox to auto-verify
     console.log(`  [${county}] Waiting for reCAPTCHA...`);
     let captchaSolved = false;
     try {
       // Wait for captcha iframe to load
       await page.waitForSelector('#cphContent_cphMain_ctrlCaptcha_captchUI iframe', { timeout: 10000 });
 
-      // Find the anchor frame and click the checkbox
-      const frames = page.frames();
-      const anchorFrame = frames.find(f => f.url().includes('recaptcha/api2/anchor'));
-      if (anchorFrame) {
-        await anchorFrame.click('#recaptcha-anchor');
-        console.log(`  [${county}] Clicked reCAPTCHA checkbox, waiting for token...`);
-      } else {
-        // Try clicking the captcha div directly
-        await page.click('#cphContent_cphMain_ctrlCaptcha_captchUI');
-      }
+      // Check if stealth already auto-solved it (token pre-populated)
+      const alreadySolved = await page.evaluate(() => {
+        const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+        return el && el.value && el.value.length > 10;
+      });
 
-      // Wait for token to be set (up to 30s)
-      await page.waitForFunction(
-        () => {
-          const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-          return el && el.value && el.value.length > 10;
-        },
-        { timeout: 30000 }
-      );
-      captchaSolved = true;
-      console.log(`  [${county}] reCAPTCHA token received.`);
+      if (alreadySolved) {
+        console.log(`  [${county}] reCAPTCHA auto-solved by stealth mode.`);
+        captchaSolved = true;
+      } else {
+        // Find the anchor frame and click the checkbox
+        const frames = page.frames();
+        const anchorFrame = frames.find(f => f.url().includes('recaptcha/api2/anchor'));
+        if (anchorFrame) {
+          await anchorFrame.click('#recaptcha-anchor');
+          console.log(`  [${county}] Clicked reCAPTCHA checkbox, waiting for token...`);
+        } else {
+          await page.click('#cphContent_cphMain_ctrlCaptcha_captchUI');
+        }
+
+        // Wait for token (stealth should resolve the checkbox quickly)
+        await page.waitForFunction(
+          () => {
+            const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+            return el && el.value && el.value.length > 10;
+          },
+          { timeout: 30000 }
+        );
+        captchaSolved = true;
+        console.log(`  [${county}] reCAPTCHA token received.`);
+      }
     } catch (err) {
       console.error(`  [${county}] reCAPTCHA handling failed: ${err.message}`);
-      console.error(`  [${county}] Skipping — captcha must be solved to search SagesGov.`);
+      console.error(`  [${county}] Skipping — captcha not solved (stealth mode active; may need 2captcha integration).`);
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
 
