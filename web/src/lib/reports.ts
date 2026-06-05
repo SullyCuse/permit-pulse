@@ -14,6 +14,8 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Sandy Springs':    { slug: 'sandy-springs',    display: 'Sandy Springs',     fullName: 'Sandy Springs, GA' },
   'Cherokee County':  { slug: 'cherokee-county',  display: 'Cherokee County',   fullName: 'Cherokee County, GA' },
   'Conyers':          { slug: 'conyers',           display: 'Conyers',           fullName: 'Conyers, GA' },
+  'Gainesville':      { slug: 'gainesville',       display: 'Gainesville',       fullName: 'Gainesville, GA' },
+  'Oakwood':          { slug: 'oakwood',           display: 'Oakwood',           fullName: 'Oakwood, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

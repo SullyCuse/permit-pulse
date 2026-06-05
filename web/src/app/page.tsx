@@ -235,7 +235,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, and Cherokee County — and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Gainesville, and Oakwood — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -247,7 +247,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more areas?',
-                a: 'Yes — we recently added Sandy Springs and Cherokee County and are actively expanding. Pro subscribers get early access to new areas.',
+                a: 'Yes — we recently added Gainesville and Oakwood and are actively expanding. Pro subscribers get early access to new areas.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-stone-200 pb-6">
@@ -345,7 +345,7 @@ export default function HomePage() {
           Ready to stay ahead?
         </h2>
         <p className="text-gray-500 mb-8 max-w-xl mx-auto">
-          Join contractors, investors, and agents already tracking permits across Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.
+          Join contractors, investors, and agents already tracking permits across Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Gainesville, and Oakwood.
         </p>
         <Link
           href="/login"
