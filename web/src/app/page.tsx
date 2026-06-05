@@ -88,7 +88,7 @@ export default function HomePage() {
             <div className="flex gap-4 mt-10 flex-wrap">
               {[
                 { value: '40,000+', label: 'permits tracked' },
-                { value: '20', label: 'GA markets' },
+                { value: '22', label: 'GA markets' },
                 { value: '3×/wk', label: 'fresh data' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white/80 backdrop-blur-sm border border-stone-200 rounded-xl px-4 py-2.5">
@@ -128,7 +128,7 @@ export default function HomePage() {
               stats={[
                 { value: '3×', label: 'per week' },
                 { value: 'ZIP', label: 'code alerts' },
-                { value: '20', label: 'GA markets' },
+                { value: '22', label: 'GA markets' },
               ]}
             />
             <PersonaCard
@@ -269,7 +269,7 @@ export default function HomePage() {
             >
               Browse permits by area
             </h2>
-            <p className="text-gray-500 text-sm">We cover 20 Georgia counties and cities. Click an area to see what's being built.</p>
+            <p className="text-gray-500 text-sm">We cover 22 Georgia counties and cities. Click an area to see what's being built.</p>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-10">
             {/* Map */}
