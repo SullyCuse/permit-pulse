@@ -274,6 +274,22 @@ async function setMariettaLastTimestamp(ms) {
   return setStateValue('marietta_last_timestamp', ms);
 }
 
+// Glynn County — last processed dateSubmitted as Unix ms timestamp
+async function getGlynnLastTimestamp() {
+  return getStateValue('glynn_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setGlynnLastTimestamp(ms) {
+  return setStateValue('glynn_last_timestamp', ms);
+}
+
+// LaGrange (SagesGov) — last processed submission date as Unix ms timestamp
+async function getLaGrangeLastTimestamp() {
+  return getStateValue('lagrange_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setLaGrangeLastTimestamp(ms) {
+  return setStateValue('lagrange_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -309,5 +325,7 @@ module.exports = {
   getFayetteLastTimestamp, setFayetteLastTimestamp,
   getHenryLastTimestamp, setHenryLastTimestamp,
   getMariettaLastTimestamp, setMariettaLastTimestamp,
+  getGlynnLastTimestamp, setGlynnLastTimestamp,
+  getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
