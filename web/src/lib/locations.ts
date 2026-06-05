@@ -380,10 +380,41 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Cherokee County data is sourced from the Cherokee County Government\'s official public permit records at cherokeega.com, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, and Conyers.',
     metaTitle: 'Cherokee County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Cherokee County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
+  },
+  {
+    slug: 'conyers-ga-building-permits',
+    name: 'Conyers',
+    region: 'GA',
+    fullName: 'Conyers, GA',
+    headline: 'Every Conyers building permit — live tracking updated Monday, Wednesday & Friday.',
+    subheadline:
+      'Permit Pulse monitors every permit filed in Conyers, GA and delivers a digest to Pro subscribers three times a week. Never miss a new build or renovation in Rockdale County\'s largest city.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Get every new residential and commercial permit in Conyers — building, electrical, plumbing, mechanical, pools, and more — delivered three times a week before your competition.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Conyers neighborhoods. Spot emerging development trends in this growing Rockdale County community before they hit the headlines.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Conyers streets are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this active market.',
+      },
+    ],
+    faqWhere: 'Our Conyers data is sourced from the City of Conyers\'s official public permit records via the SmartGov permitting portal, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, and Sandy Springs.',
+    metaTitle: 'Conyers GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Conyers, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
 ]
 

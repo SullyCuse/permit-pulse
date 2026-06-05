@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers'] as const
 
 export default async function DashboardPage({
   searchParams,
@@ -372,6 +372,7 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Augusta':        'https://cityview.augustaga.gov/cityviewportal',
   'Johns Creek':    'https://selfservice.johnscreekga.gov/EnerGov_Prod/SelfService#/home',
   'Cherokee County':'https://cityview.cherokeega.com/cvprodportal/Permit/InspectionLocator',
+  'Conyers':         'https://ci-conyers-ga.smartgovcommunity.com/Public/PermitSearch',
 }
 
 function PermitCard({ permit }: { permit: any }) {
