@@ -17,6 +17,12 @@ const TRACKED_FIPS = new Set([
   '13051', // Chatham County (Savannah)
   '13245', // Richmond County (Augusta)
   '13247', // Rockdale County (Conyers)
+  '13067', // Cobb County (Smyrna, Austell)
+  '13015', // Bartow County (Cartersville)
+  '13103', // Effingham County
+  '13039', // Camden County
+  '13119', // Franklin County
+  '13075', // Decatur County (Bainbridge)
 ])
 
 const FOREST = '#2d5a27'

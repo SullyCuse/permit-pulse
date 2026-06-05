@@ -14,8 +14,15 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Sandy Springs':    { slug: 'sandy-springs',    display: 'Sandy Springs',     fullName: 'Sandy Springs, GA' },
   'Cherokee County':  { slug: 'cherokee-county',  display: 'Cherokee County',   fullName: 'Cherokee County, GA' },
   'Conyers':          { slug: 'conyers',           display: 'Conyers',           fullName: 'Conyers, GA' },
-  'Gainesville':      { slug: 'gainesville',       display: 'Gainesville',       fullName: 'Gainesville, GA' },
-  'Oakwood':          { slug: 'oakwood',           display: 'Oakwood',           fullName: 'Oakwood, GA' },
+  'Smyrna':           { slug: 'smyrna',            display: 'Smyrna',            fullName: 'Smyrna, GA' },
+  'Cartersville':     { slug: 'cartersville',      display: 'Cartersville',      fullName: 'Cartersville, GA' },
+  'Effingham County': { slug: 'effingham-county',  display: 'Effingham County',  fullName: 'Effingham County, GA' },
+  'Austell':          { slug: 'austell',            display: 'Austell',           fullName: 'Austell, GA' },
+  'Camden County':    { slug: 'camden-county',      display: 'Camden County',     fullName: 'Camden County, GA' },
+  'Franklin County':  { slug: 'franklin-county',   display: 'Franklin County',   fullName: 'Franklin County, GA' },
+  'Bainbridge':       { slug: 'bainbridge',         display: 'Bainbridge',        fullName: 'Bainbridge, GA' },
+  'Gainesville':      { slug: 'gainesville',        display: 'Gainesville',       fullName: 'Gainesville, GA' },
+  'Oakwood':          { slug: 'oakwood',            display: 'Oakwood',           fullName: 'Oakwood, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
