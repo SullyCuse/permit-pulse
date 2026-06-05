@@ -22,6 +22,10 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Fayette County':   { slug: 'fayette-county',     display: 'Fayette County',    fullName: 'Fayette County, GA' },
   'Henry County':     { slug: 'henry-county',       display: 'Henry County',      fullName: 'Henry County, GA' },
   'Marietta':         { slug: 'marietta',            display: 'Marietta',          fullName: 'Marietta, GA' },
+  'Coweta County':    { slug: 'coweta-county',       display: 'Coweta County',     fullName: 'Coweta County, GA' },
+  'Cobb County':      { slug: 'cobb-county',         display: 'Cobb County',       fullName: 'Cobb County, GA' },
+  'Glynn County':     { slug: 'glynn-county',        display: 'Glynn County',      fullName: 'Glynn County, GA' },
+  'LaGrange':         { slug: 'lagrange',            display: 'LaGrange',          fullName: 'LaGrange, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

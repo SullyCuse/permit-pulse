@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Cobb County', 'Glynn County', 'LaGrange'] as const
 
 export default async function DashboardPage({
   searchParams,
@@ -381,6 +381,10 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Fayette County':   'https://www.sagesgov.com/fayettecounty-ga/portal/search.aspx',
   'Henry County':     'https://www.sagesgov.com/henrycounty-ga/portal/search.aspx',
   'Marietta':         'https://www.sagesgov.com/marietta-ga/portal/search.aspx',
+  'Coweta County':    'https://aca-prod.accela.com/COWETA/Cap/CapHome.aspx?module=Building&TabName=Home',
+  'Cobb County':      'https://cobbca.cobbcounty.gov/CitizenAccess/Cap/CapHome.aspx?module=Building&TabName=Home',
+  'Glynn County':     'https://glynncountyga.portal.opengov.com',
+  'LaGrange':         'https://www.sagesgov.com/lagrange-ga/portal/search.aspx',
 }
 
 function PermitCard({ permit }: { permit: any }) {

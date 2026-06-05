@@ -22,7 +22,9 @@ const { fetchNewPermits: fetchCamdenPermits } = require('./camden-fetch-permits'
 const { fetchNewPermits: fetchFranklinCountyPermits } = require('./franklincounty-fetch-permits');
 const { fetchNewPermits: fetchBainbridgePermits } = require('./bainbridge-fetch-permits');
 const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accela-fetch-permits');
-const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits } = require('./sagesgov-fetch-permits');
+const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGrangePermits } = require('./sagesgov-fetch-permits');
+const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
+const { fetchCowetaPermits, fetchCobbPermits } = require('./accela-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -50,6 +52,10 @@ const {
   getFayetteLastTimestamp, setFayetteLastTimestamp,
   getHenryLastTimestamp, setHenryLastTimestamp,
   getMariettaLastTimestamp, setMariettaLastTimestamp,
+  getCowetaLastTimestamp, setCowetaLastTimestamp,
+  getCobbLastTimestamp, setCobbLastTimestamp,
+  getGlynnLastTimestamp, setGlynnLastTimestamp,
+  getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -642,6 +648,90 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Coweta County ---
+    let cowetaCount = 0;
+    try {
+      const cowetaLastTs = await getCowetaLastTimestamp();
+      console.log(`\n[Coweta County] Last processed timestamp: ${new Date(cowetaLastTs).toISOString()}`);
+      const { permits: cowetaPermits, maxTimestamp: cowetaMax } = await fetchCowetaPermits(cowetaLastTs);
+      if (cowetaPermits.length === 0) {
+        console.log('[Coweta County] No new permits found.');
+      } else {
+        const result = await savePermits(cowetaPermits);
+        cowetaCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setCowetaLastTimestamp(cowetaMax);
+        console.log(`\n[Coweta County] State advanced to ${new Date(cowetaMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Coweta County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- Cobb County ---
+    let cobbCount = 0;
+    try {
+      const cobbLastTs = await getCobbLastTimestamp();
+      console.log(`\n[Cobb County] Last processed timestamp: ${new Date(cobbLastTs).toISOString()}`);
+      const { permits: cobbPermits, maxTimestamp: cobbMax } = await fetchCobbPermits(cobbLastTs);
+      if (cobbPermits.length === 0) {
+        console.log('[Cobb County] No new permits found.');
+      } else {
+        const result = await savePermits(cobbPermits);
+        cobbCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setCobbLastTimestamp(cobbMax);
+        console.log(`\n[Cobb County] State advanced to ${new Date(cobbMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Cobb County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- Glynn County ---
+    let glynnCount = 0;
+    try {
+      const glynnLastTs = await getGlynnLastTimestamp();
+      console.log(`\n[Glynn County] Last processed timestamp: ${new Date(glynnLastTs).toISOString()}`);
+      const { permits: glynnPermits, maxTimestamp: glynnMax } = await fetchGlynnPermits(glynnLastTs);
+      if (glynnPermits.length === 0) {
+        console.log('[Glynn County] No new permits found.');
+      } else {
+        const result = await savePermits(glynnPermits);
+        glynnCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setGlynnLastTimestamp(glynnMax);
+        console.log(`\n[Glynn County] State advanced to ${new Date(glynnMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Glynn County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- LaGrange (SagesGov) ---
+    let laGrangeCount = 0;
+    try {
+      const laGrangeLastTs = await getLaGrangeLastTimestamp();
+      console.log(`\n[LaGrange] Last processed timestamp: ${new Date(laGrangeLastTs).toISOString()}`);
+      const { permits: laGrangePermits, maxTimestamp: laGrangeMax } = await fetchLaGrangePermits(laGrangeLastTs);
+      if (laGrangePermits.length === 0) {
+        console.log('[LaGrange] No new permits found.');
+      } else {
+        const result = await savePermits(laGrangePermits);
+        laGrangeCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setLaGrangeLastTimestamp(laGrangeMax);
+        console.log(`\n[LaGrange] State advanced to ${new Date(laGrangeMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [LaGrange] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -669,6 +759,10 @@ async function main() {
     console.log(`  Fayette County permits fetched: ${fayetteCount}`);
     console.log(`  Henry County permits fetched: ${henryCount}`);
     console.log(`  Marietta permits fetched: ${mariettaCount}`);
+    console.log(`  Coweta County permits fetched: ${cowetaCount}`);
+    console.log(`  Cobb County permits fetched: ${cobbCount}`);
+    console.log(`  Glynn County permits fetched: ${glynnCount}`);
+    console.log(`  LaGrange permits fetched: ${laGrangeCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

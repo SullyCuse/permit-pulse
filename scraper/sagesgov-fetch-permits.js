@@ -23,6 +23,7 @@ const JURISDICTIONS = {
   fayetteCounty: { slug: 'fayettecounty-ga', county: 'Fayette County' },
   henryCounty:   { slug: 'henrycounty-ga',   county: 'Henry County'   },
   marietta:      { slug: 'marietta-ga',       county: 'Marietta'       },
+  laGrange:      { slug: 'lagrange-ga',       county: 'LaGrange'       },
 };
 
 function msToDateStr(ms) {
@@ -472,7 +473,11 @@ async function fetchMariettaPermits(lastTimestampMs) {
   return fetchPermitsForJurisdiction(lastTimestampMs, JURISDICTIONS.marietta);
 }
 
-module.exports = { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits };
+async function fetchLaGrangePermits(lastTimestampMs) {
+  return fetchPermitsForJurisdiction(lastTimestampMs, JURISDICTIONS.laGrange);
+}
+
+module.exports = { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGrangePermits };
 
 if (require.main === module) {
   const target = process.argv[2] || 'fayette';
@@ -480,8 +485,9 @@ if (require.main === module) {
     ? new Date(process.argv[3]).getTime()
     : Date.now() - 30 * 24 * 60 * 60 * 1000;
 
-  const fn = target === 'henry' ? fetchHenryPermits
+  const fn = target === 'henry'    ? fetchHenryPermits
            : target === 'marietta' ? fetchMariettaPermits
+           : target === 'lagrange' ? fetchLaGrangePermits
            : fetchFayettePermits;
 
   fn(since)
