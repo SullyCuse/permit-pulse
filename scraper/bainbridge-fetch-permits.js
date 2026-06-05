@@ -165,14 +165,37 @@ async function fetchNewPermits(lastTimestampMs) {
     await page.waitForNetworkIdle({ idleTime: 1000, timeout: 20000 }).catch(() => {});
     await new Promise(r => setTimeout(r, 500));
 
+    const searchPageResponses = [];
+    page.on('response', async (resp) => {
+      if (resp.url().includes('/SearchPage') && resp.status() === 200) {
+        try { searchPageResponses.push(await resp.text()); } catch {}
+      }
+    });
+
+    console.log('  [Bainbridge] Loading results via gotoPage(0)...');
+    await page.evaluate(() => {
+      if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(0);
+    });
+
+    const waitStart = Date.now();
+    while (searchPageResponses.length === 0 && Date.now() - waitStart < 15000) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    if (searchPageResponses.length === 0) {
+      console.log('  [Bainbridge] No SearchPage response received.');
+      return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+    }
+
     let globalHeaders = [];
     let currentPage = 0;
     let hasMore = true;
 
     while (hasMore && currentPage < 50) {
-      const html = await page.content();
-      const { headers, rows } = parseResultsHtml(html);
+      const html = searchPageResponses.shift();
+      if (!html) break;
 
+      const { headers, rows } = parseResultsHtml(html);
       if (currentPage === 0) {
         if (rows.length === 0) { console.log('  [Bainbridge] No results found.'); break; }
         if (headers.length > 0) {
@@ -189,16 +212,17 @@ async function fetchNewPermits(lastTimestampMs) {
         if (permit.permit_number) permits.push(permit);
       }
 
-      const pageHasNext = html.includes('class="next"') || html.includes(`gotoPage(${currentPage + 1})`);
-      if (pageHasNext) {
+      hasMore = html.includes('class="next"') || html.includes(`gotoPage(${currentPage + 1})`);
+      if (hasMore) {
         currentPage++;
-        const nextLink = await page.$('a.next, li.next > a');
-        if (nextLink) {
-          nextLink.click();
-          await page.waitForNetworkIdle({ idleTime: 1000, timeout: 10000 }).catch(() => {});
+        await page.evaluate((pn) => {
+          if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(pn);
+        }, currentPage);
+        const pageStart = Date.now();
+        while (searchPageResponses.length === 0 && Date.now() - pageStart < 10000) {
           await new Promise(r => setTimeout(r, 300));
-        } else { hasMore = false; }
-      } else { hasMore = false; }
+        }
+      }
     }
 
   } catch (err) {

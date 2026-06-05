@@ -186,36 +186,40 @@ async function fetchNewPermits(lastTimestampMs) {
     await page.waitForNetworkIdle({ idleTime: 1000, timeout: 20000 }).catch(() => {});
     await new Promise(r => setTimeout(r, 500));
 
-    // Step 4: Parse results from page HTML — SmartGov renders results inline after submit
+    // Step 4: SmartGov is two-step — Search click sends criteria, gotoPage(0) loads rows.
+    const searchPageResponses = [];
+    page.on('response', async (resp) => {
+      if (resp.url().includes('/SearchPage') && resp.status() === 200) {
+        try { searchPageResponses.push(await resp.text()); } catch {}
+      }
+    });
+
+    console.log('  [Conyers] Loading results via gotoPage(0)...');
+    await page.evaluate(() => {
+      if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(0);
+    });
+
+    const waitStart = Date.now();
+    while (searchPageResponses.length === 0 && Date.now() - waitStart < 15000) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    if (searchPageResponses.length === 0) {
+      console.log('  [Conyers] No SearchPage response received.');
+      return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+    }
+
     let globalHeaders = [];
     let currentPage = 0;
     let hasMore = true;
 
     while (hasMore && currentPage < 50) {
-      const html = await page.content();
-
-      // Debug: log page title and key HTML fragments to diagnose parsing
-      if (currentPage === 0) {
-        const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
-        console.log(`  [Conyers] Page title: ${titleMatch ? titleMatch[1] : 'unknown'}`);
-        console.log(`  [Conyers] Has ils-list-row: ${html.includes('ils-list-row')}`);
-        console.log(`  [Conyers] Has search-results: ${html.includes('search-results')}`);
-        console.log(`  [Conyers] Has <tr: ${html.includes('<tr')}`);
-        const idxTr = html.indexOf('ils-list-row');
-        if (idxTr > 0) console.log(`  [Conyers] ils-list-row context: ${html.slice(Math.max(0, idxTr-50), idxTr+200)}`);
-        else {
-          const trIdx = html.indexOf('<tr');
-          if (trIdx > 0) console.log(`  [Conyers] First <tr context: ${html.slice(trIdx, trIdx+300)}`);
-        }
-      }
+      const html = searchPageResponses.shift();
+      if (!html) break;
 
       const { headers, rows } = parseResultsHtml(html);
-
       if (currentPage === 0) {
-        if (rows.length === 0) {
-          console.log('  [Conyers] No results found.');
-          break;
-        }
+        if (rows.length === 0) { console.log('  [Conyers] No results found.'); break; }
         if (headers.length > 0) {
           globalHeaders = headers;
           console.log('  [Conyers] Columns:', headers.join(', '));
@@ -230,20 +234,16 @@ async function fetchNewPermits(lastTimestampMs) {
         if (permit.permit_number) permits.push(permit);
       }
 
-      const pageHasNext = html.includes('class="next"') ||
-                          html.includes(`gotoPage(${currentPage + 1})`);
-      if (pageHasNext) {
+      hasMore = html.includes('class="next"') || html.includes(`gotoPage(${currentPage + 1})`);
+      if (hasMore) {
         currentPage++;
-        const nextLink = await page.$('a.next, li.next > a');
-        if (nextLink) {
-          nextLink.click();
-          await page.waitForNetworkIdle({ idleTime: 1000, timeout: 10000 }).catch(() => {});
+        await page.evaluate((pn) => {
+          if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(pn);
+        }, currentPage);
+        const pageStart = Date.now();
+        while (searchPageResponses.length === 0 && Date.now() - pageStart < 10000) {
           await new Promise(r => setTimeout(r, 300));
-        } else {
-          hasMore = false;
         }
-      } else {
-        hasMore = false;
       }
     }
 
