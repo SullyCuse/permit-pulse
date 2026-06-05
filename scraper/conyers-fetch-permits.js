@@ -193,6 +193,22 @@ async function fetchNewPermits(lastTimestampMs) {
 
     while (hasMore && currentPage < 50) {
       const html = await page.content();
+
+      // Debug: log page title and key HTML fragments to diagnose parsing
+      if (currentPage === 0) {
+        const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
+        console.log(`  [Conyers] Page title: ${titleMatch ? titleMatch[1] : 'unknown'}`);
+        console.log(`  [Conyers] Has ils-list-row: ${html.includes('ils-list-row')}`);
+        console.log(`  [Conyers] Has search-results: ${html.includes('search-results')}`);
+        console.log(`  [Conyers] Has <tr: ${html.includes('<tr')}`);
+        const idxTr = html.indexOf('ils-list-row');
+        if (idxTr > 0) console.log(`  [Conyers] ils-list-row context: ${html.slice(Math.max(0, idxTr-50), idxTr+200)}`);
+        else {
+          const trIdx = html.indexOf('<tr');
+          if (trIdx > 0) console.log(`  [Conyers] First <tr context: ${html.slice(trIdx, trIdx+300)}`);
+        }
+      }
+
       const { headers, rows } = parseResultsHtml(html);
 
       if (currentPage === 0) {
