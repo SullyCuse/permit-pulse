@@ -16,6 +16,7 @@ const TRACKED_FIPS = new Set([
   '13121', // Fulton County (Atlanta, Alpharetta, Johns Creek, Sandy Springs)
   '13051', // Chatham County (Savannah)
   '13245', // Richmond County (Augusta)
+  '13247', // Rockdale County (Conyers)
 ])
 
 const FOREST = '#2d5a27'

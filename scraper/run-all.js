@@ -13,6 +13,7 @@ const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permit
 const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
 const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
 const { fetchNewPermits: fetchCherokeePermits } = require('./cherokee-fetch-permits');
+const { fetchNewPermits: fetchConyersPermits } = require('./conyers-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -27,6 +28,7 @@ const {
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastDate, setCherokeeLastDate,
+  getConyersLastTimestamp, setConyersLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -346,6 +348,27 @@ async function main() {
       totalErrors++;
     }
 
+    // --- City of Conyers ---
+    let conyersCount = 0;
+    try {
+      const conyersLastTs = await getConyersLastTimestamp();
+      console.log(`\n[City of Conyers] Last processed timestamp: ${new Date(conyersLastTs).toISOString()}`);
+      const { permits: conyersPermits, maxTimestamp: conyersMax } = await fetchConyersPermits(conyersLastTs);
+      if (conyersPermits.length === 0) {
+        console.log('[City of Conyers] No new permits found.');
+      } else {
+        const result = await savePermits(conyersPermits);
+        conyersCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setConyersLastTimestamp(conyersMax);
+        console.log(`\n[City of Conyers] State advanced to ${new Date(conyersMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [City of Conyers] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -360,6 +383,7 @@ async function main() {
     console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
     console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
     console.log(`  Cherokee County permits fetched: ${cherokeeCount}`);
+    console.log(`  City of Conyers permits fetched: ${conyersCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

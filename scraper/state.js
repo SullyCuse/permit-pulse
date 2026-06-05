@@ -170,6 +170,14 @@ async function setCherokeeLastDate(dateStr) {
   return setStateValue('cherokee_last_date', dateStr);
 }
 
+// City of Conyers — last processed permit date as Unix ms timestamp
+async function getConyersLastTimestamp() {
+  return getStateValue('conyers_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setConyersLastTimestamp(ms) {
+  return setStateValue('conyers_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -192,5 +200,6 @@ module.exports = {
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getCherokeeLastDate, setCherokeeLastDate,
+  getConyersLastTimestamp, setConyersLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };
