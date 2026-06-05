@@ -178,6 +178,62 @@ async function setConyersLastTimestamp(ms) {
   return setStateValue('conyers_last_timestamp', ms);
 }
 
+// Smyrna — last processed dateSubmitted as Unix ms timestamp
+async function getSmyrnaLastTimestamp() {
+  return getStateValue('smyrna_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setSmyrnaLastTimestamp(ms) {
+  return setStateValue('smyrna_last_timestamp', ms);
+}
+
+// Cartersville — last processed dateSubmitted as Unix ms timestamp
+async function getCartersvilleLastTimestamp() {
+  return getStateValue('cartersville_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setCartersvilleLastTimestamp(ms) {
+  return setStateValue('cartersville_last_timestamp', ms);
+}
+
+// Effingham County — last processed dateSubmitted as Unix ms timestamp
+async function getEffinghamLastTimestamp() {
+  return getStateValue('effingham_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setEffinghamLastTimestamp(ms) {
+  return setStateValue('effingham_last_timestamp', ms);
+}
+
+// Austell — last processed dateSubmitted as Unix ms timestamp
+async function getAustellLastTimestamp() {
+  return getStateValue('austell_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setAustellLastTimestamp(ms) {
+  return setStateValue('austell_last_timestamp', ms);
+}
+
+// Camden County — last processed SubmittedOn as Unix ms timestamp
+async function getCamdenLastTimestamp() {
+  return getStateValue('camden_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setCamdenLastTimestamp(ms) {
+  return setStateValue('camden_last_timestamp', ms);
+}
+
+// Franklin County — last processed SubmittedOn as Unix ms timestamp
+async function getFranklinCountyLastTimestamp() {
+  return getStateValue('franklincounty_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setFranklinCountyLastTimestamp(ms) {
+  return setStateValue('franklincounty_last_timestamp', ms);
+}
+
+// Bainbridge — last processed SubmittedOn as Unix ms timestamp
+async function getBainbridgeLastTimestamp() {
+  return getStateValue('bainbridge_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setBainbridgeLastTimestamp(ms) {
+  return setStateValue('bainbridge_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -201,5 +257,12 @@ module.exports = {
   getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getCherokeeLastDate, setCherokeeLastDate,
   getConyersLastTimestamp, setConyersLastTimestamp,
+  getSmyrnaLastTimestamp, setSmyrnaLastTimestamp,
+  getCartersvilleLastTimestamp, setCartersvilleLastTimestamp,
+  getEffinghamLastTimestamp, setEffinghamLastTimestamp,
+  getAustellLastTimestamp, setAustellLastTimestamp,
+  getCamdenLastTimestamp, setCamdenLastTimestamp,
+  getFranklinCountyLastTimestamp, setFranklinCountyLastTimestamp,
+  getBainbridgeLastTimestamp, setBainbridgeLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };

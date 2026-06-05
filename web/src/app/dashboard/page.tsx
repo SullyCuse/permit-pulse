@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Camden County', 'Franklin County', 'Bainbridge'] as const
 
 export default async function DashboardPage({
   searchParams,
@@ -372,7 +372,14 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Augusta':        'https://cityview.augustaga.gov/cityviewportal',
   'Johns Creek':    'https://selfservice.johnscreekga.gov/EnerGov_Prod/SelfService#/home',
   'Cherokee County':'https://cityview.cherokeega.com/cvprodportal/Permit/InspectionLocator',
-  'Conyers':         'https://ci-conyers-ga.smartgovcommunity.com/Public/PermitSearch',
+  'Conyers':          'https://ci-conyers-ga.smartgovcommunity.com/Public/PermitSearch',
+  'Smyrna':           'https://smyrnaga.portal.opengov.com',
+  'Cartersville':     'https://cartersvillega.portal.opengov.com',
+  'Effingham County': 'https://effinghamcountyga.portal.opengov.com',
+  'Austell':          'https://austellga.portal.opengov.com',
+  'Camden County':    'https://co-camden-ga.smartgovcommunity.com/Public/PermitSearch',
+  'Franklin County':  'https://co-franklincounty-ga.smartgovcommunity.com/Public/PermitSearch',
+  'Bainbridge':       'https://ci-bainbridge-ga.smartgovcommunity.com/Public/PermitSearch',
 }
 
 function PermitCard({ permit }: { permit: any }) {
