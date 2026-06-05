@@ -6,6 +6,7 @@ import { Suspense } from 'react'
 import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import { LOCATIONS } from '@/lib/locations'
+import { GeorgiaMap } from '@/components/GeorgiaMap'
 
 const FOREST = '#2d5a27'
 const PLAYFAIR = 'var(--font-playfair), Georgia, serif'
@@ -260,24 +261,45 @@ export default function HomePage() {
 
       {/* Browse by area */}
       <section className="hero-pattern py-16">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2
-            className="text-2xl font-black text-gray-900 mb-3"
-            style={{ fontFamily: PLAYFAIR }}
-          >
-            Browse permits by area
-          </h2>
-          <p className="text-gray-500 mb-8 text-sm">We cover 12 Georgia counties and cities. Click an area to see what's being built.</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {LOCATIONS.map(loc => (
-              <Link
-                key={loc.slug}
-                href={`/${loc.slug}`}
-                className="px-5 py-2.5 rounded-full text-sm font-medium border border-stone-300 text-gray-600 hover:border-[#2d5a27] hover:text-[#2d5a27] bg-white transition-colors"
-              >
-                {loc.fullName}
-              </Link>
-            ))}
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h2
+              className="text-2xl font-black text-gray-900 mb-3"
+              style={{ fontFamily: PLAYFAIR }}
+            >
+              Browse permits by area
+            </h2>
+            <p className="text-gray-500 text-sm">We cover 12 Georgia counties and cities. Click an area to see what's being built.</p>
+          </div>
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            {/* Map */}
+            <div className="flex-shrink-0 w-56 md:w-64">
+              <div className="relative">
+                <GeorgiaMap />
+                <div className="flex items-center gap-3 mt-2 justify-center">
+                  <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span className="w-3 h-3 rounded-sm inline-block flex-shrink-0" style={{ backgroundColor: FOREST }} />
+                    Tracked
+                  </span>
+                  <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <span className="w-3 h-3 rounded-sm inline-block flex-shrink-0 bg-[#dce8dc]" />
+                    Not yet covered
+                  </span>
+                </div>
+              </div>
+            </div>
+            {/* Pills */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 flex-1">
+              {LOCATIONS.map(loc => (
+                <Link
+                  key={loc.slug}
+                  href={`/${loc.slug}`}
+                  className="px-5 py-2.5 rounded-full text-sm font-medium border border-stone-300 text-gray-600 hover:border-[#2d5a27] hover:text-[#2d5a27] bg-white transition-colors"
+                >
+                  {loc.fullName}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
