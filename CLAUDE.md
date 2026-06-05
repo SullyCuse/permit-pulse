@@ -25,6 +25,15 @@ See `memory/adding-new-scrapers.md` for full checklist.
 ## ArcGIS Service Goes Stale
 - If an ArcGIS FeatureServer stops updating, find the replacement: `arcgis.com/sharing/rest/search?q=<name>+orgid%3A<ORG_ID>&sortField=modified&sortOrder=desc`
 - Atlanta example: `Building_Permit_latest` froze Jan 2026 → replaced by `building_permit_featureLayer` (same schema)
+- Self-hosted ArcGIS (e.g. bryangis.bryan-county.org) has no ArcGIS Online search — if it freezes, look for the county's own permit portal instead
+- Bryan County example: `LandUsePermits` MapServer froze May 2026 → county migrated to Evolve portal at `evolvepublic.infovisionsoftware.com/BryanCounty/`
+
+## Evolve Portal (InfoVision Software)
+- ASP.NET WebForms — scrapable via raw HTTP (no Puppeteer needed)
+- Pattern: GET home → POST BL_Menu arg=2 (Permit Search) → POST DL_SearchType=Date Range → POST BT_Search with date strings + Telerik picker ClientState JSON
+- Reuse step-4 ViewState to click any row's Details: `__EVENTTARGET=GV_SearchResults$ctl${String(i+2).padStart(2,'0')}$LBT_ResultsDetails`
+- Permit type = first non-Applicant contact role; issue date = `<td>M/D/YYYY</td><td>Permit</td>` in Documents section
+- See `scraper/bryan-fetch-permits.js` for the full implementation
 
 ## Critical Gotchas
 - **scraper_state table requires explicit grants**: `GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE scraper_state TO service_role` — missing grants cause ALL cursors to silently fall back to defaults, re-processing everything from scratch every run. Check: `SELECT grantee, privilege_type FROM information_schema.role_table_grants WHERE table_name = 'scraper_state'`

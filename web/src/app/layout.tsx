@@ -16,12 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${geist.variable} ${playfair.variable} h-full antialiased`}>
       <head>
         <Script src="https://analytics.ahrefs.com/analytics.js" data-key="eDaU8I4k8YTPmKRwx/mQqg" strategy="afterInteractive" />
-        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-970099736" strategy="afterInteractive" />
+        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-18204694435" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'AW-970099736');
+          gtag('config', 'AW-18204694435');
         `}</Script>
       </head>
       <body className="min-h-full bg-white text-gray-900">{children}</body>
