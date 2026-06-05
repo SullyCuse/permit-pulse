@@ -235,7 +235,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Camden, and Franklin County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, and Bainbridge — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Camden, and Franklin County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -247,7 +247,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more areas?',
-                a: 'Yes — we recently added Smyrna, Cartersville, Effingham County, Austell, Camden County, Franklin County, and Bainbridge and are actively expanding. Pro subscribers get early access to new areas.',
+                a: 'Yes — we recently added Gainesville, Oakwood, and several other Georgia markets and are actively expanding. Pro subscribers get early access to new areas.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-stone-200 pb-6">
@@ -345,7 +345,7 @@ export default function HomePage() {
           Ready to stay ahead?
         </h2>
         <p className="text-gray-500 mb-8 max-w-xl mx-auto">
-          Join contractors, investors, and agents already tracking permits across 20 Georgia markets — from Metro Atlanta to the coast.
+          Join contractors, investors, and agents already tracking permits across 22 Georgia markets — from Metro Atlanta to the coast.
         </p>
         <Link
           href="/login"

@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Camden County', 'Franklin County', 'Bainbridge'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Conyers', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Camden County', 'Franklin County', 'Bainbridge', 'Gainesville', 'Oakwood'] as const
 
 export default async function DashboardPage({
   searchParams,
@@ -380,6 +380,8 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Camden County':    'https://co-camden-ga.smartgovcommunity.com/Public/PermitSearch',
   'Franklin County':  'https://co-franklincounty-ga.smartgovcommunity.com/Public/PermitSearch',
   'Bainbridge':       'https://ci-bainbridge-ga.smartgovcommunity.com/Public/PermitSearch',
+  'Gainesville':      'https://aca-prod.accela.com/HALLCO/Cap/CapHome.aspx?module=Gainesville&TabName=Home',
+  'Oakwood':          'https://aca-prod.accela.com/HALLCO/Cap/CapHome.aspx?module=Oakwood&TabName=Home',
 }
 
 function PermitCard({ permit }: { permit: any }) {
