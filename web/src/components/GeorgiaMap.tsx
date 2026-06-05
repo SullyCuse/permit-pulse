@@ -21,6 +21,9 @@ const TRACKED_FIPS = new Set([
   '13103', // Effingham County
   '13113', // Fayette County
   '13151', // Henry County
+  '13077', // Coweta County
+  '13127', // Glynn County
+  '13285', // Troup County (LaGrange)
 ])
 
 const FOREST = '#2d5a27'
