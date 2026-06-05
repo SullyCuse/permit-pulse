@@ -269,7 +269,7 @@ export default function HomePage() {
             >
               Browse permits by area
             </h2>
-            <p className="text-gray-500 text-sm">We cover 12 Georgia counties and cities. Click an area to see what's being built.</p>
+            <p className="text-gray-500 text-sm">We cover 20 Georgia counties and cities. Click an area to see what's being built.</p>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-10">
             {/* Map */}
