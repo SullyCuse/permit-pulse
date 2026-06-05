@@ -380,41 +380,10 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Cherokee County data is sourced from the Cherokee County Government\'s official public permit records at cherokeega.com, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Cherokee County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Cherokee County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
-  },
-  {
-    slug: 'conyers-ga-building-permits',
-    name: 'Conyers',
-    region: 'GA',
-    fullName: 'Conyers, GA',
-    headline: 'Every Conyers building permit — live tracking updated Monday, Wednesday & Friday.',
-    subheadline:
-      'Permit Pulse monitors every permit filed in Conyers, GA and delivers a digest to Pro subscribers three times a week. Never miss a new build or renovation in Rockdale County\'s largest city.',
-    personas: [
-      {
-        icon: '🔨',
-        title: 'Contractors & Builders',
-        desc: 'Get every new residential and commercial permit in Conyers — building, electrical, plumbing, mechanical, pools, and more — delivered three times a week before your competition.',
-      },
-      {
-        icon: '🏠',
-        title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Conyers neighborhoods. Spot emerging development trends in this growing Rockdale County community before they hit the headlines.',
-      },
-      {
-        icon: '📋',
-        title: 'Agents & Realtors',
-        desc: 'Know which Conyers streets are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this active market.',
-      },
-    ],
-    faqWhere: 'Our Conyers data is sourced from the City of Conyers\'s official public permit records via the SmartGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
-    metaTitle: 'Conyers GA Building Permits | Permit Pulse',
-    metaDescription:
-      'Get a digest of every new building permit filed in Conyers, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
   {
     slug: 'smyrna-ga-building-permits',
@@ -442,7 +411,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Smyrna\'s official public permit records via the OpenGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Smyrna GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Smyrna, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -473,7 +442,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Cartersville\'s official public permit records via the OpenGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Austell, and Bainbridge.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Cartersville GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Cartersville, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -504,7 +473,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from Effingham County\'s official public permit records via the OpenGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Effingham County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Effingham County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -535,103 +504,10 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'We pull directly from the City of Austell\'s official public permit records via the OpenGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, and Bainbridge.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Austell GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Austell, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
-  },
-  {
-    slug: 'camden-county-ga-building-permits',
-    name: 'Camden County',
-    region: 'GA',
-    fullName: 'Camden County, GA',
-    headline: 'Every Camden County building permit.\nDelivered before your competition sees it.',
-    subheadline:
-      'Permit Pulse monitors every building permit filed in Camden County and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
-    personas: [
-      {
-        icon: '🔨',
-        title: 'Contractors & Builders',
-        desc: 'Camden County is one of Georgia\'s fastest-growing coastal counties, anchored by Kingsland and St. Marys. Get a digest of every new residential and commercial permit three times a week — and show up to quote first.',
-      },
-      {
-        icon: '🏠',
-        title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Camden County zip codes. Coastal Georgia growth is accelerating — spot deals before they hit the market.',
-      },
-      {
-        icon: '📋',
-        title: 'Agents & Realtors',
-        desc: 'Know which Camden County areas are seeing new development before your clients do. Use permit data to prospect smarter in this growing coastal market.',
-      },
-    ],
-    faqWhere: 'We pull directly from Camden County\'s official public permit records via the SmartGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
-    metaTitle: 'Camden County GA Building Permits | Permit Pulse',
-    metaDescription:
-      'Get a digest of every new building permit filed in Camden County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
-  },
-  {
-    slug: 'franklin-county-ga-building-permits',
-    name: 'Franklin County',
-    region: 'GA',
-    fullName: 'Franklin County, GA',
-    headline: 'Every Franklin County building permit.\nDelivered before your competition sees it.',
-    subheadline:
-      'Permit Pulse monitors every building permit filed in Franklin County and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
-    personas: [
-      {
-        icon: '🔨',
-        title: 'Contractors & Builders',
-        desc: 'Franklin County in Northeast Georgia is seeing steady residential growth. Get a digest of every new permit three times a week — and beat competitors to the quote in this emerging market.',
-      },
-      {
-        icon: '🏠',
-        title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Franklin County zip codes. Northeast Georgia is attracting buyers seeking affordability and rural character — spot trends early.',
-      },
-      {
-        icon: '📋',
-        title: 'Agents & Realtors',
-        desc: 'Know which Franklin County areas are seeing new development before your clients do. Use permit data to prospect smarter in this growing Northeast Georgia county.',
-      },
-    ],
-    faqWhere: 'We pull directly from Franklin County\'s official public permit records via the SmartGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
-    metaTitle: 'Franklin County GA Building Permits | Permit Pulse',
-    metaDescription:
-      'Get a digest of every new building permit filed in Franklin County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
-  },
-  {
-    slug: 'bainbridge-ga-building-permits',
-    name: 'Bainbridge',
-    region: 'GA',
-    fullName: 'Bainbridge, GA',
-    headline: 'Every Bainbridge building permit.\nDelivered before your competition sees it.',
-    subheadline:
-      'Permit Pulse monitors every building permit filed in Bainbridge and sends Pro subscribers a digest every Monday, Wednesday, and Friday — so contractors, investors, and agents can move first.',
-    personas: [
-      {
-        icon: '🔨',
-        title: 'Contractors & Builders',
-        desc: 'Bainbridge is Southwest Georgia\'s largest city and a hub for regional construction activity. Get a digest of every new permit three times a week — and show up to quote before anyone else does.',
-      },
-      {
-        icon: '🏠',
-        title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Bainbridge. Affordable prices and steady growth make this Decatur County seat an attractive market for value-focused investors.',
-      },
-      {
-        icon: '📋',
-        title: 'Agents & Realtors',
-        desc: 'Know which Bainbridge streets are seeing new investment before your clients do. Use permit data to prospect smarter in this active Southwest Georgia market.',
-      },
-    ],
-    faqWhere: 'We pull directly from the City of Bainbridge\'s official public permit records via the SmartGov permitting portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Gainesville, and Oakwood.',
-    metaTitle: 'Bainbridge GA Building Permits | Permit Pulse',
-    metaDescription:
-      'Get a digest of every new building permit filed in Bainbridge, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
   },
   {
     slug: 'gainesville-ga-building-permits',
@@ -659,7 +535,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Gainesville data is sourced from the City of Gainesville\'s official public permit records via the Accela Citizen Access portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Oakwood, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Oakwood, and Marietta.',
     metaTitle: 'Gainesville GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Gainesville, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -690,7 +566,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Oakwood data is sourced from the City of Oakwood\'s official public permit records via the Accela Citizen Access portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, and Marietta.',
     metaTitle: 'Oakwood GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Oakwood, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -721,7 +597,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Fayette County data is sourced from the Fayette County Building Safety Department\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, Oakwood, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Fayette County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Fayette County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -752,7 +628,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Henry County data is sourced from the Henry County Building & Plan Review Department\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, Fayette County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, Oakwood, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'Henry County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Henry County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -783,7 +659,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Marietta data is sourced from the City of Marietta\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Camden County, Franklin County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, Bainbridge, Gainesville, and Oakwood.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, and Oakwood.',
     metaTitle: 'Marietta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Marietta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
