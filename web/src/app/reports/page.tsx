@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
-  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb County, Bryan County, Atlanta, Savannah, Alpharetta, Johns Creek, and Augusta, Georgia. Permit counts by zip code, type, and month-over-month trends.',
+  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Camden, and Franklin County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Conyers, Smyrna, Cartersville, Austell, and Bainbridge, Georgia.',
 }
 
 const FOREST = '#2d5a27'
