@@ -698,7 +698,7 @@ export const LOCATIONS: Location[] = [
   {
     slug: 'fayette-county-ga-building-permits',
     name: 'Fayette County',
-    county: 'Fayette County',
+    region: 'GA',
     fullName: 'Fayette County, GA',
     headline: 'Every Fayette County building permit — live tracking updated Monday, Wednesday & Friday.',
     subheadline:
@@ -729,7 +729,7 @@ export const LOCATIONS: Location[] = [
   {
     slug: 'henry-county-ga-building-permits',
     name: 'Henry County',
-    county: 'Henry County',
+    region: 'GA',
     fullName: 'Henry County, GA',
     headline: 'Every Henry County building permit — live tracking updated Monday, Wednesday & Friday.',
     subheadline:
@@ -760,7 +760,7 @@ export const LOCATIONS: Location[] = [
   {
     slug: 'marietta-ga-building-permits',
     name: 'Marietta',
-    county: 'Marietta',
+    region: 'GA',
     fullName: 'Marietta, GA',
     headline: 'Every Marietta building permit — live tracking updated Monday, Wednesday & Friday.',
     subheadline:
