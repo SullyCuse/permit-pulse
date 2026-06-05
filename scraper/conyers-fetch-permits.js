@@ -187,10 +187,25 @@ async function fetchNewPermits(lastTimestampMs) {
     await new Promise(r => setTimeout(r, 500));
 
     // Step 4: SmartGov is two-step — Search click sends criteria, gotoPage(0) loads rows.
+    // Debug: log the POST data being sent to SearchPage
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+      if (req.url().includes('/SearchPage') || req.url().includes('/Search')) {
+        console.log(`  [Conyers] REQUEST: ${req.method()} ${req.url()}`);
+        const body = req.postData();
+        if (body) console.log(`  [Conyers] POST body (500): ${body.slice(0, 500)}`);
+      }
+      req.continue();
+    });
+
     const searchPageResponses = [];
     page.on('response', async (resp) => {
       if (resp.url().includes('/SearchPage') && resp.status() === 200) {
-        try { searchPageResponses.push(await resp.text()); } catch {}
+        try {
+          const text = await resp.text();
+          console.log(`  [Conyers] SearchPage response (500): ${text.slice(0, 500)}`);
+          searchPageResponses.push(text);
+        } catch {}
       }
     });
 
