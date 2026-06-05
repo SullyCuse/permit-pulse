@@ -235,7 +235,7 @@ export default function HomePage() {
             {[
               {
                 q: 'Where does the permit data come from?',
-                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Cobb, and Glynn County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange — updated Monday, Wednesday, and Friday.',
+                a: 'We pull directly from the official public records of Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, and Glynn County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange — updated Monday, Wednesday, and Friday.',
               },
               {
                 q: 'How quickly will I get alerted?',
@@ -247,7 +247,7 @@ export default function HomePage() {
               },
               {
                 q: 'Will you add more areas?',
-                a: 'Yes — we recently added Coweta County, Cobb County, Glynn County, LaGrange, and several other Georgia markets and are actively expanding. Pro subscribers get early access to new areas.',
+                a: 'Yes — we recently added Coweta County, Glynn County, LaGrange, and several other Georgia markets and are actively expanding. Pro subscribers get early access to new areas.',
               },
             ].map(item => (
               <div key={item.q} className="border-b border-stone-200 pb-6">

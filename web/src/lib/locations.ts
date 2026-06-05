@@ -659,7 +659,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Marietta data is sourced from the City of Marietta\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Cobb County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and LaGrange.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and LaGrange.',
     metaTitle: 'Marietta GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Marietta, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors.',
@@ -690,41 +690,10 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Coweta County data is sourced from the Coweta County official public permit records via the Accela Citizen Access portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Cobb County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange.',
     metaTitle: 'Coweta County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Coweta County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in the Newnan area.',
-  },
-  {
-    slug: 'cobb-county-ga-building-permits',
-    name: 'Cobb County',
-    region: 'GA',
-    fullName: 'Cobb County, GA',
-    headline: 'Every Cobb County building permit — live tracking updated Monday, Wednesday & Friday.',
-    subheadline:
-      'Permit Pulse monitors every unincorporated Cobb County permit and delivers a digest to Pro subscribers three times a week. One of Georgia\'s largest suburban counties — never miss a new build or renovation.',
-    personas: [
-      {
-        icon: '🔨',
-        title: 'Contractors & Builders',
-        desc: 'Get every new residential and commercial permit in unincorporated Cobb County — new construction, renovations, electrical, plumbing, and more — delivered three times a week before your competition.',
-      },
-      {
-        icon: '🏠',
-        title: 'Real Estate Investors',
-        desc: 'Track new construction and renovation activity across Cobb County\'s unincorporated communities. Spot emerging development trends in this densely built, high-value suburban market.',
-      },
-      {
-        icon: '📋',
-        title: 'Agents & Realtors',
-        desc: 'Know which Cobb County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of clients in this dynamic Northwest Atlanta market.',
-      },
-    ],
-    faqWhere: 'Our Cobb County data is sourced from the Cobb County official public permit records via the Accela Citizen Access portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange.',
-    metaTitle: 'Cobb County GA Building Permits | Permit Pulse',
-    metaDescription:
-      'Get a digest of every new building permit filed in Cobb County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in the Atlanta suburbs.',
   },
   {
     slug: 'glynn-county-ga-building-permits',
@@ -783,7 +752,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our LaGrange data is sourced from the City of LaGrange\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Cobb County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'LaGrange GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in LaGrange, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Troup County.',

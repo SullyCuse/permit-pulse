@@ -282,14 +282,6 @@ async function setCowetaLastTimestamp(ms) {
   return setStateValue('coweta_last_timestamp', ms);
 }
 
-// Cobb County (Accela) — last processed permit date as Unix ms timestamp
-async function getCobbLastTimestamp() {
-  return getStateValue('cobb_last_timestamp', 1751328000000); // default: 2025-07-01
-}
-async function setCobbLastTimestamp(ms) {
-  return setStateValue('cobb_last_timestamp', ms);
-}
-
 // Glynn County — last processed dateSubmitted as Unix ms timestamp
 async function getGlynnLastTimestamp() {
   return getStateValue('glynn_last_timestamp', 1751328000000); // default: 2025-07-01
@@ -342,7 +334,6 @@ module.exports = {
   getHenryLastTimestamp, setHenryLastTimestamp,
   getMariettaLastTimestamp, setMariettaLastTimestamp,
   getCowetaLastTimestamp, setCowetaLastTimestamp,
-  getCobbLastTimestamp, setCobbLastTimestamp,
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
