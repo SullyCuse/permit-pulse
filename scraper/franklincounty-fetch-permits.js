@@ -161,11 +161,9 @@ async function fetchNewPermits(lastTimestampMs) {
       console.log('  [Franklin County] Search button not found — skipping.');
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
-      searchBtn.click(),
-    ]);
-    await new Promise(r => setTimeout(r, 1500));
+    searchBtn.click();
+    await page.waitForNetworkIdle({ idleTime: 1000, timeout: 20000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 500));
 
     let globalHeaders = [];
     let currentPage = 0;
@@ -196,11 +194,9 @@ async function fetchNewPermits(lastTimestampMs) {
         currentPage++;
         const nextLink = await page.$('a.next, li.next > a');
         if (nextLink) {
-          await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {}),
-            nextLink.click(),
-          ]);
-          await new Promise(r => setTimeout(r, 500));
+          nextLink.click();
+          await page.waitForNetworkIdle({ idleTime: 1000, timeout: 10000 }).catch(() => {});
+          await new Promise(r => setTimeout(r, 300));
         } else { hasMore = false; }
       } else { hasMore = false; }
     }
