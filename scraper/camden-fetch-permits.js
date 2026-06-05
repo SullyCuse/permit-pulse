@@ -144,63 +144,43 @@ async function fetchNewPermits(lastTimestampMs) {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
-    const searchPageResponses = [];
-    page.on('response', async (resp) => {
-      if (resp.url().includes('/SearchPage') && resp.status() === 200) {
-        try {
-          const text = await resp.text();
-          if (text && text.includes('<tr')) searchPageResponses.push(text);
-        } catch {}
-      }
-    });
-
     console.log('  [Camden County] Loading search page...');
     await page.goto(SEARCH_URL, { waitUntil: 'networkidle2', timeout: 30000 });
 
     console.log(`  [Camden County] Setting date range: ${dateRange}`);
     await page.evaluate((range) => {
+      const edit = document.getElementById('search-edit');
+      if (edit) edit.style.display = 'block';
       const inp = document.getElementById('SubmittedOn');
-      if (inp) {
-        inp.value = range;
-        inp.dispatchEvent(new Event('change', { bubbles: true }));
-        inp.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-      const display = document.querySelector('[name="SubmittedOn.display"]');
-      if (display) { display.value = range; }
+      if (inp) inp.value = range;
     }, dateRange);
 
-    console.log('  [Camden County] Submitting search...');
-    await page.evaluate(() => { FormSupport.submitAction('BasicSearch'); });
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
-
-    console.log('  [Camden County] Loading first results page...');
-    await page.evaluate(() => {
-      if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(0);
-    });
-
-    const timeout = 15000;
-    const start = Date.now();
-    while (searchPageResponses.length === 0 && Date.now() - start < timeout) {
-      await new Promise(r => setTimeout(r, 500));
-    }
-
-    if (searchPageResponses.length === 0) {
-      console.log('  [Camden County] No results returned from SearchPage.');
+    console.log('  [Camden County] Clicking Search button...');
+    const searchBtn = await page.$('button.sgc-button-primary, button[onclick*="Search"]');
+    if (!searchBtn) {
+      console.log('  [Camden County] Search button not found — skipping.');
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+      searchBtn.click(),
+    ]);
+    await new Promise(r => setTimeout(r, 1500));
 
     let globalHeaders = [];
     let currentPage = 0;
     let hasMore = true;
 
     while (hasMore && currentPage < 50) {
-      const html = searchPageResponses.shift();
-      if (!html) break;
-
+      const html = await page.content();
       const { headers, rows } = parseResultsHtml(html);
-      if (currentPage === 0 && headers.length > 0) {
-        globalHeaders = headers;
-        console.log('  [Camden County] Columns:', headers.join(', '));
+
+      if (currentPage === 0) {
+        if (rows.length === 0) { console.log('  [Camden County] No results found.'); break; }
+        if (headers.length > 0) {
+          globalHeaders = headers;
+          console.log('  [Camden County] Columns:', headers.join(', '));
+        }
       }
 
       if (rows.length === 0) { hasMore = false; break; }
@@ -211,21 +191,18 @@ async function fetchNewPermits(lastTimestampMs) {
         if (permit.permit_number) permits.push(permit);
       }
 
-      hasMore = html.includes('class="next"') ||
-                html.includes(`gotoPage(${currentPage + 1})`) ||
-                html.includes(`gotoPage( ${currentPage + 1} )`);
-
-      if (hasMore) {
+      const pageHasNext = html.includes('class="next"') || html.includes(`gotoPage(${currentPage + 1})`);
+      if (pageHasNext) {
         currentPage++;
-        await page.evaluate((pn) => {
-          if (typeof PermitSearchResults !== 'undefined') PermitSearchResults.gotoPage(pn);
-        }, currentPage);
-
-        const pageStart = Date.now();
-        while (searchPageResponses.length === 0 && Date.now() - pageStart < 10000) {
-          await new Promise(r => setTimeout(r, 300));
-        }
-      }
+        const nextLink = await page.$('a.next, li.next > a');
+        if (nextLink) {
+          await Promise.all([
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {}),
+            nextLink.click(),
+          ]);
+          await new Promise(r => setTimeout(r, 500));
+        } else { hasMore = false; }
+      } else { hasMore = false; }
     }
 
   } catch (err) {

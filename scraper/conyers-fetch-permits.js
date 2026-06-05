@@ -162,83 +162,50 @@ async function fetchNewPermits(lastTimestampMs) {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
-    // Queue for capturing SearchPage AJAX responses
-    const searchPageResponses = [];
-    page.on('response', async (resp) => {
-      if (resp.url().includes('/SearchPage') && resp.status() === 200) {
-        try {
-          const text = await resp.text();
-          if (text && text.includes('<tr')) {
-            searchPageResponses.push(text);
-          }
-        } catch {}
-      }
-    });
-
-    // Step 1: Navigate to search page (establishes session)
+    // Step 1: Navigate to search page
     console.log('  [Conyers] Loading search page...');
     await page.goto(SEARCH_URL, { waitUntil: 'networkidle2', timeout: 30000 });
 
-    // Step 2: Set SubmittedOn date range.
-    // The field starts as type="text"; il-daterangepicker.js may replace it
-    // with a web component. We set the underlying hidden input directly.
+    // Step 2: Show the search form and set the date range
     console.log(`  [Conyers] Setting date range: ${dateRange}`);
     await page.evaluate((range) => {
+      const edit = document.getElementById('search-edit');
+      if (edit) edit.style.display = 'block';
       const inp = document.getElementById('SubmittedOn');
-      if (inp) {
-        inp.value = range;
-        inp.dispatchEvent(new Event('change', { bubbles: true }));
-        inp.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-      // Also set the display field if the daterangepicker already replaced it
-      const display = document.querySelector('[name="SubmittedOn.display"]');
-      if (display) { display.value = range; }
+      if (inp) inp.value = range;
     }, dateRange);
 
-    // Step 3: Submit the search form
-    console.log('  [Conyers] Submitting search...');
-    await page.evaluate(() => {
-      FormSupport.submitAction('BasicSearch');
-    });
-
-    // Wait for the page to reload (full form submit → navigation)
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
-      .catch(() => {});
-
-    // Step 4: Trigger first SearchPage AJAX load
-    // The page has PermitSearchResults.gotoPage defined; call it to load results.
-    console.log('  [Conyers] Loading first results page...');
-    await page.evaluate(() => {
-      if (typeof PermitSearchResults !== 'undefined') {
-        PermitSearchResults.gotoPage(0);
-      }
-    });
-
-    // Wait for the first SearchPage response
-    const timeout = 15000;
-    const start = Date.now();
-    while (searchPageResponses.length === 0 && Date.now() - start < timeout) {
-      await new Promise(r => setTimeout(r, 500));
-    }
-
-    if (searchPageResponses.length === 0) {
-      console.log('  [Conyers] No results returned from SearchPage.');
+    // Step 3: Click the Search button directly
+    console.log('  [Conyers] Clicking Search button...');
+    const searchBtn = await page.$('button.sgc-button-primary, button[onclick*="Search"]');
+    if (!searchBtn) {
+      console.log('  [Conyers] Search button not found — skipping.');
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+      searchBtn.click(),
+    ]);
+    await new Promise(r => setTimeout(r, 1500));
 
-    // Step 5: Process the first page
+    // Step 4: Parse results from page HTML — SmartGov renders results inline after submit
     let globalHeaders = [];
     let currentPage = 0;
     let hasMore = true;
 
     while (hasMore && currentPage < 50) {
-      const html = searchPageResponses.shift();
-      if (!html) break;
-
+      const html = await page.content();
       const { headers, rows } = parseResultsHtml(html);
-      if (currentPage === 0 && headers.length > 0) {
-        globalHeaders = headers;
-        console.log('  [Conyers] Columns:', headers.join(', '));
+
+      if (currentPage === 0) {
+        if (rows.length === 0) {
+          console.log('  [Conyers] No results found.');
+          break;
+        }
+        if (headers.length > 0) {
+          globalHeaders = headers;
+          console.log('  [Conyers] Columns:', headers.join(', '));
+        }
       }
 
       if (rows.length === 0) { hasMore = false; break; }
@@ -249,24 +216,22 @@ async function fetchNewPermits(lastTimestampMs) {
         if (permit.permit_number) permits.push(permit);
       }
 
-      // Check if more pages exist (SmartGov shows page nav with class "next" or page number links)
-      hasMore = html.includes('class="next"') ||
-                html.includes(`gotoPage(${currentPage + 1})`) ||
-                html.includes(`gotoPage( ${currentPage + 1} )`);
-
-      if (hasMore) {
+      const pageHasNext = html.includes('class="next"') ||
+                          html.includes(`gotoPage(${currentPage + 1})`);
+      if (pageHasNext) {
         currentPage++;
-        await page.evaluate((pn) => {
-          if (typeof PermitSearchResults !== 'undefined') {
-            PermitSearchResults.gotoPage(pn);
-          }
-        }, currentPage);
-
-        // Wait for next page response
-        const pageStart = Date.now();
-        while (searchPageResponses.length === 0 && Date.now() - pageStart < 10000) {
-          await new Promise(r => setTimeout(r, 300));
+        const nextLink = await page.$('a.next, li.next > a');
+        if (nextLink) {
+          await Promise.all([
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {}),
+            nextLink.click(),
+          ]);
+          await new Promise(r => setTimeout(r, 500));
+        } else {
+          hasMore = false;
         }
+      } else {
+        hasMore = false;
       }
     }
 
