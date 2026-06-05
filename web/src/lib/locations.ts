@@ -705,18 +705,18 @@ export const LOCATIONS: Location[] = [
       'Permit Pulse monitors every permit filed in Fayette County, GA and delivers a digest to Pro subscribers three times a week. Never miss a new build or renovation in one of metro Atlanta\'s fastest-growing suburban counties.',
     personas: [
       {
-        role: 'Contractor',
-        headline: 'Find new Fayette County projects before the competition.',
+        icon: '🔨',
+        title: 'Contractors & Builders',
         desc: 'Get every new residential and commercial permit in Fayette County — building, electrical, plumbing, mechanical, signs, and more — delivered three times a week before your competition.',
       },
       {
-        role: 'Investor',
-        headline: 'Spot Fayette County development trends early.',
+        icon: '🏠',
+        title: 'Real Estate Investors',
         desc: 'Track new construction and renovation activity across Fayette County. Spot emerging development trends in this growing community south of Atlanta before they hit the headlines.',
       },
       {
-        role: 'Realtor',
-        headline: 'Stay ahead of Fayette County market activity.',
+        icon: '📋',
+        title: 'Agents & Realtors',
         desc: 'Know which Fayette County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this active market.',
       },
     ],
@@ -736,18 +736,18 @@ export const LOCATIONS: Location[] = [
       'Permit Pulse monitors every permit filed in Henry County, GA and delivers a digest to Pro subscribers three times a week. Never miss a new build or renovation in one of metro Atlanta\'s most active growth counties.',
     personas: [
       {
-        role: 'Contractor',
-        headline: 'Find new Henry County projects before the competition.',
+        icon: '🔨',
+        title: 'Contractors & Builders',
         desc: 'Get every new residential and commercial permit in Henry County — building, electrical, plumbing, mechanical, signs, and more — delivered three times a week before your competition.',
       },
       {
-        role: 'Investor',
-        headline: 'Spot Henry County development trends early.',
+        icon: '🏠',
+        title: 'Real Estate Investors',
         desc: 'Track new construction and renovation activity across Henry County. Spot emerging development trends in this rapidly expanding community southeast of Atlanta before they hit the headlines.',
       },
       {
-        role: 'Realtor',
-        headline: 'Stay ahead of Henry County market activity.',
+        icon: '📋',
+        title: 'Agents & Realtors',
         desc: 'Know which Henry County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this high-growth market.',
       },
     ],
@@ -767,18 +767,18 @@ export const LOCATIONS: Location[] = [
       'Permit Pulse monitors every permit filed in Marietta, GA and delivers a digest to Pro subscribers three times a week. Never miss a new build or renovation in Cobb County\'s largest city.',
     personas: [
       {
-        role: 'Contractor',
-        headline: 'Find new Marietta projects before the competition.',
+        icon: '🔨',
+        title: 'Contractors & Builders',
         desc: 'Get every new residential and commercial permit in Marietta — building, electrical, plumbing, mechanical, signs, and more — delivered three times a week before your competition.',
       },
       {
-        role: 'Investor',
-        headline: 'Spot Marietta development trends early.',
+        icon: '🏠',
+        title: 'Real Estate Investors',
         desc: 'Track new construction and renovation activity across Marietta neighborhoods. Spot emerging development trends in this active Cobb County hub before they hit the headlines.',
       },
       {
-        role: 'Realtor',
-        headline: 'Stay ahead of Marietta market activity.',
+        icon: '📋',
+        title: 'Agents & Realtors',
         desc: 'Know which Marietta neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to stay ahead of your clients in this dynamic market.',
       },
     ],
