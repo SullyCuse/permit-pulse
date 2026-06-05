@@ -43,21 +43,22 @@ function cleanPermitType(raw) {
   return raw.replace(/^[A-Z]\s*-\s*/, '').trim() || null;
 }
 
-// "1411 SW BROWNS BRIDGE ROAD SW, GAINESVILLE GA 30501" → { address, zip }
-// "621 WASHINGTON STREET SW, A3, GAINESVILLE GA 30501" → { address, zip }
+// "1411 SW BROWNS BRIDGE ROAD SW, GAINESVILLE GA 30501" → { address: "1411 SW BROWNS BRIDGE ROAD SW, Gainesville", zip: "30501" }
+// "621 WASHINGTON STREET SW, A3, GAINESVILLE GA 30501" → { address: "621 WASHINGTON STREET SW, A3, Gainesville", zip: "30501" }
 function parseAddressCell(raw) {
   if (!raw) return { address: null, zip: null };
   const zipMatch = raw.match(/\bGA\s+(\d{5})\s*$/i);
   const zip = zipMatch ? zipMatch[1] : null;
-  // Everything before the last comma segment containing state/zip is the street
   const parts = raw.split(',').map(s => s.trim());
-  // Last part is "CITY GA ZIP" — street is everything before it
-  // Second-to-last might be a unit/apt (if >= 3 parts)
-  let streetParts = parts.length >= 2 ? parts.slice(0, -1) : parts;
-  // Drop the city+state+zip part — it's always the last comma-delimited segment
+  // Last part is "CITY GA ZIP" — extract city name before " GA "
   const cityStateZip = parts[parts.length - 1]; // e.g. "GAINESVILLE GA 30501"
-  // If second-to-last looks like a city (no digits), it's an apt/unit
-  const address = streetParts.join(', ').trim() || null;
+  const cityMatch = cityStateZip.match(/^(.+?)\s+GA\s+\d{5}/i);
+  const city = cityMatch ? cityMatch[1].trim() : null;
+  // Street is everything before the last comma segment
+  const streetParts = parts.length >= 2 ? parts.slice(0, -1) : parts;
+  let address = streetParts.join(', ').trim() || null;
+  // Append city so the full address is stored (consistent with Bryan County)
+  if (address && city) address = `${address}, ${city}`;
   return { address, zip };
 }
 

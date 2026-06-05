@@ -168,6 +168,79 @@ function mapRow({ cells, detailHref }, headers, slug) {
   };
 }
 
+// Attempt a direct HTTP POST to the SagesGov search form without solving reCAPTCHA.
+// SagesGov sometimes does not enforce the token server-side; if it does, it returns
+// an HTML page without any Details.aspx links and we fall back to Puppeteer.
+async function tryDirectHttp(searchUrl, slug, startFmt, endFmt, county) {
+  try {
+    const axios = require('axios');
+    const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+    // Step 1: GET the page for session cookie + hidden ASP.NET fields
+    const r1 = await axios.get(searchUrl, {
+      headers: { 'User-Agent': UA },
+      timeout: 20000,
+      withCredentials: true,
+    });
+
+    const setCookies = r1.headers['set-cookie'] || [];
+    const cookieStr  = setCookies.map(c => c.split(';')[0]).join('; ');
+
+    // Extract hidden ASP.NET fields
+    const hiddenFields = {};
+    for (const m of (r1.data || '').matchAll(/<input[^>]+type="hidden"[^>]+>/gi)) {
+      const tag  = m[0];
+      const name = (tag.match(/name="([^"]+)"/) || [])[1];
+      const val  = (tag.match(/value="([^"]*)"/) || [])[1] ?? '';
+      if (name) hiddenFields[name] = val;
+    }
+
+    if (!hiddenFields['__VIEWSTATE']) {
+      console.log(`  [${county}] Direct HTTP: no ViewState on GET — skipping direct attempt.`);
+      return null;
+    }
+
+    // Step 2: POST the search — include all hidden fields + search criteria + empty captcha token
+    const timeframeKey = 'ctl00$cphContent$cphMain$Search1$SearchOrViewFilters1$rptrDateFilter$ctl03$ddlTimeframe_2';
+    const startKey     = 'ctl00$cphContent$cphMain$Search1$SearchOrViewFilters1$rptrDateFilter$ctl03$txtPeriodStart_2';
+    const endKey       = 'ctl00$cphContent$cphMain$Search1$SearchOrViewFilters1$rptrDateFilter$ctl03$txtPeriodEnd_2';
+    const classKey     = 'ctl00$cphContent$cphMain$Search1$ddlClass';
+    const captchaKey   = 'ctl00$cphContent$cphMain$ctrlCaptcha$txtCaptchaToken';
+    const searchBtnKey = 'ctl00$cphContent$cphMain$btnSearch';
+
+    const form = new URLSearchParams({
+      ...hiddenFields,
+      [classKey]:     '1009',
+      [timeframeKey]: 'DateRange',
+      [startKey]:     startFmt,
+      [endKey]:       endFmt,
+      [captchaKey]:   '',
+      [searchBtnKey]: 'Search',
+    });
+
+    const r2 = await axios.post(searchUrl, form.toString(), {
+      headers: {
+        'User-Agent':   UA,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cookie':       cookieStr,
+        'Referer':      searchUrl,
+      },
+      timeout: 30000,
+    });
+
+    if (r2.data && r2.data.includes('Details.aspx')) {
+      console.log(`  [${county}] Direct HTTP succeeded (reCAPTCHA not enforced server-side).`);
+      return r2.data;
+    }
+
+    console.log(`  [${county}] Direct HTTP returned no results — reCAPTCHA likely enforced; falling back to Puppeteer.`);
+    return null;
+  } catch (err) {
+    console.log(`  [${county}] Direct HTTP failed (${err.message}) — falling back to Puppeteer.`);
+    return null;
+  }
+}
+
 async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
   const effectiveLastMs = lastTimestampMs || (Date.now() - 90 * 24 * 60 * 60 * 1000);
   const lastDateStr = msToDateStr(effectiveLastMs);
@@ -176,6 +249,32 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
   const endFmt      = fmtDate(todayStr);
 
   console.log(`[${county}] Fetching permits from ${lastDateStr} to ${todayStr}...`);
+
+  const searchUrl = `${BASE_URL}/${slug}/portal/search.aspx`;
+  const allPermits = [];
+  let maxTimestamp = effectiveLastMs;
+
+  // Try direct HTTP first — avoids Puppeteer + reCAPTCHA entirely if server doesn't validate token
+  const directHtml = await tryDirectHttp(searchUrl, slug, startFmt, endFmt, county);
+  if (directHtml) {
+    const { headers, rows } = parseResultsHtml(directHtml);
+    if (headers) console.log(`  [${county}] Columns: ${headers.join(', ')}`);
+    for (const row of (rows || [])) {
+      const permit = mapRow(row, headers || [], slug);
+      if (permit.permit_number || permit.source_url) allPermits.push(permit);
+    }
+    console.log(`  [${county}] Direct HTTP: ${allPermits.length} permits parsed.`);
+
+    const finalPermits = allPermits.map(p => {
+      const ts = p._submittedMs || 0;
+      if (ts > maxTimestamp) maxTimestamp = ts;
+      const { _submittedMs, _cells, _status, ...permit } = p;
+      return { ...permit, county, raw_data: { status: _status } };
+    });
+    if (maxTimestamp === effectiveLastMs && finalPermits.length > 0) maxTimestamp = Date.now();
+    console.log(`[${county}] Found ${finalPermits.length} permits via direct HTTP.`);
+    return { permits: finalPermits, maxTimestamp };
+  }
 
   let puppeteerExtra, StealthPlugin;
   try {
@@ -195,10 +294,6 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
     executablePath: findChrome(),
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
-
-  const searchUrl = `${BASE_URL}/${slug}/portal/search.aspx`;
-  const allPermits = [];
-  let maxTimestamp = effectiveLastMs;
 
   try {
     const page = await browser.newPage();
