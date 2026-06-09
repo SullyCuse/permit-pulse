@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -13,6 +14,9 @@ import {
 // No build-time Supabase calls (env vars not available in preview builds).
 export const revalidate = 86400
 
+// Deduplicate DB calls between generateMetadata and ReportPage
+const getCachedReportData = cache(getReportData)
+
 const FOREST = '#2d5a27'
 const PLAYFAIR = 'var(--font-playfair), Georgia, serif'
 
@@ -25,9 +29,17 @@ export async function generateMetadata(
   const { county, year, month } = parsed
   const meta = COUNTY_META[county]
   const monthYear = formatMonthYear(year, month)
+  const report = await getCachedReportData(county, year, month)
+
+  // Don't let Google index thin pages — very few permits = near-empty content
+  const now = new Date()
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth()
+  const isThin = report.total < 5
+
   return {
     title: `${meta.fullName} Building Permits — ${monthYear} | Permit Pulse`,
-    description: `${monthYear} building permit activity in ${meta.fullName}. Permit counts by zip code and type, with month-over-month comparison.`,
+    description: `${monthYear} building permit activity in ${meta.fullName}. ${report.total > 0 ? `${report.total.toLocaleString()} permits issued` : 'Permit counts'} by zip code and type, with month-over-month comparison.`,
+    ...(isThin || isCurrentMonth ? { robots: { index: false, follow: true } } : {}),
   }
 }
 
@@ -39,7 +51,7 @@ export default async function ReportPage(
   if (!parsed || !COUNTY_META[parsed.county]) notFound()
 
   const { county, year, month } = parsed
-  const report = await getReportData(county, year, month)
+  const report = await getCachedReportData(county, year, month)
   // Don't 404 on zero permits — show the empty-state section instead.
   // A valid county/month with no data yet (e.g. scraper hasn't run)
   // should return 200 so internal links from landing pages don't break.
@@ -92,6 +104,21 @@ export default async function ReportPage(
         <p className="mt-4 text-gray-500">
           Official permit data from {meta.display} — updated Mon, Wed &amp; Fri from the county permitting office.
         </p>
+        {report.total > 0 && (
+          <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
+            {meta.fullName} issued{' '}
+            <strong className="text-gray-800">{report.total.toLocaleString()} building permits</strong>{' '}
+            in {monthYear}
+            {pctChange != null
+              ? pctChange >= 0
+                ? `, up ${pctChange}% from the prior month`
+                : `, down ${Math.abs(pctChange)}% from the prior month`
+              : ''
+            }
+            {report.byZip[0] ? `. The most active zip code was ${report.byZip[0].zip} with ${report.byZip[0].count} permits` : ''}
+            {topType ? `. ${topType.type} was the top permit type, making up ${totalTyped > 0 ? Math.round((topType.count / totalTyped) * 100) : 0}% of all permits issued` : ''}.
+          </p>
+        )}
       </section>
 
       {/* Key metrics */}

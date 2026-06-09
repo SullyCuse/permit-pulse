@@ -16,9 +16,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth()
+
   const summaries = await getAllReportSummaries()
   const reportPages = summaries
-    .filter(s => s.count > 0 && COUNTY_META[s.county])
+    .filter(s =>
+      s.count > 0 &&
+      COUNTY_META[s.county] &&
+      // Exclude current month — data is always incomplete mid-month
+      !(s.year === currentYear && s.month === currentMonth)
+    )
     .map(s => ({
       url: `${base}/reports/${buildSlug(s.county, s.year, s.month)}`,
       lastModified: new Date(),
