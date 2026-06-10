@@ -8,6 +8,19 @@ const OUT_FIELDS = 'JobID,JobAddress,JobTypeDescription,JobStatus,JobSquareFoota
 
 const geocodeCache = new Map();
 
+let _supabase = null;
+function getSupabase() {
+  if (!_supabase && process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY) {
+    const { createClient } = require('@supabase/supabase-js');
+    _supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SECRET_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+  }
+  return _supabase;
+}
+
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function msToIsoDate(ms) {
@@ -28,8 +41,22 @@ function msToArcgisTimestamp(ms) {
 }
 
 async function reverseGeocode(lat, lng) {
-  const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+  const key = `geo:${lat.toFixed(4)},${lng.toFixed(4)}`;
   if (geocodeCache.has(key)) return geocodeCache.get(key);
+
+  const sb = getSupabase();
+  if (sb) {
+    const { data } = await sb
+      .from('geocode_cache')
+      .select('zip_code, city')
+      .eq('address', key)
+      .maybeSingle();
+    if (data !== null) {
+      const cached = (data.zip_code || data.city) ? { zip: data.zip_code, city: data.city } : null;
+      geocodeCache.set(key, cached);
+      return cached;
+    }
+  }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
@@ -53,6 +80,7 @@ async function reverseGeocode(lat, lng) {
 
       if (data.status !== 'OK' || !data.results?.length) {
         geocodeCache.set(key, null);
+        if (sb) await sb.from('geocode_cache').upsert({ address: key, zip_code: null, city: null }, { onConflict: 'address' });
         return null;
       }
 
@@ -62,6 +90,7 @@ async function reverseGeocode(lat, lng) {
 
       const result = { zip, city };
       geocodeCache.set(key, result);
+      if (sb) await sb.from('geocode_cache').upsert({ address: key, zip_code: zip, city }, { onConflict: 'address' });
       return result;
     } catch (err) {
       console.warn(`  Reverse geocode failed for (${lat}, ${lng}): ${err.message}`);
@@ -125,7 +154,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   for (const permit of permits) {
     const geo = permit._geometry;
     if (geo?.x && geo?.y) {
-      const cacheKey = `${geo.y.toFixed(5)},${geo.x.toFixed(5)}`;
+      const cacheKey = `geo:${geo.y.toFixed(4)},${geo.x.toFixed(4)}`;
       const cached = geocodeCache.has(cacheKey);
       const result = await reverseGeocode(geo.y, geo.x);
       if (result?.zip) {
