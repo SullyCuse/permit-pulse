@@ -6,6 +6,13 @@
 - Wire into `scraper/run-all.js` following existing county block pattern
 - `county` field doubles as the upsert conflict key — must be consistent (e.g. `'Sandy Springs'`, not `'Sandy Springs, GA'`)
 
+## Geocoding (zip_code / city)
+- If a scraper needs Google Geocoding API (forward or reverse) for zip_code/city, it MUST cache results in the shared `geocode_cache` table (columns: `address` text PK, `zip_code`, `city`, `created_at`) — uncached per-permit calls exhaust the daily quota fast (DeKalb hit OVER_QUERY_LIMIT on ~94/96 permits in one run before caching was added)
+- Forward geocode (address string): cache key = `${address}, GA` — see `gwinnett-geocode.js` / `bryan-fetch-permits.js`
+- Reverse geocode (lat/lng from ArcGIS geometry): cache key = `geo:${lat.toFixed(4)},${lng.toFixed(4)}` — see `dekalb-fetch-permits.js` / `johnscreek-fetch-permits.js`
+- Pattern: check `geocode_cache` first (treat a row with both null zip/city as a cached "no result"), call Google API only on miss, then `upsert` the result (including null misses) with `onConflict: 'address'`
+- Google Geocoding API costs $5/1000 requests. Daily quota cap is set to 200 (could allow up to ~$13/month if maxed every run); the $10/month billing limit is the actual backstop — caching should keep real usage well under both
+
 ## ViewpointCloud / OpenGov Portals
 - OpenGov portals (*.portal.opengov.com) run on ViewpointCloud, not ArcGIS
 - Real API: `https://api-east.viewpointcloud.com/v2/<subdomain>/records?recordTypeID=<id>`
