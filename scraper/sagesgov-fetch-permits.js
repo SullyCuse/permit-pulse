@@ -491,6 +491,30 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
 
       if (!html.includes('Details.aspx')) {
         console.log(`  [${county}] No results found on page ${pageNum + 1}.`);
+        if (pageNum === 0 && process.env.SAGESGOV_DEBUG) {
+          // Diagnose: captcha rejection vs. empty grid vs. lost search criteria.
+          const diag = await page.evaluate(() => {
+            const bodyText = (document.body.innerText || '').replace(/\s+/g, ' ').trim();
+            const tokenEl = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+            const classEl = document.getElementById('cphContent_cphMain_Search1_ddlClass');
+            const startEl = document.getElementById('cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodStart_2');
+            const endEl   = document.getElementById('cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodEnd_2');
+            const grid = document.querySelector('[id*="grid" i], [id*="Results" i], table');
+            return {
+              title: document.title,
+              tokenLen: tokenEl ? (tokenEl.value || '').length : -1,
+              classVal: classEl ? classEl.value : null,
+              startVal: startEl ? startEl.value : null,
+              endVal:   endEl ? endEl.value : null,
+              gridText: grid ? (grid.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 200) : '(no grid)',
+              hasCaptchaWord: /robot|captcha|verify you/i.test(bodyText),
+              snippet: bodyText.slice(0, 600),
+            };
+          });
+          console.log(`  [${county}] DEBUG title="${diag.title}" tokenLen=${diag.tokenLen} class=${diag.classVal} start=${diag.startVal} end=${diag.endVal} captchaWord=${diag.hasCaptchaWord}`);
+          console.log(`  [${county}] DEBUG grid="${diag.gridText}"`);
+          console.log(`  [${county}] DEBUG body="${diag.snippet}"`);
+        }
         break;
       }
 
