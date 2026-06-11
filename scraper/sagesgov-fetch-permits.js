@@ -295,6 +295,164 @@ async function solve2Captcha(sitekey, pageUrl, county) {
   }
 }
 
+// Run a single SagesGov search for one date window on an existing page.
+// Returns { tooMany: bool, permits: [rawPermit...] }. `tooMany` signals the result
+// set exceeded SagesGov's display cap so the caller should retry a narrower window.
+async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt }) {
+  const timeframeId = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_ddlTimeframe_2';
+  const startId     = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodStart_2';
+  const endId       = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodEnd_2';
+
+  // Fresh load each attempt so the form state (and captcha widget) is reset.
+  await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+
+  // Select Permits class
+  await page.select('#cphContent_cphMain_Search1_ddlClass', '1009');
+  await new Promise(r => setTimeout(r, 800));
+
+  // Set Submission Date → Date Range (option value has a space; label is "Date range (fixed)").
+  await page.select(`#${timeframeId}`, 'Date Range');
+  // Selecting it reveals the Period Start/End inputs (may involve an AutoPostBack).
+  await page.waitForFunction(
+    (id) => { const el = document.getElementById(id); return el && el.offsetParent !== null; },
+    { timeout: 15000 },
+    startId,
+  ).catch(() => {});
+  await new Promise(r => setTimeout(r, 300));
+
+  // Type start + end dates
+  await page.evaluate((id) => { const el = document.getElementById(id); if (el) { el.value = ''; el.focus(); } }, startId);
+  await page.type(`#${startId}`, startFmt, { delay: 50 });
+  await page.evaluate((id) => { const el = document.getElementById(id); if (el) { el.value = ''; el.focus(); } }, endId);
+  await page.type(`#${endId}`, endFmt, { delay: 50 });
+
+  // Solve reCAPTCHA — stealth may auto-solve; otherwise use 2captcha; else click the checkbox.
+  console.log(`  [${county}] Waiting for reCAPTCHA...`);
+  await page.waitForSelector('#cphContent_cphMain_ctrlCaptcha_captchUI iframe', { timeout: 10000 });
+
+  const alreadySolved = await page.evaluate(() => {
+    const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+    return el && el.value && el.value.length > 10;
+  });
+
+  if (alreadySolved) {
+    console.log(`  [${county}] reCAPTCHA auto-solved by stealth mode.`);
+  } else if (process.env.TWOCAPTCHA_API_KEY) {
+    const sitekey = await page.evaluate(() => {
+      const el = document.querySelector('[data-sitekey]');
+      if (el) return el.getAttribute('data-sitekey');
+      const iframe = document.querySelector('iframe[src*="recaptcha/api2/anchor"]');
+      if (iframe) {
+        const m = iframe.src.match(/[?&]k=([^&]+)/);
+        if (m) return decodeURIComponent(m[1]);
+      }
+      return null;
+    });
+    if (!sitekey) throw new Error('could not find reCAPTCHA sitekey');
+
+    console.log(`  [${county}] Solving reCAPTCHA via 2captcha (sitekey ${sitekey.slice(0, 12)}…)...`);
+    const token = await solve2Captcha(sitekey, searchUrl, county);
+    if (!token) throw new Error('2captcha did not return a token');
+
+    // Inject token: populate g-recaptcha-response, the SagesGov hidden field, and fire the callback.
+    await page.evaluate((tok) => {
+      document.querySelectorAll('textarea#g-recaptcha-response, textarea[name="g-recaptcha-response"]')
+        .forEach(t => { t.value = tok; t.style.display = 'block'; });
+      const hidden = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+      if (hidden) hidden.value = tok;
+      const cbEl = document.querySelector('[data-callback]');
+      const cbName = cbEl && cbEl.getAttribute('data-callback');
+      if (cbName && typeof window[cbName] === 'function') {
+        try { window[cbName](tok); } catch {}
+      }
+    }, token);
+
+    const injected = await page.evaluate(() => {
+      const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+      return !!(el && el.value && el.value.length > 10);
+    });
+    if (!injected) throw new Error('token injection did not populate the hidden field');
+    console.log(`  [${county}] reCAPTCHA token injected.`);
+  } else {
+    const frames = page.frames();
+    const anchorFrame = frames.find(f => f.url().includes('recaptcha/api2/anchor'));
+    if (anchorFrame) {
+      await anchorFrame.click('#recaptcha-anchor');
+      console.log(`  [${county}] Clicked reCAPTCHA checkbox, waiting for token...`);
+    } else {
+      await page.click('#cphContent_cphMain_ctrlCaptcha_captchUI');
+    }
+    await page.waitForFunction(
+      () => {
+        const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+        return el && el.value && el.value.length > 10;
+      },
+      { timeout: 30000 },
+    );
+    console.log(`  [${county}] reCAPTCHA token received.`);
+  }
+
+  // Submit the search
+  console.log(`  [${county}] Submitting search...`);
+  await Promise.all([
+    page.click('#cphContent_cphMain_btnSearch'),
+    page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+  ]);
+  await new Promise(r => setTimeout(r, 1000));
+
+  const firstHtml = await page.content();
+  if (/too many records/i.test(firstHtml)) {
+    return { tooMany: true, permits: [] };
+  }
+
+  // Parse results across all pages
+  const permits = [];
+  let pageNum = 0;
+  let hasMore = true;
+  while (hasMore && pageNum < 50) {
+    const html = await page.content();
+    if (!html.includes('Details.aspx')) {
+      if (pageNum === 0) console.log(`  [${county}] No results found in this window.`);
+      break;
+    }
+
+    const { headers, rows } = parseResultsHtml(html);
+    if (pageNum === 0 && headers.length > 0) {
+      console.log(`  [${county}] Columns: ${headers.join(', ')}`);
+    }
+    if (!rows || rows.length === 0) break;
+    console.log(`  [${county}] Page ${pageNum + 1}: ${rows.length} rows`);
+
+    for (const row of rows) {
+      const permit = mapRow(row, headers, slug);
+      if (permit.permit_number || permit.source_url) permits.push(permit);
+    }
+
+    const nextPageHref = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
+      for (const l of links) {
+        const text = l.textContent.trim();
+        if (text === '>' || text.toLowerCase() === 'next') return l.getAttribute('href');
+      }
+      return null;
+    });
+
+    if (nextPageHref) {
+      pageNum++;
+      await page.evaluate((href) => {
+        const m = href.match(/__doPostBack\('([^']+)','([^']*)'\)/);
+        if (m) __doPostBack(m[1], m[2]); // eslint-disable-line no-undef
+      }, nextPageHref);
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+      await new Promise(r => setTimeout(r, 500));
+    } else {
+      hasMore = false;
+    }
+  }
+
+  return { tooMany: false, permits };
+}
+
 async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
   const effectiveLastMs = lastTimestampMs || (Date.now() - 90 * 24 * 60 * 60 * 1000);
   const lastDateStr = msToDateStr(effectiveLastMs);
@@ -349,244 +507,38 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
 
+  // Adaptive date-range narrowing: SagesGov rejects oversized result sets with
+  // "Too many records matched". Try the requested window first; if it's too large,
+  // shrink it (anchored at today) until the search returns rows. Steady-state runs
+  // have a small window (cursor ~days back) and succeed on the first attempt; only a
+  // cold-start backfill triggers narrowing.
+  const day = 24 * 60 * 60 * 1000;
+  const candidateStarts = [effectiveLastMs, Date.now() - 60 * day, Date.now() - 30 * day, Date.now() - 14 * day, Date.now() - 7 * day]
+    .filter(ms => ms >= effectiveLastMs);
+  const windowStarts = [...new Set(candidateStarts)].sort((a, b) => a - b); // widest first
+
   try {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
-    console.log(`  [${county}] Loading search page...`);
-    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-
-    // Select Permits class
-    await page.select('#cphContent_cphMain_Search1_ddlClass', '1009');
-    await new Promise(r => setTimeout(r, 800));
-
-    // Set Submission Date → DateRange
-    const timeframeId = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_ddlTimeframe_2';
-    const startId     = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodStart_2';
-    const endId       = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodEnd_2';
-
-    // Option value is "Date Range" (with a space) — the visible label is "Date range (fixed)".
-    await page.select(`#${timeframeId}`, 'Date Range');
-    // Selecting it reveals the Period Start/End inputs (may involve an AutoPostBack).
-    await page.waitForFunction(
-      (id) => { const el = document.getElementById(id); return el && el.offsetParent !== null; },
-      { timeout: 15000 },
-      startId,
-    ).catch(() => {});
-    await new Promise(r => setTimeout(r, 300));
-
-    // Type start date
-    await page.evaluate((id) => { const el = document.getElementById(id); if (el) { el.value = ''; el.focus(); } }, startId);
-    await page.type(`#${startId}`, startFmt, { delay: 50 });
-
-    // Type end date
-    await page.evaluate((id) => { const el = document.getElementById(id); if (el) { el.value = ''; el.focus(); } }, endId);
-    await page.type(`#${endId}`, endFmt, { delay: 50 });
-
-    // Solve reCAPTCHA — stealth mode often causes checkbox to auto-verify
-    console.log(`  [${county}] Waiting for reCAPTCHA...`);
-    let captchaSolved = false;
-    try {
-      // Wait for captcha iframe to load
-      await page.waitForSelector('#cphContent_cphMain_ctrlCaptcha_captchUI iframe', { timeout: 10000 });
-
-      // Check if stealth already auto-solved it (token pre-populated)
-      const alreadySolved = await page.evaluate(() => {
-        const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-        return el && el.value && el.value.length > 10;
-      });
-
-      if (alreadySolved) {
-        console.log(`  [${county}] reCAPTCHA auto-solved by stealth mode.`);
-        captchaSolved = true;
-      } else if (process.env.TWOCAPTCHA_API_KEY) {
-        // Extract sitekey from a data-sitekey attribute or the anchor iframe's k= param.
-        const sitekey = await page.evaluate(() => {
-          const el = document.querySelector('[data-sitekey]');
-          if (el) return el.getAttribute('data-sitekey');
-          const iframe = document.querySelector('iframe[src*="recaptcha/api2/anchor"]');
-          if (iframe) {
-            const m = iframe.src.match(/[?&]k=([^&]+)/);
-            if (m) return decodeURIComponent(m[1]);
-          }
-          return null;
-        });
-
-        if (!sitekey) {
-          console.error(`  [${county}] Could not find reCAPTCHA sitekey — skipping.`);
-          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
-        }
-
-        console.log(`  [${county}] Solving reCAPTCHA via 2captcha (sitekey ${sitekey.slice(0, 12)}…)...`);
-        const token = await solve2Captcha(sitekey, searchUrl, county);
-        if (!token) {
-          console.error(`  [${county}] Skipping — 2captcha did not return a token.`);
-          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
-        }
-
-        // Inject the token: populate g-recaptcha-response, the SagesGov hidden field,
-        // and fire the widget's data-callback so any client-side state stays consistent.
-        await page.evaluate((tok) => {
-          document.querySelectorAll('textarea#g-recaptcha-response, textarea[name="g-recaptcha-response"]')
-            .forEach(t => { t.value = tok; t.style.display = 'block'; });
-          const hidden = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-          if (hidden) hidden.value = tok;
-          const cbEl = document.querySelector('[data-callback]');
-          const cbName = cbEl && cbEl.getAttribute('data-callback');
-          if (cbName && typeof window[cbName] === 'function') {
-            try { window[cbName](tok); } catch {}
-          }
-        }, token);
-
-        captchaSolved = await page.evaluate(() => {
-          const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-          return !!(el && el.value && el.value.length > 10);
-        });
-        if (captchaSolved) {
-          console.log(`  [${county}] reCAPTCHA token injected.`);
-        } else {
-          console.error(`  [${county}] Token injection did not populate the hidden field — skipping.`);
-          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
-        }
-      } else {
-        // No 2captcha key — try clicking the checkbox (stealth may resolve it).
-        const frames = page.frames();
-        const anchorFrame = frames.find(f => f.url().includes('recaptcha/api2/anchor'));
-        if (anchorFrame) {
-          await anchorFrame.click('#recaptcha-anchor');
-          console.log(`  [${county}] Clicked reCAPTCHA checkbox, waiting for token...`);
-        } else {
-          await page.click('#cphContent_cphMain_ctrlCaptcha_captchUI');
-        }
-
-        // Wait for token (stealth should resolve the checkbox quickly)
-        await page.waitForFunction(
-          () => {
-            const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-            return el && el.value && el.value.length > 10;
-          },
-          { timeout: 30000 }
-        );
-        captchaSolved = true;
-        console.log(`  [${county}] reCAPTCHA token received.`);
-      }
-    } catch (err) {
-      console.error(`  [${county}] reCAPTCHA handling failed: ${err.message}`);
-      console.error(`  [${county}] Skipping — captcha not solved (set TWOCAPTCHA_API_KEY to enable 2captcha solving).`);
-      return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
-    }
-
-    if (!captchaSolved) {
-      return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
-    }
-
-    if (process.env.SAGESGOV_DEBUG) {
-      const pre = await page.evaluate((ids) => {
-        const tf = document.getElementById(ids.timeframeId);
-        const opts = tf ? Array.from(tf.options).map(o => `${o.value}=${o.text}`) : [];
-        const startEl = document.getElementById(ids.startId);
-        const endEl = document.getElementById(ids.endId);
-        const tok = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-        return {
-          tfValue: tf ? tf.value : '(no timeframe el)',
-          tfOptions: opts,
-          startVal: startEl ? startEl.value : '(no start el)',
-          startVisible: startEl ? !!(startEl.offsetParent) : null,
-          endVal: endEl ? endEl.value : '(no end el)',
-          tokenLen: tok ? (tok.value || '').length : -1,
-        };
-      }, { timeframeId, startId, endId });
-      console.log(`  [${county}] PRE-SUBMIT tfValue=${pre.tfValue} start="${pre.startVal}" (visible=${pre.startVisible}) end="${pre.endVal}" tokenLen=${pre.tokenLen}`);
-      console.log(`  [${county}] PRE-SUBMIT tfOptions=${JSON.stringify(pre.tfOptions)}`);
-    }
-
-    // Submit the search
-    console.log(`  [${county}] Submitting search...`);
-    await Promise.all([
-      page.click('#cphContent_cphMain_btnSearch'),
-      page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
-    ]);
-
-    await new Promise(r => setTimeout(r, 1000));
-
-    // Parse results across all pages
-    let pageNum = 0;
-    let hasMore = true;
-
-    while (hasMore && pageNum < 50) {
-      const html = await page.content();
-
-      if (!html.includes('Details.aspx')) {
-        console.log(`  [${county}] No results found on page ${pageNum + 1}.`);
-        if (pageNum === 0 && process.env.SAGESGOV_DEBUG) {
-          // Diagnose: captcha rejection vs. empty grid vs. lost search criteria.
-          const diag = await page.evaluate(() => {
-            const bodyText = (document.body.innerText || '').replace(/\s+/g, ' ').trim();
-            const tokenEl = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
-            const classEl = document.getElementById('cphContent_cphMain_Search1_ddlClass');
-            const startEl = document.getElementById('cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodStart_2');
-            const endEl   = document.getElementById('cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodEnd_2');
-            const grid = document.querySelector('[id*="grid" i], [id*="Results" i], table');
-            return {
-              title: document.title,
-              tokenLen: tokenEl ? (tokenEl.value || '').length : -1,
-              classVal: classEl ? classEl.value : null,
-              startVal: startEl ? startEl.value : null,
-              endVal:   endEl ? endEl.value : null,
-              gridText: grid ? (grid.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 200) : '(no grid)',
-              hasCaptchaWord: /robot|captcha|verify you/i.test(bodyText),
-              snippet: bodyText.slice(0, 600),
-            };
-          });
-          console.log(`  [${county}] DEBUG title="${diag.title}" tokenLen=${diag.tokenLen} class=${diag.classVal} start=${diag.startVal} end=${diag.endVal} captchaWord=${diag.hasCaptchaWord}`);
-          console.log(`  [${county}] DEBUG grid="${diag.gridText}"`);
-          console.log(`  [${county}] DEBUG body="${diag.snippet}"`);
-        }
+    for (let i = 0; i < windowStarts.length; i++) {
+      const ws = windowStarts[i];
+      const sFmt = fmtDate(msToDateStr(ws));
+      console.log(`  [${county}] Searching ${msToDateStr(ws)} → ${todayStr}...`);
+      let res;
+      try {
+        res = await searchOneWindow(page, { searchUrl, slug, county, startFmt: sFmt, endFmt });
+      } catch (err) {
+        console.error(`  [${county}] Search attempt failed: ${err.message}`);
         break;
       }
-
-      const { headers, rows } = parseResultsHtml(html);
-
-      if (pageNum === 0 && headers.length > 0) {
-        console.log(`  [${county}] Columns: ${headers.join(', ')}`);
+      if (res.tooMany) {
+        console.log(`  [${county}] Too many records — narrowing window.`);
+        continue;
       }
-
-      if (!rows || rows.length === 0) break;
-      console.log(`  [${county}] Page ${pageNum + 1}: ${rows.length} rows`);
-
-      for (const row of rows) {
-        const permit = mapRow(row, headers, slug);
-        if (permit.permit_number || permit.source_url) {
-          allPermits.push(permit);
-        }
-      }
-
-      // Check for next page — look for __doPostBack links with Page$ pattern
-      const nextPageHref = await page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
-        // Find the ">" or "Next" link, or the next numbered page
-        for (const l of links) {
-          const text = l.textContent.trim();
-          if (text === '>' || text.toLowerCase() === 'next') {
-            return l.getAttribute('href');
-          }
-        }
-        return null;
-      });
-
-      if (nextPageHref) {
-        pageNum++;
-        await page.evaluate((href) => {
-          const m = href.match(/__doPostBack\('([^']+)','([^']*)'\)/);
-          if (m) __doPostBack(m[1], m[2]); // eslint-disable-line no-undef
-        }, nextPageHref);
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
-        await new Promise(r => setTimeout(r, 500));
-      } else {
-        hasMore = false;
-      }
+      for (const p of res.permits) allPermits.push(p);
+      break;
     }
-
   } catch (err) {
     console.error(`  ❌ [${county}] Error: ${err.message}`);
   } finally {
