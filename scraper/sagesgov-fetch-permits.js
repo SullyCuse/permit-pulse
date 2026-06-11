@@ -242,6 +242,59 @@ async function tryDirectHttp(searchUrl, slug, startFmt, endFmt, county) {
   }
 }
 
+// Solve a reCAPTCHA v2 checkbox via the 2captcha service.
+// Returns the g-recaptcha-response token string, or null on failure/no API key.
+// Uses the stable in.php/res.php HTTP API so no extra npm dependency is required.
+async function solve2Captcha(sitekey, pageUrl, county) {
+  const apiKey = process.env.TWOCAPTCHA_API_KEY;
+  if (!apiKey) return null;
+
+  const axios = require('axios');
+  try {
+    const inResp = await axios.get('https://2captcha.com/in.php', {
+      params: {
+        key: apiKey,
+        method: 'userrecaptcha',
+        googlekey: sitekey,
+        pageurl: pageUrl,
+        json: 1,
+      },
+      timeout: 20000,
+    });
+
+    if (inResp.data.status !== 1) {
+      console.error(`  [${county}] 2captcha submit failed: ${inResp.data.request}`);
+      return null;
+    }
+
+    const id = inResp.data.request;
+    console.log(`  [${county}] 2captcha job ${id} submitted; polling for solution...`);
+
+    // reCAPTCHA solves usually take 15–60s; poll for up to ~120s.
+    for (let i = 0; i < 24; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const res = await axios.get('https://2captcha.com/res.php', {
+        params: { key: apiKey, action: 'get', id, json: 1 },
+        timeout: 20000,
+      });
+      if (res.data.status === 1) {
+        console.log(`  [${county}] 2captcha solved.`);
+        return res.data.request;
+      }
+      if (res.data.request !== 'CAPCHA_NOT_READY') {
+        console.error(`  [${county}] 2captcha error: ${res.data.request}`);
+        return null;
+      }
+    }
+
+    console.error(`  [${county}] 2captcha timed out after ~120s.`);
+    return null;
+  } catch (err) {
+    console.error(`  [${county}] 2captcha request failed: ${err.message}`);
+    return null;
+  }
+}
+
 async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
   const effectiveLastMs = lastTimestampMs || (Date.now() - 90 * 24 * 60 * 60 * 1000);
   const lastDateStr = msToDateStr(effectiveLastMs);
@@ -339,8 +392,57 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
       if (alreadySolved) {
         console.log(`  [${county}] reCAPTCHA auto-solved by stealth mode.`);
         captchaSolved = true;
+      } else if (process.env.TWOCAPTCHA_API_KEY) {
+        // Extract sitekey from a data-sitekey attribute or the anchor iframe's k= param.
+        const sitekey = await page.evaluate(() => {
+          const el = document.querySelector('[data-sitekey]');
+          if (el) return el.getAttribute('data-sitekey');
+          const iframe = document.querySelector('iframe[src*="recaptcha/api2/anchor"]');
+          if (iframe) {
+            const m = iframe.src.match(/[?&]k=([^&]+)/);
+            if (m) return decodeURIComponent(m[1]);
+          }
+          return null;
+        });
+
+        if (!sitekey) {
+          console.error(`  [${county}] Could not find reCAPTCHA sitekey — skipping.`);
+          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+        }
+
+        console.log(`  [${county}] Solving reCAPTCHA via 2captcha (sitekey ${sitekey.slice(0, 12)}…)...`);
+        const token = await solve2Captcha(sitekey, searchUrl, county);
+        if (!token) {
+          console.error(`  [${county}] Skipping — 2captcha did not return a token.`);
+          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+        }
+
+        // Inject the token: populate g-recaptcha-response, the SagesGov hidden field,
+        // and fire the widget's data-callback so any client-side state stays consistent.
+        await page.evaluate((tok) => {
+          document.querySelectorAll('textarea#g-recaptcha-response, textarea[name="g-recaptcha-response"]')
+            .forEach(t => { t.value = tok; t.style.display = 'block'; });
+          const hidden = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+          if (hidden) hidden.value = tok;
+          const cbEl = document.querySelector('[data-callback]');
+          const cbName = cbEl && cbEl.getAttribute('data-callback');
+          if (cbName && typeof window[cbName] === 'function') {
+            try { window[cbName](tok); } catch {}
+          }
+        }, token);
+
+        captchaSolved = await page.evaluate(() => {
+          const el = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+          return !!(el && el.value && el.value.length > 10);
+        });
+        if (captchaSolved) {
+          console.log(`  [${county}] reCAPTCHA token injected.`);
+        } else {
+          console.error(`  [${county}] Token injection did not populate the hidden field — skipping.`);
+          return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
+        }
       } else {
-        // Find the anchor frame and click the checkbox
+        // No 2captcha key — try clicking the checkbox (stealth may resolve it).
         const frames = page.frames();
         const anchorFrame = frames.find(f => f.url().includes('recaptcha/api2/anchor'));
         if (anchorFrame) {
@@ -363,7 +465,7 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
       }
     } catch (err) {
       console.error(`  [${county}] reCAPTCHA handling failed: ${err.message}`);
-      console.error(`  [${county}] Skipping — captcha not solved (stealth mode active; may need 2captcha integration).`);
+      console.error(`  [${county}] Skipping — captcha not solved (set TWOCAPTCHA_API_KEY to enable 2captcha solving).`);
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
 
