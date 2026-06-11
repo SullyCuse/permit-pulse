@@ -53,7 +53,12 @@ function extractZip(address) {
 }
 
 function htmlText(html) {
-  return (html || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return (html || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function findChrome() {
@@ -121,30 +126,28 @@ function parseResultsHtml(html) {
   return { headers, rows };
 }
 
+// SagesGov result grids share a consistent column set:
+//   permit | status | parcel # | address | project/case | process |
+//   issued date | expiration date | added on | record status changed on
+// The "permit" cell is "<NUMBER> - <Type description>"; "added on" is the
+// submission date (always populated); "issued date" is blank until issued.
 function mapRow({ cells, detailHref }, headers, slug) {
-  function get(label, fallbackPos) {
-    if (headers.length > 0) {
-      const idx = headers.findIndex(h =>
-        h.includes(label.toLowerCase()) ||
-        (label === 'number' && (h.includes('case') || h.includes('permit') || h.includes('#'))) ||
-        (label === 'type' && (h.includes('type') || h.includes('record'))) ||
-        (label === 'address' && h.includes('address')) ||
-        (label === 'status' && h.includes('status')) ||
-        (label === 'date' && (h.includes('date') || h.includes('submitted') || h.includes('filed'))) ||
-        (label === 'applicant' && (h.includes('applicant') || h.includes('owner')))
-      );
-      if (idx >= 0 && cells[idx] != null) return cells[idx].trim();
-    }
-    return (cells[fallbackPos] || '').trim();
-  }
+  const col = (...needles) => {
+    const idx = headers.findIndex(h => needles.some(n => h.includes(n)));
+    return idx >= 0 ? (cells[idx] || '').trim() : '';
+  };
 
-  const permitNumber  = get('number', 0);
-  const permitType    = get('type', 1);
-  const address       = get('address', 2);
-  const status        = get('status', 3);
-  const submittedDate = get('date', 4);
-  const applicant     = get('applicant', 5);
+  const permitRaw = col('permit') || (cells[0] || '').trim();
+  const dashIdx   = permitRaw.indexOf(' - ');
+  const permitNumber = dashIdx >= 0 ? permitRaw.slice(0, dashIdx).trim() : permitRaw;
+  const typeFromName = dashIdx >= 0 ? permitRaw.slice(dashIdx + 3).trim() : '';
 
+  const address    = col('address');
+  const status     = col('status');
+  const permitType = typeFromName || col('process') || null;
+
+  // Prefer "added on" (submission date, always present); fall back to issued date.
+  const submittedDate = col('added on') || col('issued') || col('submitted', 'filed');
   const submittedMs   = parseSgDate(submittedDate);
   const dateFiled     = submittedMs
     ? new Date(submittedMs).toISOString().slice(0, 10)
@@ -161,7 +164,7 @@ function mapRow({ cells, detailHref }, headers, slug) {
     permit_type:    permitType || null,
     description:    null,
     date_filed:     dateFiled,
-    applicant_name: applicant || null,
+    applicant_name: null,
     source_url:     detailUrl,
     _submittedMs:   submittedMs,
     _status:        status || null,
@@ -422,9 +425,6 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
     }
     if (!rows || rows.length === 0) break;
     console.log(`  [${county}] Page ${pageNum + 1}: ${rows.length} rows`);
-    if (pageNum === 0 && process.env.SAGESGOV_DEBUG && rows[0]) {
-      console.log(`  [${county}] DEBUG row0 ${JSON.stringify(headers.map((h, i) => `${h}=${rows[0].cells[i]}`))}`);
-    }
 
     for (const row of rows) {
       const permit = mapRow(row, headers, slug);
