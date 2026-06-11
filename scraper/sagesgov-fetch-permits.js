@@ -512,8 +512,11 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
   // shrink it (anchored at today) until the search returns rows. Steady-state runs
   // have a small window (cursor ~days back) and succeed on the first attempt; only a
   // cold-start backfill triggers narrowing.
+  // SagesGov caps results at ~11 rows and rejects any larger set with "Too many
+  // records" (no pagination), so high-volume jurisdictions like Henry need a window
+  // as tight as a single day to land under the cap.
   const day = 24 * 60 * 60 * 1000;
-  const candidateStarts = [effectiveLastMs, Date.now() - 60 * day, Date.now() - 30 * day, Date.now() - 14 * day, Date.now() - 7 * day]
+  const candidateStarts = [effectiveLastMs, ...[60, 30, 14, 7, 3, 1].map(d => Date.now() - d * day)]
     .filter(ms => ms >= effectiveLastMs);
   const windowStarts = [...new Set(candidateStarts)].sort((a, b) => a - b); // widest first
 
