@@ -212,7 +212,7 @@ async function tryDirectHttp(searchUrl, slug, startFmt, endFmt, county) {
     const form = new URLSearchParams({
       ...hiddenFields,
       [classKey]:     '1009',
-      [timeframeKey]: 'DateRange',
+      [timeframeKey]: 'Date Range',
       [startKey]:     startFmt,
       [endKey]:       endFmt,
       [captchaKey]:   '',
@@ -365,7 +365,14 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
     const startId     = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodStart_2';
     const endId       = 'cphContent_cphMain_Search1_SearchOrViewFilters1_rptrDateFilter_tfddlDateFilter_2_txtPeriodEnd_2';
 
-    await page.select(`#${timeframeId}`, 'DateRange');
+    // Option value is "Date Range" (with a space) — the visible label is "Date range (fixed)".
+    await page.select(`#${timeframeId}`, 'Date Range');
+    // Selecting it reveals the Period Start/End inputs (may involve an AutoPostBack).
+    await page.waitForFunction(
+      (id) => { const el = document.getElementById(id); return el && el.offsetParent !== null; },
+      { timeout: 15000 },
+      startId,
+    ).catch(() => {});
     await new Promise(r => setTimeout(r, 300));
 
     // Type start date
