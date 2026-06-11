@@ -473,6 +473,26 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
       return { permits: [], maxTimestamp: lastTimestampMs || Date.now() };
     }
 
+    if (process.env.SAGESGOV_DEBUG) {
+      const pre = await page.evaluate((ids) => {
+        const tf = document.getElementById(ids.timeframeId);
+        const opts = tf ? Array.from(tf.options).map(o => `${o.value}=${o.text}`) : [];
+        const startEl = document.getElementById(ids.startId);
+        const endEl = document.getElementById(ids.endId);
+        const tok = document.getElementById('cphContent_cphMain_ctrlCaptcha_txtCaptchaToken');
+        return {
+          tfValue: tf ? tf.value : '(no timeframe el)',
+          tfOptions: opts,
+          startVal: startEl ? startEl.value : '(no start el)',
+          startVisible: startEl ? !!(startEl.offsetParent) : null,
+          endVal: endEl ? endEl.value : '(no end el)',
+          tokenLen: tok ? (tok.value || '').length : -1,
+        };
+      }, { timeframeId, startId, endId });
+      console.log(`  [${county}] PRE-SUBMIT tfValue=${pre.tfValue} start="${pre.startVal}" (visible=${pre.startVisible}) end="${pre.endVal}" tokenLen=${pre.tokenLen}`);
+      console.log(`  [${county}] PRE-SUBMIT tfOptions=${JSON.stringify(pre.tfOptions)}`);
+    }
+
     // Submit the search
     console.log(`  [${county}] Submitting search...`);
     await Promise.all([
