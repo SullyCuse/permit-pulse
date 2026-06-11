@@ -422,6 +422,9 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
     }
     if (!rows || rows.length === 0) break;
     console.log(`  [${county}] Page ${pageNum + 1}: ${rows.length} rows`);
+    if (pageNum === 0 && process.env.SAGESGOV_DEBUG && rows[0]) {
+      console.log(`  [${county}] DEBUG row0 ${JSON.stringify(headers.map((h, i) => `${h}=${rows[0].cells[i]}`))}`);
+    }
 
     for (const row of rows) {
       const permit = mapRow(row, headers, slug);
