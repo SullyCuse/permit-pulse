@@ -24,8 +24,34 @@ function getSupabase() {
   return _supabase;
 }
 
+// Viewport that biases Google toward Bryan County (SW|NE corners). Lets a
+// city-less street like "205 NEWPORT CIRCLE" resolve to the right subdivision
+// instead of a same-named street elsewhere in GA.
+const BRYAN_BOUNDS = '31.85,-81.80|32.30,-81.20';
+
+function extractZipCity(result) {
+  const components = result.address_components;
+  const zip    = components.find(c => c.types.includes('postal_code'))?.short_name ?? null;
+  const city   = components.find(c => c.types.includes('locality'))?.long_name ?? null;
+  const county = components.find(c => c.types.includes('administrative_area_level_2'))?.long_name ?? null;
+  return { zip, city, county };
+}
+
+// One Google forward-geocode call. Returns { status, zip, city, county }.
+async function googleForward(apiKey, params) {
+  const { data } = await axios.get(GEOCODE_URL, {
+    params: { key: apiKey, ...params },
+    timeout: 5000,
+  });
+  if (data.status === 'OVER_QUERY_LIMIT') return { status: 'OVER_QUERY_LIMIT' };
+  if (data.status !== 'OK' || !data.results?.length) return { status: 'ZERO_RESULTS' };
+  return { status: 'OK', ...extractZipCity(data.results[0]) };
+}
+
 // Forward-geocode a bare street address in Bryan County → { zip, city }
 // Uses geocode_cache table (L2) to avoid re-billing the same address.
+// On a miss with the county-qualified query, retries with a Bryan-County
+// viewport bias and only accepts a result that lands back in Bryan County.
 async function geocodeBryanAddress(address) {
   if (!address) return { zip: null, city: null };
 
@@ -52,18 +78,24 @@ async function geocodeBryanAddress(address) {
   if (!apiKey) return { zip: null, city: null };
 
   try {
-    const { data } = await axios.get(GEOCODE_URL, {
-      params: { address: query, key: apiKey },
-      timeout: 5000,
-    });
+    // Attempt 1: county-qualified address (most precise when the street is unique)
+    let r = await googleForward(apiKey, { address: query });
 
-    if (data.status === 'OVER_QUERY_LIMIT') {
+    // Attempt 2: drop the county text, bias to the Bryan viewport, and require
+    // the match to fall back inside Bryan County (rejects wrong same-named streets).
+    if (r.status === 'ZERO_RESULTS') {
+      const biased = await googleForward(apiKey, { address: `${address}, GA`, bounds: BRYAN_BOUNDS });
+      if (biased.status === 'OK' && biased.county === 'Bryan County') r = biased;
+      else if (biased.status === 'OVER_QUERY_LIMIT') r = biased;
+    }
+
+    if (r.status === 'OVER_QUERY_LIMIT') {
       // Transient rate limit — do NOT cache, will retry on next run
       console.warn('  Google Maps API rate limited — zip/city will be null for this run');
       return { zip: null, city: null };
     }
 
-    if (data.status !== 'OK' || !data.results?.length) {
+    if (r.status !== 'OK') {
       // Genuine no-result — cache as null so we don't keep calling the API
       const empty = { zip: null, city: null };
       geoMemCache.set(query, empty);
@@ -71,13 +103,9 @@ async function geocodeBryanAddress(address) {
       return empty;
     }
 
-    const components = data.results[0].address_components;
-    const zip  = components.find(c => c.types.includes('postal_code'))?.short_name ?? null;
-    const city = components.find(c => c.types.includes('locality'))?.long_name ?? null;
-
-    const result = { zip, city };
+    const result = { zip: r.zip, city: r.city };
     geoMemCache.set(query, result);
-    if (sb) await sb.from('geocode_cache').upsert({ address: query, zip_code: zip, city }, { onConflict: 'address' });
+    if (sb) await sb.from('geocode_cache').upsert({ address: query, zip_code: r.zip, city: r.city }, { onConflict: 'address' });
     return result;
   } catch (err) {
     console.warn(`  Geocode failed for "${query}": ${err.message}`);
@@ -356,7 +384,7 @@ async function fetchNewPermits(lastTimestampMs = 0) {
   return { permits, maxTimestamp: Date.now() };
 }
 
-module.exports = { fetchNewPermits };
+module.exports = { fetchNewPermits, geocodeBryanAddress };
 
 if (require.main === module) {
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
