@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+const { parseCity } = require('./parse-address');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -34,6 +35,11 @@ async function savePermits(permits) {
     };
     // Only include zip_code when we have a value — preserves existing zip on updates
     if (permit.zip_code != null) upsertData.zip_code = permit.zip_code;
+
+    // Derive city from the address (or use one a scraper already supplied). Same
+    // non-null guard as zip: a parse miss must not wipe an existing city on update.
+    const city = permit.city ?? parseCity(permit.address);
+    if (city != null) upsertData.city = city;
 
     const { error } = await supabase
       .from('permits')
