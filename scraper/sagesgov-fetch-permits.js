@@ -439,7 +439,9 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
 
     for (const row of rows) {
       const permit = mapRow(row, headers, slug);
-      if (permit.permit_number || permit.source_url) permits.push(permit);
+      // Real permit rows always carry a Details.aspx link; this filters out stray
+      // header/pager rows that otherwise parse into junk (e.g. permit_number "1").
+      if (permit.source_url) permits.push(permit);
     }
 
     const nextPageHref = await page.evaluate(() => {
@@ -487,7 +489,7 @@ async function fetchPermitsForJurisdiction(lastTimestampMs, { slug, county }) {
     if (headers) console.log(`  [${county}] Columns: ${headers.join(', ')}`);
     for (const row of (rows || [])) {
       const permit = mapRow(row, headers || [], slug);
-      if (permit.permit_number || permit.source_url) allPermits.push(permit);
+      if (permit.source_url) allPermits.push(permit);
     }
     console.log(`  [${county}] Direct HTTP: ${allPermits.length} permits parsed.`);
 
