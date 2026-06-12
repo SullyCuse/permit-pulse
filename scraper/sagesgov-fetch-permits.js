@@ -432,15 +432,21 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
   // SagesGov paginates results (10 per page) with an ASP.NET GridView. Read the
   // "X of Y records" total and walk pages via __doPostBack(target, 'Page$N') — the
   // visible pager only shows a numeric window + ">>", so direct postbacks are simpler.
-  const { total, target } = await page.evaluate(() => {
-    const m = (document.body.innerText || '').match(/of\s+([\d,]+)\s+records?/i);
-    let target = null;
-    for (const a of document.querySelectorAll('a[href*="__doPostBack"]')) {
-      const mm = (a.getAttribute('href') || '').match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
-      if (mm) { target = mm[1]; break; }
+  const totalMatch = htmlText(firstHtml).match(/of\s+([\d,]+)\s+records?/i);
+  const total = totalMatch ? parseInt(totalMatch[1].replace(/,/g, ''), 10) : null;
+
+  // Mirror the proven evaluate shape (Array.from + return a string) — returning a
+  // richer object here previously tripped Puppeteer's function serialization.
+  const targetHref = await page.evaluate(() => {
+    const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
+    for (const l of links) {
+      const h = l.getAttribute('href') || '';
+      if (/Page\$\d+/.test(h)) return h;
     }
-    return { total: m ? parseInt(m[1].replace(/,/g, ''), 10) : null, target };
+    return null;
   });
+  const targetMatch = targetHref && targetHref.match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
+  const target = targetMatch ? targetMatch[1] : null;
 
   const totalPages = total ? Math.min(Math.ceil(total / 10), 60) : 1;
   if (target && totalPages > 1) {
