@@ -21,6 +21,34 @@ const MULTIWORD_CITIES = [
   'St Simons Island', 'Sky Valley', 'Lake City', 'Locust Grove',
 ].sort((a, b) => b.length - a.length);
 
+// Words that are never a city on their own — street-type suffixes, directionals, and
+// unit markers. A no-comma address like "1033 MCLENDON DR" would otherwise yield "Dr".
+const NON_CITY_WORDS = new Set([
+  'st', 'street', 'rd', 'road', 'dr', 'drive', 'ln', 'lane', 'ct', 'court', 'pl', 'place',
+  'way', 'ave', 'avenue', 'blvd', 'boulevard', 'cir', 'circle', 'trl', 'trail', 'ter', 'terrace',
+  'hwy', 'highway', 'pkwy', 'parkway', 'run', 'pt', 'point', 'cres', 'crescent', 'sq', 'square',
+  'loop', 'walk', 'path', 'xing', 'crossing', 'row', 'cv', 'cove', 'pass', 'bnd', 'bend',
+  'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw', 'north', 'south', 'east', 'west',
+  'ste', 'suite', 'apt', 'unit', 'bldg', 'lot', 'fl', 'ga', 'georgia',
+]);
+
+// Reject obvious non-cities: contains a digit (parcel IDs, malformed zips like "GA 0"),
+// too short ("Ga", unit letters), or a bare street suffix / directional.
+function isValidCity(c) {
+  if (!c) return false;
+  if (!/^[a-z]/i.test(c)) return false; // must start with a letter (drops "(A)", etc.)
+  if (/\d/.test(c)) return false;
+  if (c.length < 3) return false;
+  if (NON_CITY_WORDS.has(c.toLowerCase())) return false;
+  return true;
+}
+
+// Title-case and validate a candidate; returns the clean city or null.
+function clean(candidate) {
+  const t = titleCase(candidate.trim());
+  return isValidCity(t) ? t : null;
+}
+
 function titleCase(s) {
   return s
     .toLowerCase()
@@ -33,13 +61,11 @@ function titleCase(s) {
 // Handles both ", GA 30306" and the glued "Canton, GA30115" Cherokee form.
 function stripStateZip(address) {
   let s = address.trim();
-  // Normalize the glued "GA30115" form to "GA 30115" so the zip strip below catches it.
-  s = s.replace(/,?\s*GA\s*(\d{5})/i, ', GA $1');
-  // Trailing zip (5 or ZIP+4).
-  s = s.replace(/[,\s]+\d{5}(-\d{4})?\s*$/i, '');
-  // Trailing state (with or without a leading comma).
-  s = s.replace(/[,\s]+GA\s*$/i, '');
-  return s.trim();
+  s = s.replace(/[\s,]+$/, '');                              // trailing commas/spaces (", ,  ")
+  s = s.replace(/,?\s*(GA|GEORGIA)\s*(\d{5})/i, ', GA $2');  // normalize glued "GA30115"/"Georgia 30115"
+  s = s.replace(/[,\s]+\d{5}(-\d{4})?\s*$/i, '');            // trailing zip (5 or ZIP+4)
+  s = s.replace(/[,\s]+(GA|GEORGIA)\s*\d*\s*$/i, '');        // state + any leftover short digits ("GA 0", "GA 303")
+  return s.replace(/[\s,]+$/, '').trim();
 }
 
 // Extract the city from a raw address string. Returns a title-cased city, or null.
@@ -66,7 +92,7 @@ function parseCity(address) {
 
   // Multiple segments → the last surviving one is the city (street is earlier).
   if (segments.length > 1) {
-    return titleCase(segments[segments.length - 1]);
+    return clean(segments[segments.length - 1]);
   }
 
   // Single segment. If the original had a comma, this lone segment is the street
@@ -88,7 +114,7 @@ function parseCity(address) {
   }
   const words = lone.split(/\s+/);
   if (words.length < 2) return null; // just a street number / nothing city-like
-  return titleCase(words[words.length - 1]);
+  return clean(words[words.length - 1]);
 }
 
 // Street-only display value: the address with the trailing ", city, GA zip" removed.
@@ -125,6 +151,12 @@ if (require.main === module) {
     ['4688 Hwy 280 W, Pembroke', 'Pembroke'],
     ['101 Fiber Dr, CARTERSVILLE, GA 30120', 'Cartersville'],
     ['5169 MUNDY GROVE LANE SW, GAINESVILLE', 'Gainesville'],
+    // edge cases that must NOT yield a bogus city
+    ['1033 MCLENDON DR ', null],               // no city -> not "Dr"
+    ['1137 AVIATION WAY SW', null],            // directional -> not "Sw"
+    ['2710 BOULDERCREST RD STE C ', null],     // unit -> not "C"
+    ['21N11 006 , 21-1054-0002', null],        // parcel id -> not "21-1054-0002"
+    ['0 ANTHONY NW, ATLANTA, GA 0', 'Atlanta'],// malformed zip -> still Atlanta, not "Ga 0"
   ];
   let pass = 0;
   for (const [addr, expected] of cases) {
