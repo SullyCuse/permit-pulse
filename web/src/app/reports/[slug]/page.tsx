@@ -6,7 +6,7 @@ import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
 import {
   parseSlug, getReportData, formatMonthYear, COUNTY_META,
-  getCountyMonths, buildSlug,
+  getCountyMonths, buildSlug, MIN_INDEXABLE_PERMITS,
 } from '@/lib/reports'
 
 // revalidate without generateStaticParams = ISR on-demand:
@@ -34,7 +34,7 @@ export async function generateMetadata(
   // Don't let Google index thin pages — very few permits = near-empty content
   const now = new Date()
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth()
-  const isThin = report.total < 5
+  const isThin = report.total < MIN_INDEXABLE_PERMITS
 
   return {
     title: `${meta.fullName} Building Permits — ${monthYear} | Permit Pulse`,

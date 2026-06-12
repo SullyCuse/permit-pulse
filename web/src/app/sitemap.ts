@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { LOCATIONS } from '@/lib/locations'
-import { COUNTY_META, buildSlug, getAllReportSummaries } from '@/lib/reports'
+import { COUNTY_META, buildSlug, getAllReportSummaries, MIN_INDEXABLE_PERMITS } from '@/lib/reports'
 
 // Sitemap calls Supabase — must be dynamic so it isn't pre-rendered at build time
 // (Supabase env vars are only available at runtime, not in preview builds)
@@ -23,7 +23,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const summaries = await getAllReportSummaries()
   const reportPages = summaries
     .filter(s =>
-      s.count > 0 &&
+      // Match the page's noindex threshold — thin pages are noindex, so keeping
+      // them out of the sitemap avoids the "Noindex page in sitemap" conflict
+      s.count >= MIN_INDEXABLE_PERMITS &&
       COUNTY_META[s.county] &&
       // Exclude current month — data is always incomplete mid-month
       !(s.year === currentYear && s.month === currentMonth)
