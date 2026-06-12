@@ -97,6 +97,12 @@ export function getPastMonthSlugs(): string[] {
   return slugs
 }
 
+// Reports with fewer than this many permits are "thin": near-empty content
+// that we noindex AND keep out of the sitemap. Both must use this threshold —
+// if they diverge, thin pages end up in the sitemap while marked noindex,
+// which search consoles (e.g. Ahrefs) flag as "Noindex page in sitemap".
+export const MIN_INDEXABLE_PERMITS = 5
+
 export interface ReportData {
   county: string
   year: number
