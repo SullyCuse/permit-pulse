@@ -38,4 +38,3 @@ jobs:
           APP_URL:              ${{ secrets.APP_URL }}
           GOOGLE_MAPS_API_KEY:  ${{ secrets.GOOGLE_MAPS_API_KEY }}
           TWOCAPTCHA_API_KEY:   ${{ secrets.TWOCAPTCHA_API_KEY }}
-          SAGESGOV_DEBUG:       "1"

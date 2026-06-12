@@ -408,65 +408,49 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
     return { tooMany: true, permits: [] };
   }
 
-  // Parse results across all pages
   const permits = [];
-  let pageNum = 0;
-  let hasMore = true;
-  while (hasMore && pageNum < 50) {
-    const html = await page.content();
-    if (!html.includes('Details.aspx')) {
-      if (pageNum === 0) console.log(`  [${county}] No results found in this window.`);
-      break;
-    }
-
+  const collectPage = (html) => {
     const { headers, rows } = parseResultsHtml(html);
-    if (pageNum === 0 && headers.length > 0) {
-      console.log(`  [${county}] Columns: ${headers.join(', ')}`);
-    }
-    if (!rows || rows.length === 0) break;
-    console.log(`  [${county}] Page ${pageNum + 1}: ${rows.length} rows`);
-    if (pageNum === 0 && process.env.SAGESGOV_DEBUG) {
-      const addedIdx = headers.findIndex(h => h.includes('added on'));
-      console.log(`  [${county}] DEBUG addedOn dates: ${JSON.stringify(rows.map(r => r.cells[addedIdx]))}`);
-      const pager = await page.evaluate(() => {
-        const recordText = (document.body.innerText.match(/[\d,]+\s+(?:of|records?|results?)[^.\n]*/i) || [])[0] || null;
-        const pagerHrefs = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'))
-          .filter(a => /^\d+$|^>>?$|next/i.test(a.textContent.trim()))
-          .map(a => `${a.textContent.trim()}::${a.getAttribute('href')}`);
-        return { recordText, pagerHrefs: pagerHrefs.slice(0, 12) };
-      });
-      console.log(`  [${county}] DEBUG recordText="${pager.recordText}" pagerHrefs=${JSON.stringify(pager.pagerHrefs)}`);
-    }
-
-    for (const row of rows) {
+    let added = 0;
+    for (const row of (rows || [])) {
       const permit = mapRow(row, headers, slug);
       // Real permit rows always carry a Details.aspx link; this filters out stray
       // header/pager rows that otherwise parse into junk (e.g. permit_number "1").
-      if (permit.source_url) permits.push(permit);
+      if (permit.source_url) { permits.push(permit); added++; }
     }
+    return { headers, added };
+  };
 
-    const nextPageHref = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
-      for (const l of links) {
-        const text = l.textContent.trim();
-        if (text === '>' || text.toLowerCase() === 'next') return l.getAttribute('href');
-      }
-      return null;
-    });
+  if (!firstHtml.includes('Details.aspx')) {
+    console.log(`  [${county}] No results found in this window.`);
+    return { tooMany: false, permits };
+  }
 
-    if (nextPageHref) {
-      pageNum++;
-      await page.evaluate((href) => {
-        const m = href.match(/__doPostBack\('([^']+)','([^']*)'\)/);
-        if (m) __doPostBack(m[1], m[2]); // eslint-disable-line no-undef
-      }, nextPageHref);
+  const { headers } = collectPage(firstHtml);
+  console.log(`  [${county}] Columns: ${headers.join(', ')}`);
+
+  // SagesGov paginates results (10 per page) with an ASP.NET GridView. Read the
+  // "X of Y records" total and walk pages via __doPostBack(target, 'Page$N') — the
+  // visible pager only shows a numeric window + ">>", so direct postbacks are simpler.
+  const { total, target } = await page.evaluate(() => {
+    const m = document.body.innerText.match(/of\s+([\d,]+)\s+records?/i);
+    const link = document.querySelector('a[href*="Page$"]');
+    const mm = link && link.getAttribute('href').match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
+    return { total: m ? parseInt(m[1].replace(/,/g, ''), 10) : null, target: mm ? mm[1] : null };
+  });
+
+  const totalPages = total ? Math.min(Math.ceil(total / 10), 60) : 1;
+  if (target && totalPages > 1) {
+    for (let p = 2; p <= totalPages; p++) {
+      await page.evaluate((t, n) => __doPostBack(t, 'Page$' + n), target, p); // eslint-disable-line no-undef
       await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
-      await new Promise(r => setTimeout(r, 500));
-    } else {
-      hasMore = false;
+      await new Promise(r => setTimeout(r, 400));
+      const { added } = collectPage(await page.content());
+      if (added === 0) break; // safety: stop if a page yields no rows
     }
   }
 
+  console.log(`  [${county}] Collected ${permits.length}${total ? ` of ${total}` : ''} records across ${Math.min(totalPages, 60)} page(s).`);
   return { tooMany: false, permits };
 }
 
