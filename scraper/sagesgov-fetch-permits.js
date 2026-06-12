@@ -434,35 +434,33 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
   // visible pager only shows a numeric window + ">>", so direct postbacks are simpler.
   const totalMatch = htmlText(firstHtml).match(/of\s+([\d,]+)\s+records?/i);
   const total = totalMatch ? parseInt(totalMatch[1].replace(/,/g, ''), 10) : null;
-  console.log(`  [${county}] DBG1 total=${total}`);
 
-  // Mirror the proven evaluate shape (Array.from + return a string) — returning a
-  // richer object here previously tripped Puppeteer's function serialization.
-  let targetHref = null;
-  try {
-    targetHref = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
-      for (const l of links) {
-        const h = l.getAttribute('href') || '';
-        if (h.indexOf("'Page$") !== -1) return h;
-      }
-      return null;
-    });
-  } catch (e) { console.log(`  [${county}] DBG2 targetHref eval threw: ${e.message}`); throw e; }
-  console.log(`  [${county}] DBG3 targetHref=${targetHref}`);
+  const targetHref = await page.evaluate(() => {
+    const links = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'));
+    for (const l of links) {
+      const h = l.getAttribute('href') || '';
+      if (h.indexOf("'Page$") !== -1) return h;
+    }
+    return null;
+  });
   const targetMatch = targetHref && targetHref.match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
   const target = targetMatch ? targetMatch[1] : null;
 
   const totalPages = total ? Math.min(Math.ceil(total / 10), 60) : 1;
   if (target && totalPages > 1) {
     for (let p = 2; p <= totalPages; p++) {
-      const href = `__doPostBack('${target}','Page$${p}')`;
-      try {
-        await page.evaluate((h) => {
-          const m = h.match(/__doPostBack\('([^']+)','([^']*)'\)/);
-          if (m) __doPostBack(m[1], m[2]); // eslint-disable-line no-undef
-        }, href);
-      } catch (e) { console.log(`  [${county}] DBG4 postback p=${p} threw: ${e.message}`); throw e; }
+      // Drive the GridView postback by setting the event fields and submitting the
+      // form directly. Calling __doPostBack() from inside evaluate throws a
+      // strict-mode "arguments" error because ASP.NET's onsubmit handler reads
+      // arguments.callee; HTMLFormElement.prototype.submit bypasses onsubmit.
+      await page.evaluate((tgt, arg) => {
+        const et = document.getElementById('__EVENTTARGET');
+        const ea = document.getElementById('__EVENTARGUMENT');
+        if (et) et.value = tgt;
+        if (ea) ea.value = arg;
+        const f = (et && et.form) || document.forms[0];
+        HTMLFormElement.prototype.submit.call(f);
+      }, target, `Page$${p}`);
       await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
       await new Promise(r => setTimeout(r, 400));
       const { added } = collectPage(await page.content());
