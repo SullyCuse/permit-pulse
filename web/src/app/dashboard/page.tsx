@@ -101,7 +101,7 @@ export default async function DashboardPage({
       {checkoutSuccess && <CheckoutConversion />}
       {/* Header */}
       <header className="bg-white/95 backdrop-blur-sm border-b border-stone-200 px-6 py-4 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Logo color="#2d5a27" />
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">{user.email}</span>
@@ -114,7 +114,7 @@ export default async function DashboardPage({
 
       {!isActive && (
         <div className="border-b border-stone-200 px-6 py-4" style={{ backgroundColor: '#f0f7ee' }}>
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <p className="font-medium" style={{ color: '#1e4a1c' }}>Start your subscription to get permit alerts</p>
               <p className="text-sm mt-0.5" style={{ color: '#2d5a27' }}>Choose a plan to unlock email alerts and full access.</p>
@@ -131,9 +131,9 @@ export default async function DashboardPage({
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
         {/* Permit feed */}
-        <div className="lg:col-span-2">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Recent Permits</h2>
             <span className="text-sm text-gray-400">{totalCount?.toLocaleString() ?? 0} total</span>
@@ -219,14 +219,14 @@ export default async function DashboardPage({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
-                      <th className="px-4 py-2.5 font-medium">Permit</th>
-                      <th className="px-4 py-2.5 font-medium">Address</th>
+                      <th className="px-3 py-2.5 font-medium">Permit</th>
+                      <th className="px-3 py-2.5 font-medium">Address</th>
                       <SortHeader label="City" col="city" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} />
                       <SortHeader label="Zip" col="zip" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} />
-                      <th className="px-4 py-2.5 font-medium">County</th>
+                      <th className="px-3 py-2.5 font-medium">County</th>
                       <SortHeader label="Filed" col="date" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} align="right" />
-                      <th className="px-4 py-2.5 font-medium text-right">Value</th>
-                      <th className="px-4 py-2.5 font-medium"></th>
+                      <th className="px-3 py-2.5 font-medium text-right">Value</th>
+                      <th className="px-3 py-2.5 font-medium"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -290,7 +290,7 @@ export default async function DashboardPage({
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="w-full lg:w-48 lg:flex-shrink-0 space-y-6">
           {/* Watchlist */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">My Watchlist</h2>
@@ -405,7 +405,7 @@ function SortHeader({
     ? (sortDir === 'asc' ? 'desc' : 'asc')
     : SORT_COLUMNS[col].defaultDir
   return (
-    <th className={`px-4 py-2.5 font-medium ${align === 'right' ? 'text-right' : ''}`}>
+    <th className={`px-3 py-2.5 font-medium ${align === 'right' ? 'text-right' : ''}`}>
       <Link
         href={buildHref({ sort: col, dir: nextDir, page: 1 })}
         className={`inline-flex items-center gap-1 hover:text-gray-700 ${active ? 'text-gray-900' : ''}`}
@@ -468,7 +468,7 @@ function PermitRow({ permit }: { permit: any }) {
 
   return (
     <tr className="border-b border-gray-100 last:border-0 align-top hover:bg-gray-50/60">
-      <td className="px-4 py-3 whitespace-nowrap">
+      <td className="px-3 py-3 whitespace-nowrap">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: '#f0f7ee', color: '#2d5a27' }}>
             {permit.permit_type ?? 'Unknown'}
@@ -481,7 +481,7 @@ function PermitRow({ permit }: { permit: any }) {
         </div>
         {permit.permit_number && <div className="text-xs text-gray-400 mt-1">{permit.permit_number}</div>}
       </td>
-      <td className="px-4 py-3 min-w-[180px] max-w-[260px]">
+      <td className="px-3 py-3 min-w-[150px] max-w-[200px]">
         <div className="font-medium text-gray-900">{street}</div>
         {permit.description && (
           <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{permit.description}</div>
@@ -493,14 +493,14 @@ function PermitRow({ permit }: { permit: any }) {
           <div className="text-xs text-gray-400"><span className="font-medium text-gray-500">Applicant:</span> {applicant}</div>
         )}
       </td>
-      <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{permit.city ?? '—'}</td>
-      <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{permit.zip_code ?? '—'}</td>
-      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{permit.county}</td>
-      <td className="px-4 py-3 text-gray-500 whitespace-nowrap text-right">{filedDate}</td>
-      <td className="px-4 py-3 text-gray-700 whitespace-nowrap text-right">
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap">{permit.city ?? '—'}</td>
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap">{permit.zip_code ?? '—'}</td>
+      <td className="px-3 py-3 text-gray-500 whitespace-nowrap">{permit.county}</td>
+      <td className="px-3 py-3 text-gray-500 whitespace-nowrap text-right">{filedDate}</td>
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap text-right">
         {estimatedValue ? `$${Number(estimatedValue).toLocaleString()}` : '—'}
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-right">
+      <td className="px-3 py-3 whitespace-nowrap text-right">
         {sourceUrl && (
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs hover:underline" style={{ color: '#2d5a27' }}>
             {sourceLinkLabel}
