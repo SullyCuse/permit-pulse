@@ -58,10 +58,14 @@ See `memory/adding-new-scrapers.md` for full checklist.
 - Clear stale nulls: `DELETE FROM geocode_cache WHERE zip_code IS NULL AND city IS NULL`
 - Gwinnett geocoder (`gwinnett-geocode.js`) only returns zip; Bryan geocoder also returns city
 
-## SagesGov Portal (Fayette County, Henry County, Marietta)
+## SagesGov Portal (Fayette County, Henry County, Marietta, LaGrange)
 - Tries direct HTTP POST (no CAPTCHA) before launching Puppeteer — if server enforces reCAPTCHA, falls back to Puppeteer stealth
 - Direct HTTP form fields use `ctl00$cphContent$...` dollar-notation (not the `#id` selector names seen in DevTools)
-- reCAPTCHA v2 consistently blocks headless Chrome in CI; direct HTTP bypass is the preferred path
+- reCAPTCHA v2 consistently blocks headless Chrome in CI — **solved via 2captcha** (`TWOCAPTCHA_API_KEY` secret; `solve2Captcha()` uses the 2captcha in.php/res.php HTTP API, no npm dep). Stealth never auto-solves these; without the key the scraper skips. Extract the sitekey from the anchor iframe `k=` param, inject the token into `#...ctrlCaptcha_txtCaptchaToken`, then submit.
+- **Timeframe dropdown value is `"Date Range"` (with a space)**, not `"DateRange"` — the label is "Date range (fixed)". `page.select` silently selects nothing on a value mismatch, leaving dates unposted and the search bouncing back to an empty form.
+- **Results are a 10-per-page ASP.NET GridView.** Read the "X of Y records" total and page via the GridView postback. Do NOT call `__doPostBack` inside `page.evaluate` — ASP.NET's `onsubmit` reads `arguments.callee`, which throws a strict-mode error in Puppeteer's evaluate wrapper. Instead set `__EVENTTARGET`/`__EVENTARGUMENT` and submit via `HTMLFormElement.prototype.submit` (bypasses onsubmit).
+- **Result-count cap**: SagesGov refuses oversized result sets with "Too many records matched" (no rows). `fetchPermitsForJurisdiction` adaptively narrows the date window (anchored at today: full→60→30→14→7→3→1 days) until the search returns rows. Cold-start backfill only reaches as far back as the widest sub-cap window; steady-state runs query a small window.
+- **Date column**: map `date_filed` from the "added on" column (submission date, always populated), NOT "issued date" (blank until issued). The "permit" cell is `"<NUMBER> - <Type>"` — split it. There is no applicant column. Require a Details.aspx link to accept a row (drops the stray pager row).
 
 ## Accela Portal (Gainesville, Oakwood — hallco-accela-fetch-permits.js)
 - Raw address format is "STREET, CITY GA ZIP" — city is always the last comma segment before " GA XXXXX"
