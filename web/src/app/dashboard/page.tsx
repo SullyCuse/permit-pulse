@@ -9,10 +9,18 @@ import CheckoutConversion from './CheckoutConversion'
 const PAGE_SIZE = 50
 const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange'] as const
 
+// Sortable columns → DB column mapping. `sort` selects the column, `dir` the direction.
+const SORT_COLUMNS = {
+  date: { col: 'date_filed', defaultDir: 'desc' as const },
+  city: { col: 'city', defaultDir: 'asc' as const },
+  zip:  { col: 'zip_code', defaultDir: 'asc' as const },
+}
+type SortKey = keyof typeof SORT_COLUMNS
+
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ county?: string; page?: string; type?: string; error?: string; search?: string; sort?: string; checkout?: string }>
+  searchParams: Promise<{ county?: string; page?: string; type?: string; error?: string; search?: string; sort?: string; dir?: string; checkout?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -25,7 +33,8 @@ export default async function DashboardPage({
   const page = Math.max(1, parseInt(params.page ?? '1', 10))
   const offset = (page - 1) * PAGE_SIZE
   const activeSearch = params.search?.trim() ?? ''
-  const activeSort = params.sort === 'asc' ? 'asc' : 'desc'
+  const sortKey: SortKey = (params.sort && params.sort in SORT_COLUMNS ? params.sort : 'date') as SortKey
+  const sortDir: 'asc' | 'desc' = params.dir === 'asc' || params.dir === 'desc' ? params.dir : SORT_COLUMNS[sortKey].defaultDir
 
   const admin = createAdminClient()
 
@@ -47,7 +56,7 @@ export default async function DashboardPage({
   let query = admin
     .from('permits')
     .select('*', { count: 'exact' })
-    .order('date_filed', { ascending: activeSort === 'asc' })
+    .order(SORT_COLUMNS[sortKey].col, { ascending: sortDir === 'asc', nullsFirst: false })
     .range(offset, offset + pageSize - 1)
 
   if (activeCounty !== 'All') query = query.eq('county', activeCounty)
@@ -67,19 +76,22 @@ export default async function DashboardPage({
     .select('*')
     .eq('user_id', user.id)
 
-  function buildHref(overrides: { county?: string; type?: string; page?: number; search?: string; sort?: string }) {
+  function buildHref(overrides: { county?: string; type?: string; page?: number; search?: string; sort?: SortKey; dir?: 'asc' | 'desc' }) {
     const q = new URLSearchParams()
     const county = overrides.county ?? activeCounty
     const type = overrides.type ?? activeType
     const pg = overrides.page ?? 1
     const search = 'search' in overrides ? (overrides.search ?? '') : activeSearch
-    const sort = overrides.sort ?? activeSort
+    const sort = overrides.sort ?? sortKey
+    const dir = overrides.dir ?? sortDir
 
     if (county !== 'All') q.set('county', county)
     if (type !== 'All') q.set('type', type)
     if (pg > 1) q.set('page', String(pg))
     if (search) q.set('search', search)
-    if (sort === 'asc') q.set('sort', 'asc')
+    // Only encode sort/dir when they differ from the defaults, keeping URLs clean.
+    if (sort !== 'date') q.set('sort', sort)
+    if (dir !== SORT_COLUMNS[sort].defaultDir) q.set('dir', dir)
     const qs = q.toString()
     return `/dashboard${qs ? `?${qs}` : ''}`
   }
@@ -89,7 +101,7 @@ export default async function DashboardPage({
       {checkoutSuccess && <CheckoutConversion />}
       {/* Header */}
       <header className="bg-white/95 backdrop-blur-sm border-b border-stone-200 px-6 py-4 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Logo color="#2d5a27" />
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">{user.email}</span>
@@ -102,7 +114,7 @@ export default async function DashboardPage({
 
       {!isActive && (
         <div className="border-b border-stone-200 px-6 py-4" style={{ backgroundColor: '#f0f7ee' }}>
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <p className="font-medium" style={{ color: '#1e4a1c' }}>Start your subscription to get permit alerts</p>
               <p className="text-sm mt-0.5" style={{ color: '#2d5a27' }}>Choose a plan to unlock email alerts and full access.</p>
@@ -119,9 +131,9 @@ export default async function DashboardPage({
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-7xl mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
         {/* Permit feed */}
-        <div className="lg:col-span-2">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Recent Permits</h2>
             <span className="text-sm text-gray-400">{totalCount?.toLocaleString() ?? 0} total</span>
@@ -131,7 +143,8 @@ export default async function DashboardPage({
           <form method="GET" action="/dashboard" className="relative mb-3">
             {activeCounty !== 'All' && <input type="hidden" name="county" value={activeCounty} />}
             {activeType !== 'All' && <input type="hidden" name="type" value={activeType} />}
-            {activeSort === 'asc' && <input type="hidden" name="sort" value="asc" />}
+            {sortKey !== 'date' && <input type="hidden" name="sort" value={sortKey} />}
+            {sortDir !== SORT_COLUMNS[sortKey].defaultDir && <input type="hidden" name="dir" value={sortDir} />}
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
               fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
@@ -164,13 +177,14 @@ export default async function DashboardPage({
             />
           )}
 
-          {/* Type filter + sort toggle — subscribers only */}
+          {/* Type filter — subscribers only (sorting lives in the table headers) */}
           {isActive && (
             <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
               <form method="GET" action="/dashboard" className="flex items-center gap-0">
                 {activeCounty !== 'All' && <input type="hidden" name="county" value={activeCounty} />}
                 {activeSearch && <input type="hidden" name="search" value={activeSearch} />}
-                {activeSort === 'asc' && <input type="hidden" name="sort" value="asc" />}
+                {sortKey !== 'date' && <input type="hidden" name="sort" value={sortKey} />}
+                {sortDir !== SORT_COLUMNS[sortKey].defaultDir && <input type="hidden" name="dir" value={sortDir} />}
                 <select
                   name="type"
                   defaultValue={activeType}
@@ -196,43 +210,31 @@ export default async function DashboardPage({
                   </Link>
                 )}
               </form>
-              <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0">
-                <Link
-                  href={buildHref({ sort: 'desc', page: 1 })}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    activeSort === 'desc'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                  </svg>
-                  Newest
-                </Link>
-                <Link
-                  href={buildHref({ sort: 'asc', page: 1 })}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    activeSort === 'asc'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                  </svg>
-                  Oldest
-                </Link>
-              </div>
             </div>
           )}
 
           {permits && permits.length > 0 ? (
             <>
-              <div className="space-y-3">
-                {permits.map((permit: any) => (
-                  <PermitCard key={permit.id} permit={permit} />
-                ))}
+              <div className="overflow-x-auto bg-white rounded-xl border border-gray-200">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
+                      <th className="px-3 py-2.5 font-medium">Permit</th>
+                      <th className="px-3 py-2.5 font-medium">Address</th>
+                      <SortHeader label="City" col="city" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} />
+                      <SortHeader label="Zip" col="zip" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} />
+                      <th className="px-3 py-2.5 font-medium">County</th>
+                      <SortHeader label="Filed" col="date" sortKey={sortKey} sortDir={sortDir} buildHref={buildHref} align="right" />
+                      <th className="px-3 py-2.5 font-medium text-right">Value</th>
+                      <th className="px-3 py-2.5 font-medium"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {permits.map((permit: any) => (
+                      <PermitRow key={permit.id} permit={permit} />
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
               {/* Free user upsell */}
@@ -288,7 +290,7 @@ export default async function DashboardPage({
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="w-full lg:w-48 lg:flex-shrink-0 space-y-6">
           {/* Watchlist */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">My Watchlist</h2>
@@ -386,7 +388,53 @@ const COUNTY_PORTAL: Record<string, string> = {
   'LaGrange':         'https://www.sagesgov.com/lagrange-ga/portal/search.aspx',
 }
 
-function PermitCard({ permit }: { permit: any }) {
+// Sortable column header cell. Clicking re-sorts by `col`; clicking the active column
+// toggles direction. Carets show the current state.
+function SortHeader({
+  label, col, sortKey, sortDir, buildHref, align,
+}: {
+  label: string
+  col: SortKey
+  sortKey: SortKey
+  sortDir: 'asc' | 'desc'
+  buildHref: (o: { sort?: SortKey; dir?: 'asc' | 'desc'; page?: number }) => string
+  align?: 'right'
+}) {
+  const active = sortKey === col
+  const nextDir: 'asc' | 'desc' = active
+    ? (sortDir === 'asc' ? 'desc' : 'asc')
+    : SORT_COLUMNS[col].defaultDir
+  return (
+    <th className={`px-3 py-2.5 font-medium ${align === 'right' ? 'text-right' : ''}`}>
+      <Link
+        href={buildHref({ sort: col, dir: nextDir, page: 1 })}
+        className={`inline-flex items-center gap-1 hover:text-gray-700 ${active ? 'text-gray-900' : ''}`}
+      >
+        {label}
+        <span className="text-[9px] leading-none">{active ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}</span>
+      </Link>
+    </th>
+  )
+}
+
+// Street-only display: address with the trailing city / state / zip trimmed off.
+// Mirrors stripCity in scraper/parse-address.js (kept inline to avoid importing the
+// CommonJS scraper module into the Next.js bundle).
+function deriveStreet(address: string | null, city: string | null): string {
+  if (!address) return '—'
+  let s = address.trim()
+  s = s.replace(/,?\s*GA\s*\d{5}(-\d{4})?\s*$/i, '') // ", GA 30306" or glued "GA30306"
+  s = s.replace(/[,\s]+\d{5}(-\d{4})?\s*$/i, '')     // bare trailing zip
+  s = s.replace(/[,\s]+GA\s*$/i, '')                 // trailing state
+  if (city) {
+    const re = new RegExp('[,\\s]+' + city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'i')
+    s = s.replace(re, '')
+  }
+  s = s.replace(/[,\s]+$/, '').trim()
+  return s || address
+}
+
+function PermitRow({ permit }: { permit: any }) {
   const contractor = permit.contractor_name
   const applicant = permit.applicant_name
   const estimatedValue = permit.raw_data?.estimated_value ?? permit.raw_data?.Permit_Value ?? permit.raw_data?.WORKCOST
@@ -410,69 +458,56 @@ function PermitCard({ permit }: { permit: any }) {
     ?? COUNTY_PORTAL[permit.county]
     ?? null
   const sourceLinkLabel = permit.source_url
-    ? 'View source →'
-    : (permit.county === 'Savannah' || permit.county === 'DeKalb County') ? 'View permit →'
-    : 'View portal →'
+    ? 'Source →'
+    : (permit.county === 'Savannah' || permit.county === 'DeKalb County') ? 'Permit →'
+    : 'Portal →'
   const filedDate = permit.date_filed
     ? new Date(permit.date_filed + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—'
+  const street = deriveStreet(permit.address, permit.city)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: '#f0f7ee', color: '#2d5a27' }}>
-              {permit.permit_type ?? 'Unknown type'}
+    <tr className="border-b border-gray-100 last:border-0 align-top hover:bg-gray-50/60">
+      <td className="px-3 py-3 whitespace-nowrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: '#f0f7ee', color: '#2d5a27' }}>
+            {permit.permit_type ?? 'Unknown'}
+          </span>
+          {permitStatus && (
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[permitStatus] ?? 'bg-gray-100 text-gray-600'}`}>
+              {permitStatus}
             </span>
-            {permitStatus && (
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[permitStatus] ?? 'bg-gray-100 text-gray-600'}`}>
-                {permitStatus}
-              </span>
-            )}
-            <span className="text-xs text-gray-400">{permit.permit_number}</span>
-            <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-gray-400">{permit.county}</span>
-          </div>
-          <p className="text-sm font-medium text-gray-900">
-            {permit.address ?? 'No address'}
-            {permit.zip_code && !(permit.address ?? '').includes(permit.zip_code) ? `, ${permit.zip_code}` : ''}
-          </p>
-          {permit.description && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{permit.description}</p>
-          )}
-          {contractor && (
-            <p className="text-xs text-gray-400 mt-1.5">
-              <span className="font-medium text-gray-500">Contractor:</span> {contractor}
-            </p>
-          )}
-          {applicant && (
-            <p className="text-xs text-gray-400 mt-1">
-              <span className="font-medium text-gray-500">Applicant:</span> {applicant}
-            </p>
           )}
         </div>
-        <div className="text-right flex-shrink-0">
-          <p className="text-xs text-gray-400">{filedDate}</p>
-          {estimatedValue && (
-            <p className="text-xs font-medium text-gray-700 mt-1">
-              ${Number(estimatedValue).toLocaleString()}
-            </p>
-          )}
-          {sourceUrl && (
-            <a
-              href={sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs mt-1 block hover:underline"
-              style={{ color: '#2d5a27' }}
-            >
-              {sourceLinkLabel}
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
+        {permit.permit_number && <div className="text-xs text-gray-400 mt-1">{permit.permit_number}</div>}
+      </td>
+      <td className="px-3 py-3 min-w-[150px] max-w-[200px]">
+        <div className="font-medium text-gray-900">{street}</div>
+        {permit.description && (
+          <div className="text-xs text-gray-500 mt-0.5 line-clamp-2">{permit.description}</div>
+        )}
+        {contractor && (
+          <div className="text-xs text-gray-400 mt-1"><span className="font-medium text-gray-500">Contractor:</span> {contractor}</div>
+        )}
+        {applicant && (
+          <div className="text-xs text-gray-400"><span className="font-medium text-gray-500">Applicant:</span> {applicant}</div>
+        )}
+      </td>
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap">{permit.city ?? '—'}</td>
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap">{permit.zip_code ?? '—'}</td>
+      <td className="px-3 py-3 text-gray-500 whitespace-nowrap">{permit.county}</td>
+      <td className="px-3 py-3 text-gray-500 whitespace-nowrap text-right">{filedDate}</td>
+      <td className="px-3 py-3 text-gray-700 whitespace-nowrap text-right">
+        {estimatedValue ? `$${Number(estimatedValue).toLocaleString()}` : '—'}
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-right">
+        {sourceUrl && (
+          <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs hover:underline" style={{ color: '#2d5a27' }}>
+            {sourceLinkLabel}
+          </a>
+        )}
+      </td>
+    </tr>
   )
 }
 
