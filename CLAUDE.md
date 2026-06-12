@@ -12,6 +12,8 @@
 - Reverse geocode (lat/lng from ArcGIS geometry): cache key = `geo:${lat.toFixed(4)},${lng.toFixed(4)}` — see `dekalb-fetch-permits.js` / `johnscreek-fetch-permits.js`
 - Pattern: check `geocode_cache` first (treat a row with both null zip/city as a cached "no result"), call Google API only on miss, then `upsert` the result (including null misses) with `onConflict: 'address'`
 - Google Geocoding API costs $5/1000 requests. Daily quota cap is set to 200 (could allow up to ~$13/month if maxed every run); the $10/month billing limit is the actual backstop — caching should keep real usage well under both
+- **Prefer an authoritative county GIS address layer over Google when one exists** — it's free (no quota), and it has new subdivisions Google hasn't indexed yet (Google returns ZERO_RESULTS for streets whose house numbers aren't in its DB). Lookup order: cache → county GIS → Google. Cache GIS hits under the same key so Google is never billed for an address the county already knows. Bryan example below.
+- **Bryan County E911 address layer (authoritative):** `https://bryangis.bryan-county.org/arcgis/rest/services/AddressPoints/MapServer/0/query` — fields `ADDRNUM`, `FULLNAME` (street), `ZIPCODE`, `MUNICIPALITY`. Match `ADDRNUM='<num>'` then require a **full street-token match** on `FULLNAME` (a near-miss must fall through to Google, not pick the wrong street). City = `MUNICIPALITY` minus `City of `, else canonical USPS zip→city (31324=Richmond Hill, 31321=Pembroke, 31308=Ellabell). See `lookupBryanGis()` in `bryan-fetch-permits.js`.
 
 ## ViewpointCloud / OpenGov Portals
 - OpenGov portals (*.portal.opengov.com) run on ViewpointCloud, not ArcGIS
@@ -57,6 +59,8 @@ See `memory/adding-new-scrapers.md` for full checklist.
 - Null geocode results are cached permanently and block retries on future runs
 - Clear stale nulls: `DELETE FROM geocode_cache WHERE zip_code IS NULL AND city IS NULL`
 - Gwinnett geocoder (`gwinnett-geocode.js`) only returns zip; Bryan geocoder also returns city
+- **`service_role` has NO DELETE grant on `geocode_cache`** — a scraper/backfill calling `.delete()` on it gets `permission denied` (silent no-op). Clear stale nulls via the Supabase MCP / SQL editor (privileged), not from scraper code.
+- **The cache check short-circuits before any lookup logic.** When you add a new authoritative source (e.g. county GIS) ahead of Google, addresses already cached as null will keep returning null — you must clear those stale nulls once so the new path is reachable. (Bryan example: `DELETE FROM geocode_cache WHERE address LIKE '%, Bryan County, GA' AND zip_code IS NULL`.)
 
 ## SagesGov Portal (Fayette County, Henry County, Marietta, LaGrange)
 - Tries direct HTTP POST (no CAPTCHA) before launching Puppeteer — if server enforces reCAPTCHA, falls back to Puppeteer stealth
