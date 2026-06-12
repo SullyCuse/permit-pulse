@@ -433,16 +433,25 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
   // "X of Y records" total and walk pages via __doPostBack(target, 'Page$N') — the
   // visible pager only shows a numeric window + ">>", so direct postbacks are simpler.
   const { total, target } = await page.evaluate(() => {
-    const m = document.body.innerText.match(/of\s+([\d,]+)\s+records?/i);
-    const link = document.querySelector('a[href*="Page$"]');
-    const mm = link && link.getAttribute('href').match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
-    return { total: m ? parseInt(m[1].replace(/,/g, ''), 10) : null, target: mm ? mm[1] : null };
+    const m = (document.body.innerText || '').match(/of\s+([\d,]+)\s+records?/i);
+    let target = null;
+    for (const a of document.querySelectorAll('a[href*="__doPostBack"]')) {
+      const mm = (a.getAttribute('href') || '').match(/__doPostBack\('([^']+)','Page\$\d+'\)/);
+      if (mm) { target = mm[1]; break; }
+    }
+    return { total: m ? parseInt(m[1].replace(/,/g, ''), 10) : null, target };
   });
 
   const totalPages = total ? Math.min(Math.ceil(total / 10), 60) : 1;
   if (target && totalPages > 1) {
     for (let p = 2; p <= totalPages; p++) {
-      await page.evaluate((t, n) => __doPostBack(t, 'Page$' + n), target, p); // eslint-disable-line no-undef
+      // Use the same string-passing pattern as elsewhere; passing __doPostBack a
+      // multi-arg arrow trips Puppeteer's function serialization.
+      const href = `__doPostBack('${target}','Page$${p}')`;
+      await page.evaluate((h) => {
+        const m = h.match(/__doPostBack\('([^']+)','([^']*)'\)/);
+        if (m) __doPostBack(m[1], m[2]); // eslint-disable-line no-undef
+      }, href);
       await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
       await new Promise(r => setTimeout(r, 400));
       const { added } = collectPage(await page.content());
