@@ -80,9 +80,9 @@ export default async function LocationPage(
       <section className="border-y border-gray-100 py-8">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-4 text-center">
           {[
-            { value: '40,000+', label: 'Permits tracked' },
+            { value: '50,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: '5 Areas', label: 'GA counties & cities covered' },
+            { value: '24 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -147,7 +147,7 @@ export default async function LocationPage(
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={[`${loc.name} permit digest emails (Mon, Wed & Fri)`, 'Unlimited zip codes', 'All 5 GA areas covered']}
+            features={[`${loc.name} permit digest emails (Mon, Wed & Fri)`, 'Unlimited zip codes', 'All 24 GA areas covered']}
             highlight={true}
           />
         </div>
