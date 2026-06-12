@@ -13,14 +13,10 @@ const { fetchNewPermits: fetchAugustaPermits } = require('./augusta-fetch-permit
 const { fetchNewPermits: fetchAtlantaPermits } = require('./atlanta-fetch-permits');
 const { fetchNewPermits: fetchSandySpringsPermits } = require('./sandysprings-fetch-permits');
 const { fetchNewPermits: fetchCherokeePermits } = require('./cherokee-fetch-permits');
-const { fetchNewPermits: fetchConyersPermits } = require('./conyers-fetch-permits');
 const { fetchNewPermits: fetchSmyrnaPermits } = require('./smyrna-fetch-permits');
 const { fetchNewPermits: fetchCartersvillePermits } = require('./cartersville-fetch-permits');
 const { fetchNewPermits: fetchEffinghamPermits } = require('./effingham-fetch-permits');
 const { fetchNewPermits: fetchAustellPermits } = require('./austell-fetch-permits');
-const { fetchNewPermits: fetchCamdenPermits } = require('./camden-fetch-permits');
-const { fetchNewPermits: fetchFranklinCountyPermits } = require('./franklincounty-fetch-permits');
-const { fetchNewPermits: fetchBainbridgePermits } = require('./bainbridge-fetch-permits');
 const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accela-fetch-permits');
 const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGrangePermits } = require('./sagesgov-fetch-permits');
 const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
@@ -39,14 +35,10 @@ const {
   getAtlantaLastTimestamp, setAtlantaLastTimestamp,
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastDate, setCherokeeLastDate,
-  getConyersLastTimestamp, setConyersLastTimestamp,
   getSmyrnaLastTimestamp, setSmyrnaLastTimestamp,
   getCartersvilleLastTimestamp, setCartersvilleLastTimestamp,
   getEffinghamLastTimestamp, setEffinghamLastTimestamp,
   getAustellLastTimestamp, setAustellLastTimestamp,
-  getCamdenLastTimestamp, setCamdenLastTimestamp,
-  getFranklinCountyLastTimestamp, setFranklinCountyLastTimestamp,
-  getBainbridgeLastTimestamp, setBainbridgeLastTimestamp,
   getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
   getOakwoodLastTimestamp, setOakwoodLastTimestamp,
   getFayetteLastTimestamp, setFayetteLastTimestamp,
@@ -374,27 +366,6 @@ async function main() {
       totalErrors++;
     }
 
-    // --- City of Conyers ---
-    let conyersCount = 0;
-    try {
-      const conyersLastTs = await getConyersLastTimestamp();
-      console.log(`\n[City of Conyers] Last processed timestamp: ${new Date(conyersLastTs).toISOString()}`);
-      const { permits: conyersPermits, maxTimestamp: conyersMax } = await fetchConyersPermits(conyersLastTs);
-      if (conyersPermits.length === 0) {
-        console.log('[City of Conyers] No new permits found.');
-      } else {
-        const result = await savePermits(conyersPermits);
-        conyersCount = result.inserted;
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        await setConyersLastTimestamp(conyersMax);
-        console.log(`\n[City of Conyers] State advanced to ${new Date(conyersMax).toISOString()}`);
-      }
-    } catch (err) {
-      console.error(`  ❌ [City of Conyers] Failed: ${err.message || err.code || String(err)}`);
-      totalErrors++;
-    }
-
     // --- Smyrna ---
     let smyrnaCount = 0;
     try {
@@ -476,69 +447,6 @@ async function main() {
       }
     } catch (err) {
       console.error(`  ❌ [Austell] Failed: ${err.message || err.code || String(err)}`);
-      totalErrors++;
-    }
-
-    // --- Camden County ---
-    let camdenCount = 0;
-    try {
-      const camdenLastTs = await getCamdenLastTimestamp();
-      console.log(`\n[Camden County] Last processed timestamp: ${new Date(camdenLastTs).toISOString()}`);
-      const { permits: camdenPermits, maxTimestamp: camdenMax } = await fetchCamdenPermits(camdenLastTs);
-      if (camdenPermits.length === 0) {
-        console.log('[Camden County] No new permits found.');
-      } else {
-        const result = await savePermits(camdenPermits);
-        camdenCount = result.inserted;
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        await setCamdenLastTimestamp(camdenMax);
-        console.log(`\n[Camden County] State advanced to ${new Date(camdenMax).toISOString()}`);
-      }
-    } catch (err) {
-      console.error(`  ❌ [Camden County] Failed: ${err.message || err.code || String(err)}`);
-      totalErrors++;
-    }
-
-    // --- Franklin County ---
-    let franklinCountyCount = 0;
-    try {
-      const franklinCountyLastTs = await getFranklinCountyLastTimestamp();
-      console.log(`\n[Franklin County] Last processed timestamp: ${new Date(franklinCountyLastTs).toISOString()}`);
-      const { permits: franklinCountyPermits, maxTimestamp: franklinCountyMax } = await fetchFranklinCountyPermits(franklinCountyLastTs);
-      if (franklinCountyPermits.length === 0) {
-        console.log('[Franklin County] No new permits found.');
-      } else {
-        const result = await savePermits(franklinCountyPermits);
-        franklinCountyCount = result.inserted;
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        await setFranklinCountyLastTimestamp(franklinCountyMax);
-        console.log(`\n[Franklin County] State advanced to ${new Date(franklinCountyMax).toISOString()}`);
-      }
-    } catch (err) {
-      console.error(`  ❌ [Franklin County] Failed: ${err.message || err.code || String(err)}`);
-      totalErrors++;
-    }
-
-    // --- Bainbridge ---
-    let bainbridgeCount = 0;
-    try {
-      const bainbridgeLastTs = await getBainbridgeLastTimestamp();
-      console.log(`\n[Bainbridge] Last processed timestamp: ${new Date(bainbridgeLastTs).toISOString()}`);
-      const { permits: bainbridgePermits, maxTimestamp: bainbridgeMax } = await fetchBainbridgePermits(bainbridgeLastTs);
-      if (bainbridgePermits.length === 0) {
-        console.log('[Bainbridge] No new permits found.');
-      } else {
-        const result = await savePermits(bainbridgePermits);
-        bainbridgeCount = result.inserted;
-        totalInserted += result.inserted;
-        totalErrors += result.errors;
-        await setBainbridgeLastTimestamp(bainbridgeMax);
-        console.log(`\n[Bainbridge] State advanced to ${new Date(bainbridgeMax).toISOString()}`);
-      }
-    } catch (err) {
-      console.error(`  ❌ [Bainbridge] Failed: ${err.message || err.code || String(err)}`);
       totalErrors++;
     }
 
@@ -724,14 +632,10 @@ async function main() {
     console.log(`  City of Atlanta permits fetched: ${atlantaCount}`);
     console.log(`  Sandy Springs permits fetched: ${sandySpringsCount}`);
     console.log(`  Cherokee County permits fetched: ${cherokeeCount}`);
-    console.log(`  City of Conyers permits fetched: ${conyersCount}`);
     console.log(`  Smyrna permits fetched: ${smyrnaCount}`);
     console.log(`  Cartersville permits fetched: ${cartersvilleCount}`);
     console.log(`  Effingham County permits fetched: ${effinghamCount}`);
     console.log(`  Austell permits fetched: ${austellCount}`);
-    console.log(`  Camden County permits fetched: ${camdenCount}`);
-    console.log(`  Franklin County permits fetched: ${franklinCountyCount}`);
-    console.log(`  Bainbridge permits fetched: ${bainbridgeCount}`);
     console.log(`  City of Gainesville permits fetched: ${gainesvilleCount}`);
     console.log(`  City of Oakwood permits fetched: ${oakwoodCount}`);
     console.log(`  Fayette County permits fetched: ${fayetteCount}`);
