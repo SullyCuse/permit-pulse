@@ -15,7 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geist.variable} ${playfair.variable} h-full antialiased`}>
       <head>
-        <Script src="https://analytics.ahrefs.com/analytics.js" data-key="eDaU8I4k8YTPmKRwx/mQqg" strategy="afterInteractive" />
+        {/* Plain <script> (not next/script) so the tag renders into the SSR HTML —
+            Ahrefs' install checker reads raw HTML and won't see a client-injected tag */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="eDaU8I4k8YTPmKRwx/mQqg" async />
         <Script src="https://www.googletagmanager.com/gtag/js?id=AW-18204694435" strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
