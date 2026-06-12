@@ -4,6 +4,11 @@ const axios = require('axios');
 const BASE_URL = 'https://evolvepublic.infovisionsoftware.com/BryanCounty/';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 const GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+// Bryan County's authoritative E911 Site Address Points layer. Has every address
+// (incl. brand-new subdivisions Google hasn't indexed) keyed by ADDRNUM + street.
+const GIS_ADDRESS_URL = 'https://bryangis.bryan-county.org/arcgis/rest/services/AddressPoints/MapServer/0/query';
+// Canonical USPS city for Bryan zips, used when the address point is unincorporated.
+const ZIP_CITY = { '31324': 'Richmond Hill', '31321': 'Pembroke', '31308': 'Ellabell', '31302': 'Bloomingdale' };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -28,6 +33,46 @@ function getSupabase() {
 // city-less street like "205 NEWPORT CIRCLE" resolve to the right subdivision
 // instead of a same-named street elsewhere in GA.
 const BRYAN_BOUNDS = '31.85,-81.80|32.30,-81.20';
+
+function bryanCityFromMuni(zip, muni) {
+  if (muni && /^City of /i.test(muni)) return muni.replace(/^City of /i, '').trim();
+  return ZIP_CITY[zip] ?? null;
+}
+
+// Authoritative county lookup: parse "<num> <street>" and match it against the
+// E911 address points. Returns { zip, city } only on a full street-token match
+// (so a near-miss falls through to Google rather than picking the wrong street).
+async function lookupBryanGis(address) {
+  const m = address.match(/^(\d+)\s+(.*)$/);
+  if (!m) return null;
+  const num = m[1];
+  const streetTokens = m[2].toUpperCase().split(/\s+/).filter(t => t.length > 1);
+  if (streetTokens.length === 0) return null;
+
+  try {
+    const params = new URLSearchParams({
+      where: `ADDRNUM='${num.replace(/'/g, "''")}'`,
+      outFields: 'ADDRNUM,FULLNAME,ZIPCODE,MUNICIPALITY',
+      returnGeometry: 'false',
+      f: 'json',
+    });
+    const { data } = await axios.get(`${GIS_ADDRESS_URL}?${params}`, {
+      headers: { 'User-Agent': UA },
+      timeout: 8000,
+    });
+
+    let best = null;
+    for (const f of (data.features || [])) {
+      const fn = (f.attributes.FULLNAME || '').toUpperCase();
+      if (streetTokens.every(t => fn.includes(t))) { best = f.attributes; break; }
+    }
+    if (!best || !best.ZIPCODE) return null;
+    return { zip: best.ZIPCODE, city: bryanCityFromMuni(best.ZIPCODE, best.MUNICIPALITY) };
+  } catch (err) {
+    console.warn(`  Bryan GIS lookup failed for "${address}": ${err.message}`);
+    return null;
+  }
+}
 
 function extractZipCity(result) {
   const components = result.address_components;
@@ -72,6 +117,16 @@ async function geocodeBryanAddress(address) {
       geoMemCache.set(query, result);
       return result;
     }
+  }
+
+  // Authoritative county E911 lookup first — free, and covers new subdivisions
+  // (e.g. NEWPORT CIRCLE) that Google can't geocode yet. Cache hits under the
+  // same key so Google is never billed for an address the county already knows.
+  const gis = await lookupBryanGis(address);
+  if (gis) {
+    geoMemCache.set(query, gis);
+    if (sb) await sb.from('geocode_cache').upsert({ address: query, zip_code: gis.zip, city: gis.city }, { onConflict: 'address' });
+    return gis;
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
