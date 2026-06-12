@@ -430,11 +430,12 @@ async function searchOneWindow(page, { searchUrl, slug, county, startFmt, endFmt
       console.log(`  [${county}] DEBUG addedOn dates: ${JSON.stringify(rows.map(r => r.cells[addedIdx]))}`);
       const pager = await page.evaluate(() => {
         const recordText = (document.body.innerText.match(/[\d,]+\s+(?:of|records?|results?)[^.\n]*/i) || [])[0] || null;
-        const pbLinks = Array.from(document.querySelectorAll('a[href*="__doPostBack"]')).map(a => a.textContent.trim()).filter(Boolean);
-        const selects = Array.from(document.querySelectorAll('select')).map(s => `${s.id}=[${Array.from(s.options).map(o => o.value).join(',')}]`).filter(x => /page|size|rows|PageSize/i.test(x));
-        return { recordText, pbLinks: pbLinks.slice(0, 40), pageSizeSelects: selects };
+        const pagerHrefs = Array.from(document.querySelectorAll('a[href*="__doPostBack"]'))
+          .filter(a => /^\d+$|^>>?$|next/i.test(a.textContent.trim()))
+          .map(a => `${a.textContent.trim()}::${a.getAttribute('href')}`);
+        return { recordText, pagerHrefs: pagerHrefs.slice(0, 12) };
       });
-      console.log(`  [${county}] DEBUG recordText="${pager.recordText}" pbLinks=${JSON.stringify(pager.pbLinks)} pageSize=${JSON.stringify(pager.pageSizeSelects)}`);
+      console.log(`  [${county}] DEBUG recordText="${pager.recordText}" pagerHrefs=${JSON.stringify(pager.pagerHrefs)}`);
     }
 
     for (const row of rows) {
