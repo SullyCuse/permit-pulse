@@ -170,14 +170,6 @@ async function setCherokeeLastDate(dateStr) {
   return setStateValue('cherokee_last_date', dateStr);
 }
 
-// City of Conyers — last processed permit date as Unix ms timestamp
-async function getConyersLastTimestamp() {
-  return getStateValue('conyers_last_timestamp', 1751328000000); // default: 2025-07-01
-}
-async function setConyersLastTimestamp(ms) {
-  return setStateValue('conyers_last_timestamp', ms);
-}
-
 // Smyrna — last processed dateSubmitted as Unix ms timestamp
 async function getSmyrnaLastTimestamp() {
   return getStateValue('smyrna_last_timestamp', 1751328000000); // default: 2025-07-01
@@ -208,30 +200,6 @@ async function getAustellLastTimestamp() {
 }
 async function setAustellLastTimestamp(ms) {
   return setStateValue('austell_last_timestamp', ms);
-}
-
-// Camden County — last processed SubmittedOn as Unix ms timestamp
-async function getCamdenLastTimestamp() {
-  return getStateValue('camden_last_timestamp', 1751328000000); // default: 2025-07-01
-}
-async function setCamdenLastTimestamp(ms) {
-  return setStateValue('camden_last_timestamp', ms);
-}
-
-// Franklin County — last processed SubmittedOn as Unix ms timestamp
-async function getFranklinCountyLastTimestamp() {
-  return getStateValue('franklincounty_last_timestamp', 1751328000000); // default: 2025-07-01
-}
-async function setFranklinCountyLastTimestamp(ms) {
-  return setStateValue('franklincounty_last_timestamp', ms);
-}
-
-// Bainbridge — last processed SubmittedOn as Unix ms timestamp
-async function getBainbridgeLastTimestamp() {
-  return getStateValue('bainbridge_last_timestamp', 1751328000000); // default: 2025-07-01
-}
-async function setBainbridgeLastTimestamp(ms) {
-  return setStateValue('bainbridge_last_timestamp', ms);
 }
 
 // City of Gainesville (HALLCO Accela) — last processed permit date as Unix ms timestamp
@@ -320,14 +288,10 @@ module.exports = {
   getSandySpringsLastTimestamp, setSandySpringsLastTimestamp,
   getCherokeeLastPermitNum, setCherokeeLastPermitNum,
   getCherokeeLastDate, setCherokeeLastDate,
-  getConyersLastTimestamp, setConyersLastTimestamp,
   getSmyrnaLastTimestamp, setSmyrnaLastTimestamp,
   getCartersvilleLastTimestamp, setCartersvilleLastTimestamp,
   getEffinghamLastTimestamp, setEffinghamLastTimestamp,
   getAustellLastTimestamp, setAustellLastTimestamp,
-  getCamdenLastTimestamp, setCamdenLastTimestamp,
-  getFranklinCountyLastTimestamp, setFranklinCountyLastTimestamp,
-  getBainbridgeLastTimestamp, setBainbridgeLastTimestamp,
   getGainesvilleLastTimestamp, setGainesvilleLastTimestamp,
   getOakwoodLastTimestamp, setOakwoodLastTimestamp,
   getFayetteLastTimestamp, setFayetteLastTimestamp,
