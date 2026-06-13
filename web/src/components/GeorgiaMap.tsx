@@ -25,6 +25,13 @@ const TRACKED_FIPS = new Set([
   '13127', // Glynn County
   '13285', // Troup County (LaGrange)
   '13129', // Gordon County (Calhoun)
+  '13063', // Clayton County
+  '13013', // Barrow County
+  '13157', // Jackson County
+  '13153', // Houston County (Perry, Warner Robins)
+  '13085', // Dawson County
+  '13223', // Paulding County (Dallas)
+  // Roswell (Fulton 13121), Lawrenceville (Gwinnett 13135), Flowery Branch (Hall 13139) already tracked
 ])
 
 const FOREST = '#2d5a27'

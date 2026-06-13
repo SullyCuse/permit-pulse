@@ -22,6 +22,7 @@ const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGra
 const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
 const { fetchCowetaPermits } = require('./accela-fetch-permits');
 const { fetchNewPermits: fetchGordonPermits } = require('./gordon-fetch-permits');
+const { TYLER_JURISDICTIONS, makeFetcher: makeTylerFetcher } = require('./tyler-energov-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -49,6 +50,7 @@ const {
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getGordonLastTimestamp, setGordonLastTimestamp,
+  getStateValue, setStateValue,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -641,6 +643,31 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Tyler EnerGov portals (Clayton, Barrow, Jackson, Roswell, Perry, Lawrenceville, Houston, Flowery Branch, Dawson, Dallas) ---
+    const tylerCounts = {};
+    for (const cfg of TYLER_JURISDICTIONS) {
+      const stateKey = `${cfg.slug}_last_timestamp`;
+      try {
+        const lastTs = await getStateValue(stateKey, 1751328000000); // default 2025-07-01
+        console.log(`\n[${cfg.county}] Last processed timestamp: ${new Date(lastTs).toISOString()}`);
+        const { permits, maxTimestamp } = await makeTylerFetcher(cfg)(lastTs);
+        if (permits.length === 0) {
+          console.log(`[${cfg.county}] No new permits found.`);
+          tylerCounts[cfg.county] = 0;
+        } else {
+          const result = await savePermits(permits);
+          tylerCounts[cfg.county] = result.inserted;
+          totalInserted += result.inserted;
+          totalErrors += result.errors;
+          await setStateValue(stateKey, maxTimestamp);
+          console.log(`\n[${cfg.county}] State advanced to ${new Date(maxTimestamp).toISOString()}`);
+        }
+      } catch (err) {
+        console.error(`  ❌ [${cfg.county}] Failed: ${err.message || err.code || String(err)}`);
+        totalErrors++;
+      }
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -668,6 +695,9 @@ async function main() {
     console.log(`  Glynn County permits fetched: ${glynnCount}`);
     console.log(`  LaGrange permits fetched: ${laGrangeCount}`);
     console.log(`  Gordon County permits fetched: ${gordonCount}`);
+    for (const cfg of TYLER_JURISDICTIONS) {
+      console.log(`  ${cfg.county} permits fetched: ${tylerCounts[cfg.county] ?? 0}`);
+    }
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

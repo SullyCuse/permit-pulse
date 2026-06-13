@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange', 'Gordon County'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange', 'Gordon County', 'Clayton County', 'Barrow County', 'Jackson County', 'Roswell', 'Perry', 'Lawrenceville', 'Houston County', 'Flowery Branch', 'Dawson County', 'Dallas'] as const
 
 // Sortable columns → DB column mapping. `sort` selects the column, `dir` the direction.
 const SORT_COLUMNS = {
@@ -387,6 +387,16 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Glynn County':     'https://glynncountyga.portal.opengov.com',
   'LaGrange':         'https://www.sagesgov.com/lagrange-ga/portal/search.aspx',
   'Gordon County':    'https://countyofgordonga.portal.opengov.com',
+  'Clayton County':   'https://claytoncountyga-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Barrow County':    'https://barrowcountyga-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Jackson County':   'https://jacksoncountyga-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Roswell':          'https://cityofroswellga-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Perry':            'https://perryga-energovpub.tylerhost.net/apps/selfservice#/search',
+  'Lawrenceville':    'https://cityoflawrencevillega-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Houston County':   'https://houstoncountyga-energovpub.tylerhost.net/apps/selfservice#/search',
+  'Flowery Branch':   'https://cityofflowerybranchga-energovweb.tylerhost.net/apps/selfservice#/search',
+  'Dawson County':    'https://dawsoncountyga-energovpub.tylerhost.net/apps/selfservice#/search',
+  'Dallas':           'https://dallasga-energovpub.tylerhost.net/apps/selfservice#/search',
 }
 
 // Sortable column header cell. Clicking re-sorts by `col`; clicking the active column

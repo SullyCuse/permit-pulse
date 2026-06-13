@@ -26,6 +26,16 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Glynn County':     { slug: 'glynn-county',        display: 'Glynn County',      fullName: 'Glynn County, GA' },
   'LaGrange':         { slug: 'lagrange',            display: 'LaGrange',          fullName: 'LaGrange, GA' },
   'Gordon County':    { slug: 'gordon-county',       display: 'Gordon County',     fullName: 'Gordon County, GA' },
+  'Clayton County':   { slug: 'clayton-county',      display: 'Clayton County',    fullName: 'Clayton County, GA' },
+  'Barrow County':    { slug: 'barrow-county',       display: 'Barrow County',     fullName: 'Barrow County, GA' },
+  'Jackson County':   { slug: 'jackson-county',      display: 'Jackson County',    fullName: 'Jackson County, GA' },
+  'Roswell':          { slug: 'roswell',             display: 'Roswell',           fullName: 'Roswell, GA' },
+  'Perry':            { slug: 'perry',               display: 'Perry',             fullName: 'Perry, GA' },
+  'Lawrenceville':    { slug: 'lawrenceville',       display: 'Lawrenceville',     fullName: 'Lawrenceville, GA' },
+  'Houston County':   { slug: 'houston-county',      display: 'Houston County',    fullName: 'Houston County, GA' },
+  'Flowery Branch':   { slug: 'flowery-branch',      display: 'Flowery Branch',    fullName: 'Flowery Branch, GA' },
+  'Dawson County':    { slug: 'dawson-county',       display: 'Dawson County',     fullName: 'Dawson County, GA' },
+  'Dallas':           { slug: 'dallas',              display: 'Dallas',            fullName: 'Dallas, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

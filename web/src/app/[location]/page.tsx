@@ -82,7 +82,7 @@ export default async function LocationPage(
           {[
             { value: '50,000+', label: 'Permits tracked' },
             { value: '3x / Week', label: 'Mon, Wed & Fri updates' },
-            { value: '25 Areas', label: 'GA counties & cities covered' },
+            { value: '35 Areas', label: 'GA counties & cities covered' },
           ].map(stat => (
             <div key={stat.label}>
               <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
@@ -147,7 +147,7 @@ export default async function LocationPage(
             name="Pro"
             price={49}
             description="For investors and teams tracking more territory."
-            features={[`${loc.name} permit digest emails (Mon, Wed & Fri)`, 'Unlimited zip codes', 'All 25 GA areas covered']}
+            features={[`${loc.name} permit digest emails (Mon, Wed & Fri)`, 'Unlimited zip codes', 'All 35 GA areas covered']}
             highlight={true}
           />
         </div>

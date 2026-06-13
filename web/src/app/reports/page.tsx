@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
-  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn and Gordon County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange, Georgia.',
+  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn, Gordon, Clayton, Barrow, Jackson, Houston and Dawson County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, LaGrange, Roswell, Lawrenceville, Perry, Flowery Branch, and Dallas, Georgia.',
 }
 
 const FOREST = '#2d5a27'
@@ -53,7 +53,7 @@ export default async function ReportsIndexPage() {
           Building Permit Activity Reports
         </h1>
         <p className="mt-4 text-lg text-gray-500 max-w-2xl mx-auto">
-          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn and Gordon County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange — pulled directly from official county sources.
+          Monthly permit data across Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn, Gordon, Clayton, Barrow, Jackson, Houston and Dawson County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, LaGrange, Roswell, Lawrenceville, Perry, Flowery Branch, and Dallas — pulled directly from official county sources.
         </p>
         {totalPermits > 0 && (
           <p className="mt-3 text-sm text-gray-400">{totalPermits.toLocaleString()} permits tracked across all areas</p>
