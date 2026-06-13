@@ -22,6 +22,7 @@ const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGra
 const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
 const { fetchCowetaPermits } = require('./accela-fetch-permits');
 const { fetchNewPermits: fetchGordonPermits } = require('./gordon-fetch-permits');
+const { fetchNewPermits: fetchMorganPermits } = require('./morgan-fetch-permits');
 const { TYLER_JURISDICTIONS, makeFetcher: makeTylerFetcher } = require('./tyler-energov-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
@@ -50,6 +51,7 @@ const {
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getGordonLastTimestamp, setGordonLastTimestamp,
+  getMorganLastTimestamp, setMorganLastTimestamp,
   getStateValue, setStateValue,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
@@ -643,7 +645,28 @@ async function main() {
       totalErrors++;
     }
 
-    // --- Tyler EnerGov portals (Clayton, Barrow, Jackson, Roswell, Perry, Lawrenceville, Houston, Flowery Branch, Dawson, Dallas) ---
+    // --- Morgan County (ViewpointCloud) ---
+    let morganCount = 0;
+    try {
+      const morganLastTs = await getMorganLastTimestamp();
+      console.log(`\n[Morgan County] Last processed timestamp: ${new Date(morganLastTs).toISOString()}`);
+      const { permits: morganPermits, maxTimestamp: morganMax } = await fetchMorganPermits(morganLastTs);
+      if (morganPermits.length === 0) {
+        console.log('[Morgan County] No new permits found.');
+      } else {
+        const result = await savePermits(morganPermits);
+        morganCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setMorganLastTimestamp(morganMax);
+        console.log(`\n[Morgan County] State advanced to ${new Date(morganMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Morgan County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
+    // --- Tyler EnerGov portals (Clayton, Barrow, Jackson, Roswell, Perry, Lawrenceville, Houston, Flowery Branch, Dawson, Dallas, Bulloch) ---
     const tylerCounts = {};
     for (const cfg of TYLER_JURISDICTIONS) {
       const stateKey = `${cfg.slug}_last_timestamp`;
@@ -695,6 +718,7 @@ async function main() {
     console.log(`  Glynn County permits fetched: ${glynnCount}`);
     console.log(`  LaGrange permits fetched: ${laGrangeCount}`);
     console.log(`  Gordon County permits fetched: ${gordonCount}`);
+    console.log(`  Morgan County permits fetched: ${morganCount}`);
     for (const cfg of TYLER_JURISDICTIONS) {
       console.log(`  ${cfg.county} permits fetched: ${tylerCounts[cfg.county] ?? 0}`);
     }

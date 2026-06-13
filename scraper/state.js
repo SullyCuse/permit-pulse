@@ -274,6 +274,14 @@ async function setGordonLastTimestamp(ms) {
   return setStateValue('gordon_last_timestamp', ms);
 }
 
+// Morgan County — last processed dateSubmitted as Unix ms timestamp
+async function getMorganLastTimestamp() {
+  return getStateValue('morgan_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setMorganLastTimestamp(ms) {
+  return setStateValue('morgan_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -310,5 +318,6 @@ module.exports = {
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
   getGordonLastTimestamp, setGordonLastTimestamp,
+  getMorganLastTimestamp, setMorganLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };

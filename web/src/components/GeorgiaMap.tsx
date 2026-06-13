@@ -31,6 +31,8 @@ const TRACKED_FIPS = new Set([
   '13153', // Houston County (Perry, Warner Robins)
   '13085', // Dawson County
   '13223', // Paulding County (Dallas)
+  '13211', // Morgan County (Madison)
+  '13031', // Bulloch County (Statesboro)
   // Roswell (Fulton 13121), Lawrenceville (Gwinnett 13135), Flowery Branch (Hall 13139) already tracked
 ])
 
