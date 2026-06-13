@@ -19,10 +19,17 @@ const TYLER_JURISDICTIONS = [
   { county: 'Flowery Branch',  slug: 'flowerybranch', host: 'cityofflowerybranchga-energovweb.tylerhost.net' },
   { county: 'Dawson County',   slug: 'dawson',        host: 'dawsoncountyga-energovpub.tylerhost.net' },
   { county: 'Dallas',          slug: 'dallas',        host: 'dallasga-energovpub.tylerhost.net' },
+  // Bulloch County (Statesboro) is functional but its search server is slow (~55s/query,
+  // independent of page size) — needs the larger PAGE_SIZE + longer REQUEST_TIMEOUT below.
+  { county: 'Bulloch County',  slug: 'bulloch',       host: 'bullochcountyga-energovpub.tylerhost.net' },
 ];
 
-const PAGE_SIZE = 100;
-const MAX_PAGES = 300; // safety cap (PAGE_SIZE * MAX_PAGES = 30k newest permits per run)
+// PageSize is honored up to ~1000 at fixed per-query cost, so a large page minimizes
+// round-trips (matters for slow tenants like Bulloch). The search is Elasticsearch-backed
+// and refuses paging past 10,000 results, so MAX_PAGES * PAGE_SIZE only needs to cover that.
+const PAGE_SIZE = 1000;
+const MAX_PAGES = 12; // 12 * 1000 > the 10k ES pagination ceiling
+const REQUEST_TIMEOUT = 90000; // Bulloch's search takes ~55s; fast tenants return in 1-5s
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 function emptyCriteria(extra = {}) {
@@ -89,7 +96,7 @@ function makeFetcher(cfg) {
     for (let page = 1; page <= MAX_PAGES && !reachedCursor; page++) {
       let result;
       try {
-        const { data } = await axios.post(searchUrl, buildBody(page), { headers, timeout: 45000 });
+        const { data } = await axios.post(searchUrl, buildBody(page), { headers, timeout: REQUEST_TIMEOUT });
         result = data?.Result;
       } catch (err) {
         console.error(`  [${cfg.county}] page ${page} error: ${err.message}`);

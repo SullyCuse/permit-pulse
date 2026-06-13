@@ -36,6 +36,8 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Flowery Branch':   { slug: 'flowery-branch',      display: 'Flowery Branch',    fullName: 'Flowery Branch, GA' },
   'Dawson County':    { slug: 'dawson-county',       display: 'Dawson County',     fullName: 'Dawson County, GA' },
   'Dallas':           { slug: 'dallas',              display: 'Dallas',            fullName: 'Dallas, GA' },
+  'Morgan County':    { slug: 'morgan-county',       display: 'Morgan County',     fullName: 'Morgan County, GA' },
+  'Bulloch County':   { slug: 'bulloch-county',      display: 'Bulloch County',    fullName: 'Bulloch County, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
