@@ -648,7 +648,7 @@ async function main() {
     for (const cfg of TYLER_JURISDICTIONS) {
       const stateKey = `${cfg.slug}_last_timestamp`;
       try {
-        const lastTs = await getStateValue(stateKey, 1751328000000); // default 2025-07-01
+        const lastTs = await getStateValue(stateKey, 1704067200000); // default 2024-01-01 — deeper backfill for Tyler portals (SEO report pages + YoY trends; addresses carry zip so no geocoding cost)
         console.log(`\n[${cfg.county}] Last processed timestamp: ${new Date(lastTs).toISOString()}`);
         const { permits, maxTimestamp } = await makeTylerFetcher(cfg)(lastTs);
         if (permits.length === 0) {
