@@ -283,6 +283,7 @@ async function setLastDigestSentMs(ms) {
 }
 
 module.exports = {
+  getStateValue, setStateValue,
   getLastItemNumber, setLastItemNumber,
   getGwinnettLastDate, setGwinnettLastDate,
   getForsythLastTimestamp, setForsythLastTimestamp,
