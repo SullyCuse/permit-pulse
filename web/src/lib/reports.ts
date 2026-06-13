@@ -25,6 +25,7 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Coweta County':    { slug: 'coweta-county',       display: 'Coweta County',     fullName: 'Coweta County, GA' },
   'Glynn County':     { slug: 'glynn-county',        display: 'Glynn County',      fullName: 'Glynn County, GA' },
   'LaGrange':         { slug: 'lagrange',            display: 'LaGrange',          fullName: 'LaGrange, GA' },
+  'Gordon County':    { slug: 'gordon-county',       display: 'Gordon County',     fullName: 'Gordon County, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)

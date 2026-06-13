@@ -266,6 +266,14 @@ async function setLaGrangeLastTimestamp(ms) {
   return setStateValue('lagrange_last_timestamp', ms);
 }
 
+// Gordon County — last processed dateSubmitted as Unix ms timestamp
+async function getGordonLastTimestamp() {
+  return getStateValue('gordon_last_timestamp', 1751328000000); // default: 2025-07-01
+}
+async function setGordonLastTimestamp(ms) {
+  return setStateValue('gordon_last_timestamp', ms);
+}
+
 // Digest cooldown — last time digest email was sent (Unix ms)
 async function getLastDigestSentMs() {
   return getStateValue('last_digest_sent_ms', 0);
@@ -300,5 +308,6 @@ module.exports = {
   getCowetaLastTimestamp, setCowetaLastTimestamp,
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
+  getGordonLastTimestamp, setGordonLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 };

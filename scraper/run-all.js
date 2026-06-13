@@ -21,6 +21,7 @@ const { fetchGainesvillePermits, fetchOakwoodPermits } = require('./hallco-accel
 const { fetchFayettePermits, fetchHenryPermits, fetchMariettaPermits, fetchLaGrangePermits } = require('./sagesgov-fetch-permits');
 const { fetchNewPermits: fetchGlynnPermits } = require('./glynn-fetch-permits');
 const { fetchCowetaPermits } = require('./accela-fetch-permits');
+const { fetchNewPermits: fetchGordonPermits } = require('./gordon-fetch-permits');
 const { savePermits } = require('./save-permits');
 const {
   getLastItemNumber, setLastItemNumber,
@@ -47,6 +48,7 @@ const {
   getCowetaLastTimestamp, setCowetaLastTimestamp,
   getGlynnLastTimestamp, setGlynnLastTimestamp,
   getLaGrangeLastTimestamp, setLaGrangeLastTimestamp,
+  getGordonLastTimestamp, setGordonLastTimestamp,
   getLastDigestSentMs, setLastDigestSentMs,
 } = require('./state');
 
@@ -618,6 +620,27 @@ async function main() {
       totalErrors++;
     }
 
+    // --- Gordon County (ViewpointCloud) ---
+    let gordonCount = 0;
+    try {
+      const gordonLastTs = await getGordonLastTimestamp();
+      console.log(`\n[Gordon County] Last processed timestamp: ${new Date(gordonLastTs).toISOString()}`);
+      const { permits: gordonPermits, maxTimestamp: gordonMax } = await fetchGordonPermits(gordonLastTs);
+      if (gordonPermits.length === 0) {
+        console.log('[Gordon County] No new permits found.');
+      } else {
+        const result = await savePermits(gordonPermits);
+        gordonCount = result.inserted;
+        totalInserted += result.inserted;
+        totalErrors += result.errors;
+        await setGordonLastTimestamp(gordonMax);
+        console.log(`\n[Gordon County] State advanced to ${new Date(gordonMax).toISOString()}`);
+      }
+    } catch (err) {
+      console.error(`  ❌ [Gordon County] Failed: ${err.message || err.code || String(err)}`);
+      totalErrors++;
+    }
+
     // --- Summary & emails ---
     console.log(`\n=== Run Summary ===`);
     console.log(`  Hall PDFs checked: ${hallFound.length}`);
@@ -644,6 +667,7 @@ async function main() {
     console.log(`  Coweta County permits fetched: ${cowetaCount}`);
     console.log(`  Glynn County permits fetched: ${glynnCount}`);
     console.log(`  LaGrange permits fetched: ${laGrangeCount}`);
+    console.log(`  Gordon County permits fetched: ${gordonCount}`);
     console.log(`  Permits inserted: ${totalInserted}`);
     console.log(`  Errors: ${totalErrors}`);
 

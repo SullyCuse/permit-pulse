@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange', 'Gordon County'] as const
 
 // Sortable columns → DB column mapping. `sort` selects the column, `dir` the direction.
 const SORT_COLUMNS = {
@@ -386,6 +386,7 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Coweta County':    'https://aca-prod.accela.com/COWETA/Cap/CapHome.aspx?module=Building&TabName=Home',
   'Glynn County':     'https://glynncountyga.portal.opengov.com',
   'LaGrange':         'https://www.sagesgov.com/lagrange-ga/portal/search.aspx',
+  'Gordon County':    'https://countyofgordonga.portal.opengov.com',
 }
 
 // Sortable column header cell. Clicking re-sorts by `col`; clicking the active column
