@@ -752,10 +752,41 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our LaGrange data is sourced from the City of LaGrange\'s official public permit records via the SagesGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, Gordon County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, and Marietta.',
     metaTitle: 'LaGrange GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in LaGrange, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Troup County.',
+  },
+  {
+    slug: 'gordon-county-ga-building-permits',
+    name: 'Gordon County',
+    region: 'GA',
+    fullName: 'Gordon County, GA',
+    headline: 'Every Gordon County building permit — live tracking updated Monday, Wednesday & Friday.',
+    subheadline:
+      'Permit Pulse monitors every permit filed in Gordon County, GA and delivers a digest to Pro subscribers three times a week. Home to Calhoun and a growing Northwest Georgia manufacturing corridor — stay ahead of every new build.',
+    personas: [
+      {
+        icon: '🔨',
+        title: 'Contractors & Builders',
+        desc: 'Get every new residential and commercial permit in Gordon County — building, electrical, plumbing, HVAC, and more — delivered three times a week before your competition in this active Calhoun-area market.',
+      },
+      {
+        icon: '🏠',
+        title: 'Real Estate Investors',
+        desc: 'Track new construction and renovation activity across Calhoun, Fairmount, Ranger, and unincorporated Gordon County. Spot growth trends along the I-75 corridor between Atlanta and Chattanooga.',
+      },
+      {
+        icon: '📋',
+        title: 'Agents & Realtors',
+        desc: 'Know which Gordon County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve clients across this affordable, growing Northwest Georgia county.',
+      },
+    ],
+    faqWhere: 'Our Gordon County data is sourced from the county\'s official public permit records via the OpenGov portal, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we also cover Hall County, Gwinnett County, Forsyth County, DeKalb County, Bryan County, Cherokee County, Effingham County, Fayette County, Henry County, Coweta County, Glynn County, and the cities of Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, and LaGrange.',
+    metaTitle: 'Gordon County GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Gordon County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in the Calhoun area.',
   },
 ]
 

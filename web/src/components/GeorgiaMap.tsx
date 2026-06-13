@@ -24,6 +24,7 @@ const TRACKED_FIPS = new Set([
   '13077', // Coweta County
   '13127', // Glynn County
   '13285', // Troup County (LaGrange)
+  '13129', // Gordon County (Calhoun)
 ])
 
 const FOREST = '#2d5a27'
