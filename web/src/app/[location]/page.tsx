@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Logo } from '@/components/Logo'
 import { ContactModal } from '@/components/ContactModal'
-import { LOCATIONS, getLocation } from '@/lib/locations'
+import { LOCATIONS, getLocation, clampMetaDescription } from '@/lib/locations'
 import { COUNTY_META, getAllMonths, buildSlug, formatMonthYear } from '@/lib/reports'
 
 export function generateStaticParams() {
@@ -18,7 +18,7 @@ export async function generateMetadata(
   if (!loc) return {}
   return {
     title: loc.metaTitle,
-    description: loc.metaDescription,
+    description: clampMetaDescription(loc.metaDescription),
   }
 }
 

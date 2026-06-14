@@ -1040,3 +1040,17 @@ export const LOCATIONS: Location[] = [
 export function getLocation(slug: string): Location | undefined {
   return LOCATIONS.find(l => l.slug === slug)
 }
+
+// Keep `<meta name="description">` within Google's ~160-char display limit (Ahrefs flags
+// "Meta description too long" above it). The authored metaDescription fields lead with a
+// self-contained first sentence (~110 chars), so we trim to the last full sentence that
+// fits; if that sentence alone is still too long, trim to the last word with an ellipsis.
+// Use this for ANY page-level meta description — never ship a raw multi-sentence string.
+export function clampMetaDescription(desc: string, max = 160): string {
+  if (desc.length <= max) return desc
+  const window = desc.slice(0, max)
+  const lastSentence = window.lastIndexOf('. ')
+  if (lastSentence >= 80) return window.slice(0, lastSentence + 1)
+  const lastSpace = window.lastIndexOf(' ')
+  return (lastSpace >= 80 ? window.slice(0, lastSpace) : window.slice(0, max - 1)).trimEnd() + '…'
+}

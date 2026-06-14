@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Georgia Building Permit Reports | Permit Pulse',
-  description: 'Monthly building permit activity reports for Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn, Gordon, Clayton, Barrow, Jackson, Houston, Dawson, Morgan and Bulloch County — and Atlanta, Savannah, Alpharetta, Johns Creek, Augusta, Sandy Springs, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, LaGrange, Roswell, Lawrenceville, Perry, Flowery Branch, Dallas, and Columbus, Georgia.',
+  description: 'Monthly building permit activity reports across 38 Georgia counties and cities — new construction trends by area and month, from official records.',
 }
 
 const FOREST = '#2d5a27'
