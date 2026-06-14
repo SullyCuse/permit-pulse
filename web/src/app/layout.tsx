@@ -8,7 +8,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 
 export const metadata: Metadata = {
   title: "Permit Pulse | GA Building Permit Alerts",
-  description: "Get instant alerts when new building permits are filed across 38 Georgia markets — Hall, Gwinnett, Forsyth, DeKalb, Bryan, Cherokee, Effingham, Fayette, Henry, Coweta, Glynn, Gordon, Clayton, Barrow, Jackson, Houston, Dawson, Morgan, and Bulloch County — and Atlanta, Savannah, Alpharetta, Johns Creek, Sandy Springs, Augusta, Smyrna, Cartersville, Austell, Gainesville, Oakwood, Marietta, LaGrange, Roswell, Lawrenceville, Perry, Flowery Branch, Dallas, and Columbus, GA.",
+  description: "Get alerts when new building permits are filed across 38 Georgia counties and cities — updated Mon, Wed & Fri for contractors, investors, and agents.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

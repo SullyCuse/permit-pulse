@@ -8,6 +8,7 @@ import {
   parseSlug, getReportData, formatMonthYear, COUNTY_META,
   getCountyMonths, buildSlug, MIN_INDEXABLE_PERMITS,
 } from '@/lib/reports'
+import { clampMetaDescription } from '@/lib/locations'
 
 // revalidate without generateStaticParams = ISR on-demand:
 // pages render on first request and are cached for 24 hours.
@@ -38,7 +39,7 @@ export async function generateMetadata(
 
   return {
     title: `${meta.fullName} Building Permits — ${monthYear} | Permit Pulse`,
-    description: `${monthYear} building permit activity in ${meta.fullName}. ${report.total > 0 ? `${report.total.toLocaleString()} permits issued` : 'Permit counts'} by zip code and type, with month-over-month comparison.`,
+    description: clampMetaDescription(`${monthYear} building permit activity in ${meta.fullName}. ${report.total > 0 ? `${report.total.toLocaleString()} permits issued` : 'Permit counts'} by zip code and type, with month-over-month comparison.`),
     ...(isThin || isCurrentMonth ? { robots: { index: false, follow: true } } : {}),
   }
 }
