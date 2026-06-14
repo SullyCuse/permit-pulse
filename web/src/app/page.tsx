@@ -87,8 +87,8 @@ export default function HomePage() {
             {/* Stat pills */}
             <div className="flex gap-4 mt-10 flex-wrap">
               {[
-                { value: '50,000+', label: 'permits tracked' },
-                { value: '37', label: 'GA markets' },
+                { value: '90,000+', label: 'permits tracked' },
+                { value: '38', label: 'GA markets' },
                 { value: '3×/wk', label: 'fresh data' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white/80 backdrop-blur-sm border border-stone-200 rounded-xl px-4 py-2.5">
@@ -128,7 +128,7 @@ export default function HomePage() {
               stats={[
                 { value: '3×', label: 'per week' },
                 { value: 'ZIP', label: 'code alerts' },
-                { value: '37', label: 'GA markets' },
+                { value: '38', label: 'GA markets' },
               ]}
             />
             <PersonaCard
@@ -140,7 +140,7 @@ export default function HomePage() {
               headline="Find deals before Zillow does."
               body="Spot neighborhoods heating up before they hit the market. Track new construction, additions, and remodels by zip code to find your next deal while others are still guessing at prices."
               stats={[
-                { value: '50K+', label: 'permits' },
+                { value: '90K+', label: 'permits' },
                 { value: '∞', label: 'zip codes' },
                 { value: '$$$', label: 'value data' },
               ]}
@@ -155,7 +155,7 @@ export default function HomePage() {
               body="Know which streets are growing before your clients do. Use permit data to prospect smarter, impress sellers with real development insights, and answer questions no other agent can."
               stats={[
                 { value: 'Live', label: 'data feed' },
-                { value: '37', label: 'markets' },
+                { value: '38', label: 'markets' },
                 { value: 'Free', label: 'to browse' },
               ]}
             />
@@ -175,7 +175,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               { step: '1', title: 'Set your watchlist', desc: 'Pick the zip codes and permit types you care about. Takes 60 seconds.' },
-              { step: '2', title: 'We monitor for you', desc: 'Our system checks all 37 Georgia markets for new filings automatically — Monday, Wednesday, and Friday.' },
+              { step: '2', title: 'We monitor for you', desc: 'Our system checks all 38 Georgia markets for new filings automatically — Monday, Wednesday, and Friday.' },
               { step: '3', title: 'Get your digest', desc: 'Pro subscribers receive a clean email digest with every matching permit — address, type, value, and contractor included.' },
             ].map(item => (
               <div key={item.step} className="text-center">
@@ -208,14 +208,14 @@ export default function HomePage() {
               name="Basic"
               price={29}
               description="One area, full access."
-              features={['All 37 Georgia markets', 'Full permit feed dashboard', 'Up to 3 zip codes']}
+              features={['All 38 Georgia markets', 'Full permit feed dashboard', 'Up to 3 zip codes']}
               highlight={false}
             />
             <PricingCard
               name="Pro"
               price={49}
               description="For teams tracking more territory."
-              features={['All 37 Georgia markets', 'Email digest Mon, Wed & Fri', 'Unlimited zip codes']}
+              features={['All 38 Georgia markets', 'Email digest Mon, Wed & Fri', 'Unlimited zip codes']}
               highlight={true}
             />
           </div>
@@ -269,7 +269,7 @@ export default function HomePage() {
             >
               Browse permits by area
             </h2>
-            <p className="text-gray-500 text-sm">We cover 37 Georgia counties and cities. Click an area to see what's being built.</p>
+            <p className="text-gray-500 text-sm">We cover 38 Georgia counties and cities. Click an area to see what's being built.</p>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-10">
             {/* Map */}
@@ -345,7 +345,7 @@ export default function HomePage() {
           Ready to stay ahead?
         </h2>
         <p className="text-gray-500 mb-8 max-w-xl mx-auto">
-          Join contractors, investors, and agents already tracking permits across 37 Georgia markets — from Metro Atlanta to the coast.
+          Join contractors, investors, and agents already tracking permits across 38 Georgia markets — from Metro Atlanta to the coast.
         </p>
         <Link
           href="/login"

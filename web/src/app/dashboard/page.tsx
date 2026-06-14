@@ -7,7 +7,7 @@ import CountyTabs from './CountyTabs'
 import CheckoutConversion from './CheckoutConversion'
 
 const PAGE_SIZE = 50
-const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange', 'Gordon County', 'Clayton County', 'Barrow County', 'Jackson County', 'Roswell', 'Perry', 'Lawrenceville', 'Houston County', 'Flowery Branch', 'Dawson County', 'Dallas', 'Morgan County', 'Bulloch County'] as const
+const COUNTIES = ['All', 'Hall', 'Gwinnett', 'Forsyth', 'Savannah', 'Alpharetta', 'Bryan County', 'DeKalb County', 'Augusta', 'Johns Creek', 'Atlanta', 'Sandy Springs', 'Cherokee County', 'Smyrna', 'Cartersville', 'Effingham County', 'Austell', 'Gainesville', 'Oakwood', 'Fayette County', 'Henry County', 'Marietta', 'Coweta County', 'Glynn County', 'LaGrange', 'Gordon County', 'Clayton County', 'Barrow County', 'Jackson County', 'Roswell', 'Perry', 'Lawrenceville', 'Houston County', 'Flowery Branch', 'Dawson County', 'Dallas', 'Morgan County', 'Bulloch County', 'Columbus'] as const
 
 // Sortable columns → DB column mapping. `sort` selects the column, `dir` the direction.
 const SORT_COLUMNS = {
@@ -399,6 +399,7 @@ const COUNTY_PORTAL: Record<string, string> = {
   'Dallas':           'https://dallasga-energovpub.tylerhost.net/apps/selfservice#/search',
   'Morgan County':    'https://countyofmorganga.portal.opengov.com',
   'Bulloch County':   'https://bullochcountyga-energovpub.tylerhost.net/apps/selfservice#/search',
+  'Columbus':         'https://columbusga-energovpub.tylerhost.net/apps/selfservice#/search',
 }
 
 // Sortable column header cell. Clicking re-sorts by `col`; clicking the active column

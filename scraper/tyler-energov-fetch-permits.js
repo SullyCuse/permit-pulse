@@ -4,9 +4,15 @@ const axios = require('axios');
 // Tyler EnerGov "Civic Self Service" portals expose an ANONYMOUS public search at
 // POST /apps/selfservice/api/energov/search/search (no auth/JWT — the /permits/search
 // endpoint that needs a token is a different, unused path). Scope to permits via
-// SearchModule:1 + FilterModule:2, sort IssueDate desc, page newest-first to a cursor.
-// Server-side date filters are ignored, so we cursor client-side on IssueDate.
+// SearchModule:1 + FilterModule:2, sort the date field desc, page newest-first to a cursor.
+// Server-side date filters are ignored, so we cursor client-side on the date field.
 // Some tenants have garbage future-dated rows (e.g. year 2999) — treated as junk.
+//
+// Date field: most tenants use IssueDate (always populated for issued permits). Columbus
+// is different — its IssueDate is uniformly the placeholder 2999-01-01 (unissued), so
+// IssueDate-desc returns only junk and never reaches real data. Columbus instead sorts &
+// cursors on ApplyDate (the submission date, always populated and sane). Per-tenant via
+// cfg.dateField. (Most tenants reject an ApplyDate sort key, so this is opt-in.)
 
 const TYLER_JURISDICTIONS = [
   { county: 'Clayton County',  slug: 'clayton',       host: 'claytoncountyga-energovweb.tylerhost.net' },
@@ -22,6 +28,9 @@ const TYLER_JURISDICTIONS = [
   // Bulloch County (Statesboro) is functional but its search server is slow (~55s/query,
   // independent of page size) — needs the larger PAGE_SIZE + longer REQUEST_TIMEOUT below.
   { county: 'Bulloch County',  slug: 'bulloch',       host: 'bullochcountyga-energovpub.tylerhost.net' },
+  // Columbus (consolidated Columbus-Muscogee gov). IssueDate is all placeholder 2999-01-01,
+  // so cursor/sort on ApplyDate instead. Live replacement for the ArcGIS feed that froze 2016.
+  { county: 'Columbus',        slug: 'columbus',      host: 'columbusga-energovpub.tylerhost.net', dateField: 'ApplyDate' },
 ];
 
 // PageSize is honored up to ~1000 at fixed per-query cost, so a large page minimizes
@@ -36,7 +45,7 @@ function emptyCriteria(extra = {}) {
   return Object.assign({ PageNumber: 0, PageSize: 0, SortBy: null, SortAscending: false }, extra);
 }
 
-function buildBody(pageNumber) {
+function buildBody(pageNumber, sortBy = 'IssueDate') {
   return {
     Keyword: '', ExactMatch: false, SearchModule: 1, FilterModule: 2, SearchMainAddress: false,
     PlanCriteria: emptyCriteria(),
@@ -46,13 +55,13 @@ function buildBody(pageNumber) {
       ExpireDateFrom: null, ExpireDateTo: null, FinalDateFrom: null, FinalDateTo: null,
       ApplyDateFrom: null, ApplyDateTo: null, SearchMainAddress: false, ContactId: null,
       TypeId: null, WorkClassIds: null, ParcelNumber: null, ExcludeCases: null,
-      EnableDescriptionSearch: false, PageNumber: 0, PageSize: 0, SortBy: 'IssueDate', SortAscending: false,
+      EnableDescriptionSearch: false, PageNumber: 0, PageSize: 0, SortBy: sortBy, SortAscending: false,
     },
     InspectionCriteria: emptyCriteria({ TypeId: [], WorkClassIds: [], ExcludeCases: [], ExcludeFilterModules: [] }),
     CodeCaseCriteria: emptyCriteria(), RequestCriteria: emptyCriteria(),
     BusinessLicenseCriteria: emptyCriteria(), ProfessionalLicenseCriteria: emptyCriteria(),
     LicenseCriteria: emptyCriteria(), ProjectCriteria: emptyCriteria(),
-    ExcludeCases: null, PageNumber: pageNumber, PageSize: PAGE_SIZE, SortBy: 'IssueDate', SortAscending: false,
+    ExcludeCases: null, PageNumber: pageNumber, PageSize: PAGE_SIZE, SortBy: sortBy, SortAscending: false,
   };
 }
 
@@ -81,9 +90,10 @@ function zipFromAddress(addr) {
 
 // Build a fetcher for one jurisdiction. lastTimestampMs is the cursor (max IssueDate seen).
 function makeFetcher(cfg) {
+  const dateField = cfg.dateField || 'IssueDate'; // sort/cursor/date_filed source — see header note
   return async function fetchNewPermits(lastTimestampMs = 0) {
     const since = lastTimestampMs ? new Date(lastTimestampMs).toISOString().split('T')[0] : 'beginning';
-    console.log(`[${cfg.county}] Fetching permits since ${since}...`);
+    console.log(`[${cfg.county}] Fetching permits since ${since} (by ${dateField})...`);
     const headers = await getTenantHeaders(cfg.host);
     const searchUrl = `https://${cfg.host}/apps/selfservice/api/energov/search/search`;
     const nowCap = Date.now() + 2 * 24 * 60 * 60 * 1000; // future-date junk guard
@@ -96,7 +106,7 @@ function makeFetcher(cfg) {
     for (let page = 1; page <= MAX_PAGES && !reachedCursor; page++) {
       let result;
       try {
-        const { data } = await axios.post(searchUrl, buildBody(page), { headers, timeout: REQUEST_TIMEOUT });
+        const { data } = await axios.post(searchUrl, buildBody(page, dateField), { headers, timeout: REQUEST_TIMEOUT });
         result = data?.Result;
       } catch (err) {
         console.error(`  [${cfg.county}] page ${page} error: ${err.message}`);
@@ -107,8 +117,9 @@ function makeFetcher(cfg) {
 
       let sawSaneOnPage = false;
       for (const r of rows) {
-        if (!r.IssueDate) continue;
-        const ms = new Date(r.IssueDate).getTime();
+        const rawDate = r[dateField];
+        if (!rawDate) continue;
+        const ms = new Date(rawDate).getTime();
         if (!ms || ms > nowCap) continue; // skip garbage / future-dated junk
         sawSaneOnPage = true;
         if (ms <= lastTimestampMs) { reachedCursor = true; continue; }
@@ -123,11 +134,11 @@ function makeFetcher(cfg) {
           zip_code: zipFromAddress(addr),
           permit_type: r.CaseType || null,
           description: r.Description || null,
-          date_filed: r.IssueDate.split('T')[0],
+          date_filed: rawDate.split('T')[0],
           county: cfg.county,
           applicant_name: null,
           source_url: `https://${cfg.host}/apps/selfservice#/permit/${r.CaseId}`,
-          raw_data: { source: 'tyler-energov', status: r.CaseStatus, applyDate: r.ApplyDate, caseId: r.CaseId },
+          raw_data: { source: 'tyler-energov', status: r.CaseStatus, applyDate: r.ApplyDate, issueDate: r.IssueDate, caseId: r.CaseId },
         });
       }
       // Once a page yields a sane row at/under the cursor, the remaining (desc-sorted) rows are older.

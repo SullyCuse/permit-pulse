@@ -38,6 +38,7 @@ export const COUNTY_META: Record<string, { slug: string; display: string; fullNa
   'Dallas':           { slug: 'dallas',              display: 'Dallas',            fullName: 'Dallas, GA' },
   'Morgan County':    { slug: 'morgan-county',       display: 'Morgan County',     fullName: 'Morgan County, GA' },
   'Bulloch County':   { slug: 'bulloch-county',      display: 'Bulloch County',    fullName: 'Bulloch County, GA' },
+  'Columbus':         { slug: 'columbus',            display: 'Columbus',          fullName: 'Columbus, GA' },
 }
 
 export const COUNTIES = Object.keys(COUNTY_META)
