@@ -783,7 +783,7 @@ export const LOCATIONS: Location[] = [
       },
     ],
     faqWhere: 'Our Gordon County data is sourced from the county\'s official public permit records via the OpenGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets in total, including Clayton, Barrow, Jackson, Houston, Dawson, Hall, Gwinnett, Forsyth, DeKalb, Cherokee, Coweta and Glynn County, plus Atlanta, Savannah, Roswell, Lawrenceville, Marietta, Sandy Springs, Augusta, Perry, Flowery Branch, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets in total, including Clayton, Barrow, Jackson, Houston, Dawson, Hall, Gwinnett, Forsyth, DeKalb, Cherokee, Coweta and Glynn County, plus Atlanta, Savannah, Roswell, Lawrenceville, Marietta, Sandy Springs, Augusta, Perry, Flowery Branch, Dallas and more.',
     metaTitle: 'Gordon County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Gordon County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in the Calhoun area.',
@@ -802,7 +802,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Clayton County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve clients across the county.' },
     ],
     faqWhere: 'Our Clayton County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Barrow, Jackson, Houston, Dawson, Gordon, Gwinnett, DeKalb, Henry, Fayette and Coweta County, plus Atlanta, Roswell, Lawrenceville, Marietta, Sandy Springs, Perry, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Barrow, Jackson, Houston, Dawson, Gordon, Gwinnett, DeKalb, Henry, Fayette and Coweta County, plus Atlanta, Roswell, Lawrenceville, Marietta, Sandy Springs, Perry, Dallas and more.',
     metaTitle: 'Clayton County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Clayton County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Jonesboro, Riverdale, Forest Park, and Morrow.',
@@ -821,7 +821,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Barrow County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve buyers and sellers countywide.' },
     ],
     faqWhere: 'Our Barrow County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Clayton, Jackson, Houston, Dawson, Gordon, Gwinnett, Hall, Forsyth and Cherokee County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta, Perry, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Clayton, Jackson, Houston, Dawson, Gordon, Gwinnett, Hall, Forsyth and Cherokee County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta, Perry, Dallas and more.',
     metaTitle: 'Barrow County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Barrow County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Winder, Auburn, and Statham.',
@@ -840,7 +840,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Jackson County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve this fast-moving market.' },
     ],
     faqWhere: 'Our Jackson County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Clayton, Barrow, Houston, Dawson, Gordon, Gwinnett, Hall, Forsyth and Cherokee County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta, Perry, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Clayton, Barrow, Houston, Dawson, Gordon, Gwinnett, Hall, Forsyth and Cherokee County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta, Perry, Dallas and more.',
     metaTitle: 'Jackson County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Jackson County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Jefferson, Braselton, and Commerce.',
@@ -859,7 +859,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Roswell neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve buyers and sellers across the city.' },
     ],
     faqWhere: 'Our Roswell data is sourced from the City of Roswell\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Atlanta, Alpharetta, Johns Creek, Sandy Springs, Marietta and Lawrenceville, plus Gwinnett, Forsyth, Cherokee, Clayton, Barrow and Jackson County and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Atlanta, Alpharetta, Johns Creek, Sandy Springs, Marietta and Lawrenceville, plus Gwinnett, Forsyth, Cherokee, Clayton, Barrow and Jackson County and more.',
     metaTitle: 'Roswell GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Roswell, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in North Fulton.',
@@ -878,7 +878,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Perry neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve clients across Middle Georgia.' },
     ],
     faqWhere: 'Our Perry data is sourced from the City of Perry\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Houston County, plus Clayton, Barrow, Jackson, Dawson and Gordon County, and Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Houston County, plus Clayton, Barrow, Jackson, Dawson and Gordon County, and Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Dallas and more.',
     metaTitle: 'Perry GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Perry, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Houston County and Middle Georgia.',
@@ -897,7 +897,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Lawrenceville neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve clients across Gwinnett.' },
     ],
     faqWhere: 'Our Lawrenceville data is sourced from the City of Lawrenceville\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Gwinnett County, plus Atlanta, Roswell, Alpharetta, Johns Creek, Sandy Springs and Marietta, and Clayton, Barrow, Jackson, Hall and Forsyth County and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Gwinnett County, plus Atlanta, Roswell, Alpharetta, Johns Creek, Sandy Springs and Marietta, and Clayton, Barrow, Jackson, Hall and Forsyth County and more.',
     metaTitle: 'Lawrenceville GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Lawrenceville, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Gwinnett County.',
@@ -916,7 +916,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Houston County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve clients across the county.' },
     ],
     faqWhere: 'Our Houston County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Perry, plus Clayton, Barrow, Jackson, Dawson and Gordon County, and Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Dallas and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Perry, plus Clayton, Barrow, Jackson, Dawson and Gordon County, and Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Dallas and more.',
     metaTitle: 'Houston County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Houston County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Warner Robins and Perry.',
@@ -935,7 +935,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Flowery Branch neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve buyers and sellers.' },
     ],
     faqWhere: 'Our Flowery Branch data is sourced from the City of Flowery Branch\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Hall County and Gainesville, plus Forsyth, Gwinnett, Cherokee, Barrow and Jackson County, and Atlanta, Roswell, Lawrenceville, Marietta and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Hall County and Gainesville, plus Forsyth, Gwinnett, Cherokee, Barrow and Jackson County, and Atlanta, Roswell, Lawrenceville, Marietta and more.',
     metaTitle: 'Flowery Branch GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Flowery Branch, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in South Hall and the Lake Lanier area.',
@@ -954,7 +954,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Dawson County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve this growing North Georgia market.' },
     ],
     faqWhere: 'Our Dawson County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Forsyth, Hall, Gwinnett, Cherokee, Barrow, Jackson, Clayton and Gordon County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Forsyth, Hall, Gwinnett, Cherokee, Barrow, Jackson, Clayton and Gordon County, plus Atlanta, Roswell, Lawrenceville, Flowery Branch, Marietta and more.',
     metaTitle: 'Dawson County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Dawson County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Dawsonville and the GA 400 corridor.',
@@ -973,7 +973,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Dallas neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve buyers and sellers in Paulding County.' },
     ],
     faqWhere: 'Our Dallas data is sourced from the City of Dallas, GA\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Cherokee, Cobb (Marietta/Smyrna), Clayton, Barrow, Jackson and Gordon County, plus Atlanta, Roswell, Lawrenceville, Cartersville, Austell and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Cherokee, Cobb (Marietta/Smyrna), Clayton, Barrow, Jackson and Gordon County, plus Atlanta, Roswell, Lawrenceville, Cartersville, Austell and more.',
     metaTitle: 'Dallas GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Dallas, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Paulding County.',
@@ -992,7 +992,7 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Morgan County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve buyers and sellers around Madison and Lake Oconee.' },
     ],
     faqWhere: 'Our Morgan County data is sourced from the county\'s official public permit records via the OpenGov portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Bulloch, Clayton, Barrow, Jackson, Houston, Dawson and Gordon County, plus Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Perry and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Columbus, Bulloch, Clayton, Barrow, Jackson, Houston, Dawson and Gordon County, plus Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Marietta, Perry and more.',
     metaTitle: 'Morgan County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Morgan County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Madison and the Lake Oconee area.',
@@ -1011,10 +1011,29 @@ export const LOCATIONS: Location[] = [
       { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Bulloch County neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve the Statesboro and Georgia Southern market.' },
     ],
     faqWhere: 'Our Bulloch County data is sourced from the county\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
-    faqAreas: 'Yes — we track 37 Georgia markets, including Morgan, Clayton, Barrow, Jackson, Houston, Dawson and Gordon County, plus Savannah, Effingham, Bryan, Glynn, Atlanta, Roswell, Lawrenceville and more.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Columbus, Morgan, Clayton, Barrow, Jackson, Houston, Dawson and Gordon County, plus Savannah, Effingham, Bryan, Glynn, Atlanta, Roswell, Lawrenceville and more.',
     metaTitle: 'Bulloch County GA Building Permits | Permit Pulse',
     metaDescription:
       'Get a digest of every new building permit filed in Bulloch County, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in Statesboro and Southeast Georgia.',
+  },
+  {
+    slug: 'columbus-ga-building-permits',
+    name: 'Columbus',
+    region: 'GA',
+    fullName: 'Columbus, GA',
+    headline: 'Every Columbus building permit — live tracking updated Monday, Wednesday & Friday.',
+    subheadline:
+      'Permit Pulse monitors every permit filed in Columbus, GA and delivers a digest to Pro subscribers three times a week. Georgia\'s second-largest city — anchored by Fort Moore, the Chattahoochee riverfront, and a deep manufacturing base — sees steady residential and commercial building. Stay ahead of every new project across the consolidated Columbus-Muscogee government.',
+    personas: [
+      { icon: '🔨', title: 'Contractors & Builders', desc: 'Get every new residential and commercial permit in Columbus three times a week — building, electrical, mechanical, plumbing, pools, and more — before your competition in the Columbus-Muscogee market.' },
+      { icon: '🏠', title: 'Real Estate Investors', desc: 'Track new construction, renovation, and commercial activity across Columbus, from Midtown and Uptown to the north-side growth corridors along the Chattahoochee.' },
+      { icon: '📋', title: 'Agents & Realtors', desc: 'Know which Columbus neighborhoods are seeing new investment the week it happens. Filter by zip code and permit type to serve the Fort Moore and West Georgia market.' },
+    ],
+    faqWhere: 'Our Columbus data is sourced from the Columbus-Muscogee consolidated government\'s official public permit records via the Tyler EnerGov Citizen Self Service portal, updated Monday, Wednesday, and Friday.',
+    faqAreas: 'Yes — we track 38 Georgia markets, including Bulloch, Morgan, Clayton, Barrow, Jackson, Houston, Dawson and Gordon County, plus Atlanta, Savannah, Augusta, Roswell, Lawrenceville, Perry and more.',
+    metaTitle: 'Columbus GA Building Permits | Permit Pulse',
+    metaDescription:
+      'Get a digest of every new building permit filed in Columbus, GA — delivered Monday, Wednesday & Friday. Built for contractors, investors, and realtors in the Columbus-Muscogee and Fort Moore area.',
   },
 ]
 
